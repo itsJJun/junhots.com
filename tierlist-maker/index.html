@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make your HotS tier list · JunHotS</title>
+<meta name="description" content="Make your own Heroes of the Storm tier list with counters and synergy. Share it as a link or a picture.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<style>
+/* Layout: same quiet system as the junhots.com home page. Toolbar, tier rows in one bordered table, unranked pool, and a side panel for counters on wide screens. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0f;
+  --surface: #121419;
+  --surface-2: #181b21;
+  --line: #23262e;
+  --text: #ececef;
+  --muted: #8b8f9a;
+  --accent: #7aa7ff;
+  --good: #5fcf8f;
+  --bad: #ef7d8b;
+  --sans: "Geist", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-bottom: 60px; }
+nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 20px; border-bottom: 1px solid var(--line); }
+.logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.logo span { color: #52c7ff; text-shadow: 0 0 14px rgba(82, 199, 255, 0.55); }
+.links { display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.links a.on, .links a:hover { color: var(--text); }
+h1 { margin: 48px 0 6px; font-size: clamp(30px, 5vw, 40px); line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; }
+.lead { margin: 0 0 24px; color: var(--muted); max-width: 64ch; }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; padding: 10px 12px 10px 14px; border-radius: 8px; border: 1px solid #2b3a5c; background: #121a2b; font-size: 14px; }
+
+button { font: 500 13px/1 var(--sans); color: var(--text); height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+button:hover { background: var(--surface-2); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+button.primary:hover { background: #fff; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.bar .grow { flex: 1; }
+.seg { display: flex; gap: 3px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+.seg button { height: 28px; border: 0; background: transparent; color: var(--muted); }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { color: var(--text); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+input[type=search] { font: 400 14px var(--sans); color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; height: 36px; padding: 0 12px; min-width: 0; width: 200px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 14px; }
+
+.layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.layout.counters { grid-template-columns: minmax(0, 1fr) 320px; }
+@media (max-width: 900px) { .layout.counters { grid-template-columns: 1fr; } }
+
+.tiers { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: visible; }
+.row { display: grid; grid-template-columns: 84px 1fr; min-height: 70px; }
+.row + .row { border-top: 1px solid var(--line); }
+.row:first-child .label { border-top-left-radius: 9px; } .row:last-child .label { border-bottom-left-radius: 9px; }
+.label { position: relative; display: grid; place-items: center; align-content: center; gap: 4px; background: var(--c); color: #0b0c0f; padding: 6px 4px; }
+.label input { width: 100%; text-align: center; font: 700 20px/1 var(--sans); color: #0b0c0f; background: transparent; border: 0; padding: 2px; border-radius: 4px; }
+.label input:focus { background: rgba(255,255,255,0.4); outline: none; }
+.label .tools { display: flex; gap: 4px; }
+.label .tools button { height: 20px; padding: 0 6px; font-size: 11px; background: rgba(0,0,0,0.14); border: 0; color: #0b0c0f; }
+.swatches { position: absolute; top: calc(100% + 4px); left: 4px; z-index: 5; display: grid; grid-template-columns: repeat(4, 22px); gap: 6px; padding: 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+.swatches button { width: 22px; height: 22px; padding: 0; border-radius: 5px; background: var(--c); border: 2px solid transparent; }
+.swatches button[aria-pressed="true"] { border-color: var(--text); }
+.drop { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; padding: 8px 10px; background: var(--surface); min-width: 0; }
+.row:first-child .drop { border-top-right-radius: 9px; } .row:last-child .drop { border-bottom-right-radius: 9px; }
+.drop.over, .drop.target { background: #141b29; box-shadow: inset 0 0 0 1px #2b3a5c; }
+.confirm { display: flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; color: #0b0c0f; }
+.pool-head { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 0 8px; font-size: 13px; color: var(--muted); }
+.pool { min-height: 80px; border: 1px solid var(--line); border-radius: 10px; }
+
+.hero { position: relative; width: 54px; height: 54px; border-radius: 6px; overflow: hidden; cursor: grab; background: var(--surface-2); border: 0; padding: 0; flex: none; }
+.hero img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.hero .nm { position: absolute; inset: auto 0 0 0; font: 500 9.5px/1.4 var(--sans); text-align: center; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,0.85)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 2px 1px; }
+.hero.sel, .hero.me { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--text); overflow: visible; }
+.hero.good { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--good); }
+.hero.bad { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--bad); }
+.hero.with { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent); }
+.hero.sel img, .hero.me img { border-radius: 6px; }
+.hero .cnt { position: absolute; top: 2px; left: 2px; display: flex; gap: 2px; }
+.hero .cnt span { font: 600 10px/13px var(--sans); padding: 0 3px; border-radius: 3px; color: #0b0c0f; }
+
+.side { padding: 18px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); align-self: start; position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); }
+.side h2 { margin: 0 0 2px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.side p { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+.modes { display: grid; gap: 4px; margin-bottom: 8px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); }
+.modes button { display: flex; justify-content: space-between; align-items: center; border: 0; background: transparent; color: var(--muted); }
+.modes button[aria-pressed="true"] { color: var(--text); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.modes button span:first-child::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; background: var(--accent); }
+.modes .g span:first-child::before { background: var(--good); }
+.modes .b span:first-child::before { background: var(--bad); }
+.list h3 { margin: 14px 0 6px; font-size: 12px; font-weight: 500; color: var(--muted) !important; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 3px; border-radius: 6px; background: var(--surface-2); font-size: 13px; }
+.chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+.none { color: var(--muted); font-size: 13px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); padding: 10px 14px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); max-width: calc(100% - 32px); }
+dialog { max-width: min(540px, calc(100% - 32px)); width: 100%; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+dialog::backdrop { background: rgba(0,0,0,0.6); }
+dialog h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+dialog p { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
+dialog textarea { width: 100%; min-height: 90px; font: 12px/1.5 ui-monospace, Consolas, monospace; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; word-break: break-all; }
+dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 64px 1fr; }
+  .hero { width: 48px; height: 48px; }
+  input[type=search] { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">Jun<span>HotS</span></a>
+    <div class="links"><a href="/">Home</a><a href="/#tierlist">Tier list</a><a class="on" href="/tierlist-maker/">Make your own</a><a href="/#overlay">Overlay</a></div>
+  </nav>
+  <h1 id="top">Make your tier list</h1>
+  <p class="lead">Drag heroes into tiers, or tap a hero and then tap a row. Mark who each hero beats and who it works well with. Share it as a link or a picture, or save it for the junhots overlay.</p>
+  <div class="banner" id="sharedBanner" hidden><span id="sharedText">You're looking at a shared tier list. Change anything to make it your own.</span><button id="startFresh">Start my own</button></div>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="View">
+      <button id="viewTiers" aria-pressed="true">Tiers</button>
+      <button id="viewCounters" aria-pressed="false">Counters &amp; synergy</button>
+    </div>
+    <div class="seg" role="group" aria-label="Role" id="roles"></div>
+    <span class="grow"></span>
+    <input type="search" id="search" placeholder="Search heroes" aria-label="Search heroes">
+  </div>
+  <div class="actions">
+    <button id="addTier">+ Add tier</button>
+    <button id="openShared">Open a shared list</button>
+    <button id="loadFile">Load overlay file</button>
+    <button id="saveFile">Save for overlay</button>
+    <button id="savePic">Save as picture</button>
+    <button class="primary" id="share">Copy share link</button>
+  </div>
+
+  <div class="layout" id="layout">
+    <div>
+      <div class="tiers" id="tiers"></div>
+      <div class="pool-head"><span>Not ranked</span><span id="poolCount"></span></div>
+      <div class="drop pool" id="pool" data-tier=""></div>
+    </div>
+    <aside class="side" id="side" hidden></aside>
+  </div>
+</div>
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+
+<dialog id="shareDlg">
+  <h2>Share link</h2>
+  <p id="shareMsg">Copied. Anyone who opens this link sees your tier list, counters and synergy.</p>
+  <textarea id="shareText" readonly aria-label="Share link"></textarea>
+  <div class="row-btns"><button id="shareCopy">Copy again</button><button class="primary" id="shareClose">Done</button></div>
+</dialog>
+<dialog id="openDlg">
+  <h2>Open a shared list</h2>
+  <p>Paste a junhots.com share link (or just the code after the #).</p>
+  <textarea id="openText" aria-label="Shared link"></textarea>
+  <p id="openErr" hidden style="color:var(--bad)"></p>
+  <div class="row-btns"><button id="openCancel">Cancel</button><button class="primary" id="openGo">Open</button></div>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
+const MAX_TIERS = 8, MAX_NAME = 8, STORE = "junhots-tierlist-maker";
+let HEROES = [], H = {};
+let state = blank();
+let view = "tiers", role = "All", query = "", picked = null, focusHero = null, mode = "counters", paletteOpen = null, confirmDel = null;
+let isShared = false;
+
+function blank() {
+  return { tiers: "SABCD".split("").map((n, i) => ({ id: n, name: n, color: i })), overall: {}, counters: {}, synergy: {} };
+}
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+function changed() { if (isShared) { isShared = false; $("sharedBanner").hidden = true; } save(); render(); }
+
+// ---------- data rules (same file format as the overlay's tierlist.json) ----------
+function clean(d) {
+  const out = blank(); if (!d || typeof d !== "object") return out;
+  const tiers = [], seen = new Set();
+  for (const t of Array.isArray(d.tiers) ? d.tiers : []) {
+    const id = String(t && t.id || "").trim(); if (!id || seen.has(id)) continue;
+    seen.add(id); tiers.push({ id, name: String(t.name || id).trim().slice(0, MAX_NAME) || id.slice(0, MAX_NAME), color: (parseInt(t.color, 10) || 0) % PALETTE.length });
+    if (tiers.length >= MAX_TIERS) break;
+  }
+  if (tiers.length) out.tiers = tiers;
+  const ids = new Set(out.tiers.map(t => t.id));
+  for (const [h, t] of Object.entries(d.overall || {})) if (H[h] && ids.has(String(t))) out.overall[h] = String(t);
+  for (const key of ["counters", "synergy"]) for (const [h, list] of Object.entries(d[key] || {})) {
+    if (!H[h] || !Array.isArray(list)) continue;
+    const l = [...new Set(list.map(String))].filter(x => H[x] && x !== h); if (l.length) out[key][h] = l;
+  }
+  return out;
+}
+const beats = id => state.counters[id] || [];
+const beatenBy = id => Object.keys(state.counters).filter(a => state.counters[a].includes(id));
+const goodWith = id => [...new Set([...(state.synergy[id] || []), ...Object.keys(state.synergy).filter(a => state.synergy[a].includes(id))])];
+function toggleIn(map, a, b) {
+  const l = map[a] || []; const i = l.indexOf(b);
+  if (i >= 0) l.splice(i, 1); else l.push(b);
+  if (l.length) map[a] = l; else delete map[a];
+}
+function toggleRelation(other) {
+  const me = focusHero; if (!me || other === me) return;
+  if (mode === "counters") toggleIn(state.counters, me, other);
+  else if (mode === "countered") toggleIn(state.counters, other, me);
+  else {
+    const on = goodWith(me).includes(other);
+    for (const [a, b] of [[me, other], [other, me]]) { const l = (state.synergy[a] || []).filter(x => x !== b); if (!on) l.push(b); if (l.length) state.synergy[a] = l; else delete state.synergy[a]; }
+  }
+  changed();
+}
+
+// ---------- rendering ----------
+function visible(h) { return (role === "All" || h.role === role) && (!query || h.name.toLowerCase().includes(query)); }
+function heroTile(h) {
+  const b = el("button", "hero"); b.dataset.hero = h.id; b.draggable = view === "tiers"; b.title = h.name;
+  const i = el("img"); i.src = `/img/heroes/${h.id}.webp`; i.alt = ""; i.loading = "lazy"; b.append(i, el("span", "nm", h.name));
+  if (view === "tiers") { if (picked === h.id) b.classList.add("sel"); }
+  else {
+    const nb = beats(h.id).length, nl = beatenBy(h.id).length;
+    if (nb || nl) { const c = el("span", "cnt"); if (nb) { const s = el("span", "", nb); s.style.background = "var(--good)"; c.append(s); } if (nl) { const s = el("span", "", nl); s.style.background = "var(--bad)"; c.append(s); } b.append(c); }
+    if (focusHero) {
+      if (h.id === focusHero) b.classList.add("me");
+      else if (beats(focusHero).includes(h.id)) b.classList.add("good");
+      else if (beatenBy(focusHero).includes(h.id)) b.classList.add("bad");
+      else if (goodWith(focusHero).includes(h.id)) b.classList.add("with");
+    }
+  }
+  return b;
+}
+function render() {
+  $("viewTiers").setAttribute("aria-pressed", view === "tiers");
+  $("viewCounters").setAttribute("aria-pressed", view === "counters");
+  $("layout").classList.toggle("counters", view === "counters");
+  $("addTier").hidden = view !== "tiers" || state.tiers.length >= MAX_TIERS;
+  const box = $("tiers"); box.innerHTML = "";
+  state.tiers.forEach((t, index) => {
+    const row = el("div", "row");
+    const label = el("div", "label"); label.style.setProperty("--c", PALETTE[t.color]);
+    if (confirmDel === t.id) {
+      const c = el("div", "confirm"); c.append(el("span", "", "Delete?"));
+      const y = el("button", "", "Yes"), n = el("button", "", "No");
+      y.onclick = () => { state.tiers = state.tiers.filter(x => x.id !== t.id); for (const h in state.overall) if (state.overall[h] === t.id) delete state.overall[h]; confirmDel = null; changed(); };
+      n.onclick = () => { confirmDel = null; render(); };
+      for (const b of [y, n]) { b.style.cssText = "height:22px;padding:0 7px;font-size:12px;background:rgba(0,0,0,.18);border:0;color:#0b0c0f"; c.append(b); }
+      label.append(c);
+    } else {
+      const inp = el("input"); inp.value = t.name; inp.maxLength = MAX_NAME; inp.id = "tier-name-" + t.id; inp.setAttribute("aria-label", "Tier name");
+      inp.onchange = () => { t.name = inp.value.trim().slice(0, MAX_NAME) || t.name; changed(); };
+      inp.onkeydown = e => { if (e.key === "Enter") inp.blur(); };
+      const tools = el("div", "tools");
+      const col = el("button", "", "Color"); col.onclick = () => { paletteOpen = paletteOpen === t.id ? null : t.id; render(); };
+      const del = el("button", "", "×"); del.setAttribute("aria-label", "Delete tier"); del.onclick = () => { confirmDel = t.id; render(); };
+      if (view === "tiers") { tools.append(col); if (state.tiers.length > 1) tools.append(del); }
+      label.append(inp, tools);
+      if (paletteOpen === t.id) {
+        const sw = el("div", "swatches");
+        PALETTE.forEach((c, ci) => { const b = el("button"); b.style.setProperty("--c", c); b.setAttribute("aria-label", "Color " + (ci + 1)); b.setAttribute("aria-pressed", ci === t.color); b.onclick = () => { t.color = ci; paletteOpen = null; changed(); }; sw.append(b); });
+        label.append(sw);
+      }
+    }
+    const drop = el("div", "drop"); drop.dataset.tier = t.id; if (picked && view === "tiers") drop.classList.add("target");
+    HEROES.filter(h => state.overall[h.id] === t.id && visible(h)).forEach(h => drop.append(heroTile(h)));
+    row.append(label, drop); box.append(row);
+  });
+  const pool = $("pool"); pool.innerHTML = ""; pool.classList.toggle("target", !!picked && view === "tiers");
+  const left = HEROES.filter(h => !state.overall[h.id]);
+  left.filter(visible).forEach(h => pool.append(heroTile(h)));
+  $("poolCount").textContent = `${left.length} of ${HEROES.length}`;
+  renderSide();
+}
+function chipList(ids) {
+  if (!ids.length) return el("span", "none", "None yet");
+  const w = el("div", "chips");
+  ids.forEach(id => { const c = el("button", "chip"); const i = el("img"); i.src = `/img/heroes/${id}.webp`; i.alt = ""; c.append(i, H[id].name); c.onclick = () => { focusHero = id; render(); }; w.append(c); });
+  return w;
+}
+function renderSide() {
+  const s = $("side"); s.hidden = view !== "counters"; if (s.hidden) return; s.innerHTML = "";
+  if (!focusHero) { s.append(el("h2", "", "Pick a hero")); s.append(el("p", "", "Click a hero on the left. Then choose a list below and click the heroes that belong in it. Click again to take one out.")); return; }
+  const h = H[focusHero];
+  s.append(el("h2", "", h.name));
+  s.append(el("p", "", "Choose a list, then click heroes on the left to add or remove them."));
+  const modes = el("div", "modes");
+  [["counters", "g", "Strong against", beats(focusHero)], ["countered", "b", "Weak against", beatenBy(focusHero)], ["synergy", "", "Good with", goodWith(focusHero)]].forEach(([m, cls, name, list]) => {
+    const b = el("button", cls); b.setAttribute("aria-pressed", mode === m); b.append(el("span", "", name), el("span", "", list.length));
+    b.onclick = () => { mode = m; render(); }; modes.append(b);
+  });
+  s.append(modes);
+  for (const [name, list, color] of [["Strong against", beats(focusHero), "var(--good)"], ["Weak against", beatenBy(focusHero), "var(--bad)"], ["Good with", goodWith(focusHero), "var(--accent)"]]) {
+    const d = el("div", "list"); const t = el("h3", "", name); t.style.color = color; d.append(t, chipList(list)); s.append(d);
+  }
+  const done = el("button", "", "Pick another hero"); done.style.marginTop = "14px"; done.onclick = () => { focusHero = null; render(); }; s.append(done);
+}
+
+// ---------- moving heroes ----------
+function place(heroId, tierId) { if (tierId) state.overall[heroId] = tierId; else delete state.overall[heroId]; picked = null; changed(); }
+document.addEventListener("click", e => {
+  const hero = e.target.closest(".hero");
+  if (view === "counters") {
+    if (!hero) return;
+    if (!focusHero || hero.dataset.hero === focusHero) { focusHero = hero.dataset.hero === focusHero ? null : hero.dataset.hero; render(); }
+    else toggleRelation(hero.dataset.hero);
+    return;
+  }
+  if (hero) { picked = picked === hero.dataset.hero ? null : hero.dataset.hero; render(); return; }
+  const drop = e.target.closest(".drop");
+  if (drop && picked) place(picked, drop.dataset.tier);
+  if (paletteOpen && !e.target.closest(".label")) { paletteOpen = null; render(); }
+});
+document.addEventListener("dragstart", e => { const h = e.target.closest(".hero"); if (h) e.dataTransfer.setData("text/plain", h.dataset.hero); });
+document.addEventListener("dragover", e => { const d = e.target.closest(".drop"); if (d && view === "tiers") { e.preventDefault(); d.classList.add("over"); } });
+document.addEventListener("dragleave", e => { const d = e.target.closest(".drop"); if (d) d.classList.remove("over"); });
+document.addEventListener("drop", e => { const d = e.target.closest(".drop"); if (!d) return; e.preventDefault(); d.classList.remove("over"); const id = e.dataTransfer.getData("text/plain"); if (H[id]) place(id, d.dataset.tier); });
+
+// ---------- toolbar ----------
+$("viewTiers").onclick = () => { view = "tiers"; render(); };
+$("viewCounters").onclick = () => { view = "counters"; picked = null; render(); };
+["All", "Tank", "Bruiser", "DPS", "Support"].forEach(r => { const b = el("button", "", r); b.setAttribute("aria-pressed", r === role); b.onclick = () => { role = r; [...$("roles").children].forEach(x => x.setAttribute("aria-pressed", x === b)); render(); }; $("roles").append(b); });
+$("search").oninput = e => { query = e.target.value.trim().toLowerCase(); render(); };
+$("search").onkeydown = e => { if (e.key === "Escape") { e.target.value = ""; query = ""; render(); } };
+$("addTier").onclick = () => {
+  if (state.tiers.length >= MAX_TIERS) return;
+  let n = 1; while (state.tiers.some(t => t.id === "T" + n)) n++;
+  state.tiers.push({ id: "T" + n, name: "New", color: state.tiers.length % PALETTE.length }); changed();
+};
+$("startFresh").onclick = () => { state = blank(); isShared = false; $("sharedBanner").hidden = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} save(); render(); };
+
+// ---------- share link: the whole list packed into the link, no server needed ----------
+function b64url(bytes) { let s = ""; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+function unb64url(text) { const s = atob(text.replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(s, c => c.charCodeAt(0)); }
+async function pipe(bytes, stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
+function packed() {
+  const idx = Object.fromEntries(HEROES.map((h, i) => [h.id, i]));
+  const tierOf = HEROES.map(h => { const t = state.tiers.findIndex(x => x.id === state.overall[h.id]); return t < 0 ? "-" : String(t); }).join("");
+  const pairs = m => Object.entries(m).flatMap(([a, l]) => l.map(b => idx[a] * 128 + idx[b]));
+  return { v: 1, h: HEROES.map(h => h.id), t: state.tiers.map(t => [t.name, t.color]), o: tierOf, c: pairs(state.counters), s: pairs(state.synergy) };
+}
+function unpacked(p) {
+  const d = { tiers: p.t.map(([name, color], i) => ({ id: "T" + i, name, color })), overall: {}, counters: {}, synergy: {} };
+  p.h.forEach((id, i) => { const c = p.o[i]; if (c && c !== "-") d.overall[id] = "T" + c; });
+  const add = (m, n) => { const a = p.h[Math.floor(n / 128)], b = p.h[n % 128]; if (a && b) (m[a] = m[a] || []).push(b); };
+  (p.c || []).forEach(n => add(d.counters, n)); (p.s || []).forEach(n => add(d.synergy, n));
+  return clean(d);
+}
+async function encode() {
+  const raw = new TextEncoder().encode(JSON.stringify(packed()));
+  try { return "z" + b64url(await pipe(raw, new CompressionStream("deflate-raw"))); } catch (e) { return "j" + b64url(raw); }
+}
+async function decode(code) {
+  code = String(code).trim().replace(/^.*#/, "");
+  const bytes = unb64url(code.slice(1));
+  const raw = code[0] === "z" ? await pipe(bytes, new DecompressionStream("deflate-raw")) : bytes;
+  return unpacked(JSON.parse(new TextDecoder().decode(raw)));
+}
+function shareBase() { return location.origin + "/tierlist-maker/"; }
+async function copyText(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { return false; } }
+$("share").onclick = async () => {
+  const link = shareBase() + "#" + await encode();
+  const ok = await copyText(link);
+  $("shareText").value = link;
+  $("shareMsg").textContent = ok ? "Copied. Anyone who opens this link sees your tier list, counters and synergy." : "Select the link below and copy it. Anyone who opens it sees your tier list, counters and synergy.";
+  $("shareDlg").showModal(); if (!ok) $("shareText").select();
+};
+$("shareCopy").onclick = async () => { if (await copyText($("shareText").value)) toast("Copied"); else $("shareText").select(); };
+$("shareClose").onclick = () => $("shareDlg").close();
+$("openShared").onclick = () => { $("openText").value = ""; $("openErr").hidden = true; $("openDlg").showModal(); };
+$("openCancel").onclick = () => $("openDlg").close();
+$("openGo").onclick = async () => {
+  try { state = await decode($("openText").value); showShared(); $("openDlg").close(); render(); }
+  catch (e) { $("openErr").textContent = "That link didn't work. Check that you copied all of it."; $("openErr").hidden = false; }
+};
+function showShared() { isShared = true; $("sharedBanner").hidden = false; }
+
+// ---------- files and pictures ----------
+async function offerFile(filename, blob) {
+  const a = el("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.append(a); a.click(); a.remove();
+}
+$("saveFile").onclick = () => {
+  const d = { version: 1, tiers: state.tiers, overall: state.overall, maps: {}, counters: state.counters, synergy: state.synergy, winrates: {} };
+  offerFile("tierlist.json", new Blob([JSON.stringify(d, null, 2)], { type: "application/json" }));
+};
+$("loadFile").onclick = () => $("fileInput").click();
+$("fileInput").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { state = clean(JSON.parse(await f.text())); changed(); toast("Loaded " + f.name); } catch (err) { toast("That file isn't a tier list file"); }
+};
+function loadImg(src) { return new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; }); }
+$("savePic").onclick = async () => {
+  await document.fonts.ready;
+  const size = 64, gap = 4, labelW = 110, pad = 24, perRow = 14, W = pad * 2 + labelW + gap + perRow * (size + gap);
+  const groups = state.tiers.map(t => ({ t, heroes: HEROES.filter(h => state.overall[h.id] === t.id && (role === "All" || h.role === role)) }));
+  const rowH = g => Math.max(1, Math.ceil(g.heroes.length / perRow)) * (size + gap) + gap;
+  const Hh = pad + 56 + groups.reduce((s, g) => s + rowH(g) + 6, 0) + pad + 10;
+  const c = document.createElement("canvas"); c.width = W; c.height = Hh; const x = c.getContext("2d");
+  x.fillStyle = "#070b16"; x.fillRect(0, 0, W, Hh);
+  x.fillStyle = "#f5f9ff"; x.font = "700 34px Rajdhani, Segoe UI, sans-serif"; x.fillText(role === "All" ? "My tier list" : `My ${role} tier list`, pad, pad + 30);
+  x.fillStyle = "#52c7ff"; x.font = "700 18px Rajdhani, Segoe UI, sans-serif"; x.textAlign = "right"; x.fillText("junhots.com", W - pad, pad + 30); x.textAlign = "left";
+  const imgs = new Map(await Promise.all(HEROES.map(async h => [h.id, await loadImg(`/img/heroes/${h.id}.webp`)])));
+  let y = pad + 56;
+  for (const g of groups) {
+    const h = rowH(g);
+    x.fillStyle = "#121b30"; x.fillRect(pad, y, W - pad * 2, h);
+    x.fillStyle = PALETTE[g.t.color]; x.fillRect(pad, y, labelW, h);
+    x.fillStyle = "#0b1020"; x.font = "700 30px Rajdhani, Segoe UI, sans-serif"; x.textAlign = "center"; x.fillText(g.t.name, pad + labelW / 2, y + h / 2 + 10); x.textAlign = "left";
+    g.heroes.forEach((hero, i) => { const im = imgs.get(hero.id); if (im) x.drawImage(im, pad + labelW + gap + (i % perRow) * (size + gap), y + gap + Math.floor(i / perRow) * (size + gap), size, size); });
+    y += h + 6;
+  }
+  c.toBlob(b => offerFile("my-tierlist.png", b), "image/png");
+};
+
+// ---------- start ----------
+(async () => {
+  HEROES = await (await fetch("/data/heroes.json")).json().then(l => l.map(([id, name, r]) => ({ id, name, role: r })));
+  HEROES.forEach(h => H[h.id] = h);
+  let shared = null;
+  if (location.hash.length > 2) { try { shared = await decode(location.hash); } catch (e) {} }
+  if (shared) { state = shared; showShared(); }
+  else {
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE)); } catch (e) {}
+    state = saved ? clean(saved) : example();
+  }
+  render();
+})();
+// First visit: a few heroes already placed so the page shows how it works.
+function example() {
+  const d = blank();
+  Object.assign(d.overall, { anubarak: "S", stukov: "S", anduin: "S", hanzo: "S", johanna: "A", muradin: "A", malthael: "A", sonya: "A", valla: "A", rehgar: "A", diablo: "B", kerrigan: "B", zeratul: "B", lucio: "B", raynor: "C", thebutcher: "C", tyrande: "D" });
+  d.counters = { anubarak: ["greymane", "liming"], malthael: ["anubarak", "johanna", "diablo"] };
+  d.synergy = { anubarak: ["hanzo"], hanzo: ["anubarak"] };
+  return clean(d);
+}
+</script>
+</body>
+</html>

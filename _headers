@@ -1,0 +1,4 @@
+/data/tierlist.json
+  Cache-Control: no-cache
+/img/*
+  Cache-Control: public, max-age=604800
