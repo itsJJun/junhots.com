@@ -1,9 +1,16 @@
-// Cloudflare settings: serve the files in this repo as a static website.
+// Cloudflare settings: serve public/ as the website, and run src/worker.js for /api/* (Jun's builds editor).
 {
   "name": "junhots",
+  "main": "src/worker.js",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./public",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  // Storage for "Jun's builds". The id comes from Cloudflare: Storage & databases -> KV.
+  "kv_namespaces": [
+    { "binding": "BUILDS", "id": "cb4d84ddab184520be1376c94f16a8d3" }
+  ]
 }
