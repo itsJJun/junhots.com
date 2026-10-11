@@ -54,9 +54,9 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .slot { display: grid; justify-items: center; gap: 3px; font: 500 10px var(--mono); color: var(--muted); }
 .ic { position: relative; display: block; }
 .empty { display: block; }
-.no { position: absolute; right: -5px; bottom: -5px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--brand); color: #06121a; font: 700 11px/17px var(--sans); text-align: center; font-style: normal; box-shadow: 0 0 0 2px var(--bg); }
-.tal .no { box-shadow: 0 0 0 2px var(--surface); }
-.slot .lvl { margin-top: 2px; }
+.tal .slot .lvl { margin-top: 2px; }
+.tn { font: 600 11px/1 var(--mono); color: var(--brand); }
+.slot .tn { margin-top: -1px; }
 .code { font: 500 12px var(--mono); color: var(--muted); }
 .btn2:disabled { opacity: .45; cursor: default; }
 .slot img, .slot .empty { width: 40px; height: 40px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface-2); }
@@ -208,14 +208,14 @@ async function openHero(id, state) {
   drawMine();
 }
 function card(t, attrs, tag = "button", no) {
-  return `<${tag} class="tal" ${attrs}><span class="ic"><img src="${icon(t.icon)}" alt="" loading="lazy">${no ? `<i class="no">${no}</i>` : ""}</span><div class="nm">${esc(t.name)}<span class="key">${KEY[t.key] || t.key}</span></div><div class="meta">${esc(t.meta || "")}</div><div class="tx">${t.text}</div></${tag}>`;
+  return `<${tag} class="tal" ${attrs}><span class="ic"><img src="${icon(t.icon)}" alt="" loading="lazy"></span><div class="nm">${no ? `<span class="tn">#${no}</span>` : ""}${esc(t.name)}<span class="key">${KEY[t.key] || t.key}</span></div><div class="meta">${esc(t.meta || "")}</div><div class="tx">${t.text}</div></${tag}>`;
 }
 function strip(picks, jump) {
   return LEVELS.map((L, r) => {
     const t = picks[r] ? hero.talents[L]?.[picks[r] - 1] : null;
     const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}" title="${esc(t.name)}">` : `<span class="empty"></span>`;
-    const inner = `${img}${t ? `<i class="no">${picks[r]}</i>` : ""}`;
-    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span></span>`;
+    const inner = img;
+    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] : "&nbsp;"}</span></span>`;
   }).join("");
 }
 // In-game build code: paste it in the game chat, e.g. [T1311132,Varian]
