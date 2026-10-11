@@ -28,11 +28,27 @@
 body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 .wrap { max-width: 1180px; margin: 0 auto; padding-bottom: 60px; }
-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 20px; border-bottom: 1px solid var(--line); }
-.logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+/* Top bar: logo, page tabs, Twitch */
+nav { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; padding-block: 18px; }
 .logo span { color: #52c7ff; text-shadow: 0 0 14px rgba(82, 199, 255, 0.55); }
-.links { display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
-.links a.on, .links a:hover { color: var(--text); }
+.tabs { display: flex; gap: 24px; flex: 1; font-size: 14px; color: var(--muted); overflow-x: auto; scrollbar-width: none; }
+.tabs a { position: relative; padding-block: 21px; white-space: nowrap; }
+.tabs a:hover { color: var(--text); }
+.tabs a[aria-current="page"] { color: var(--text); }
+.tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: #52c7ff; box-shadow: 0 0 10px rgba(82, 199, 255, 0.6); }
+.nav-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.nav-live:hover { color: var(--text); }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.6); animation: rec 2s ease-out infinite; }
+@keyframes rec { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.6); } 70%, 100% { box-shadow: 0 0 0 7px rgba(255, 77, 94, 0); } }
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+@media (max-width: 640px) {
+  nav { gap: 0 20px; }
+  .tabs { order: 3; flex-basis: 100%; gap: 20px; margin-top: -6px; }
+  .tabs a { padding-block: 12px 14px; }
+  .nav-live { margin-left: auto; }
+}
 h1 { margin: 48px 0 6px; font-size: clamp(30px, 5vw, 40px); line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; }
 .lead { margin: 0 0 24px; color: var(--muted); max-width: 64ch; }
 .banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; padding: 10px 12px 10px 14px; border-radius: 8px; border: 1px solid #2b3a5c; background: #121a2b; font-size: 14px; }
@@ -59,11 +75,12 @@ input[type=search] { font: 400 14px var(--sans); color: var(--text); background:
 .row { display: grid; grid-template-columns: 84px 1fr; min-height: 70px; }
 .row + .row { border-top: 1px solid var(--line); }
 .row:first-child .label { border-top-left-radius: 9px; } .row:last-child .label { border-bottom-left-radius: 9px; }
-.label { position: relative; display: grid; place-items: center; align-content: center; gap: 4px; background: var(--c); color: #0b0c0f; padding: 6px 4px; }
-.label input { width: 100%; text-align: center; font: 700 20px/1 var(--sans); color: #0b0c0f; background: transparent; border: 0; padding: 2px; border-radius: 4px; }
-.label input:focus { background: rgba(255,255,255,0.4); outline: none; }
+.label { position: relative; display: grid; place-items: center; align-content: center; gap: 4px; color: var(--c); padding: 6px 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, var(--surface-2)), color-mix(in srgb, var(--c) 6%, var(--surface))); box-shadow: inset 3px 0 0 var(--c); border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line)); }
+.label input { width: 100%; text-align: center; font: 700 22px/1 var(--sans); color: var(--c); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent); background: transparent; border: 0; padding: 2px; border-radius: 4px; }
+.label input:focus { background: rgba(255,255,255,0.06); outline: none; }
 .label .tools { display: flex; gap: 4px; }
-.label .tools button { height: 20px; padding: 0 6px; font-size: 11px; background: rgba(0,0,0,0.14); border: 0; color: #0b0c0f; }
+.label .tools button { height: 20px; padding: 0 6px; font-size: 11px; background: rgba(255,255,255,0.06); border: 0; color: var(--muted); }
+.label .tools button:hover { color: var(--text); }
 .swatches { position: absolute; top: calc(100% + 4px); left: 4px; z-index: 5; display: grid; grid-template-columns: repeat(4, 22px); gap: 6px; padding: 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
 .swatches button { width: 22px; height: 22px; padding: 0; border-radius: 5px; background: var(--c); border: 2px solid transparent; }
 .swatches button[aria-pressed="true"] { border-color: var(--text); }
@@ -119,7 +136,8 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap
 <div class="wrap">
   <nav>
     <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="links"><a href="/">Home</a><a href="/#tierlist">Tier list</a><a class="on" href="/tierlist-maker/">Make your own</a><a href="/#overlay">Overlay</a></div>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/tierlist-maker/" aria-current="page">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
   <h1 id="top">Make your tier list</h1>
   <p class="lead">Drag heroes into tiers, or tap a hero and then tap a row. Mark who each hero beats and who it works well with. Share it as a link or a picture, or save it for the junhots overlay.</p>
@@ -414,8 +432,9 @@ $("savePic").onclick = async () => {
   for (const g of groups) {
     const h = rowH(g);
     x.fillStyle = "#121b30"; x.fillRect(pad, y, W - pad * 2, h);
-    x.fillStyle = PALETTE[g.t.color]; x.fillRect(pad, y, labelW, h);
-    x.fillStyle = "#0b1020"; x.font = "700 30px Rajdhani, Segoe UI, sans-serif"; x.textAlign = "center"; x.fillText(g.t.name, pad + labelW / 2, y + h / 2 + 10); x.textAlign = "left";
+    x.fillStyle = PALETTE[g.t.color] + "26"; x.fillRect(pad, y, labelW, h);
+    x.fillStyle = PALETTE[g.t.color]; x.fillRect(pad, y, 4, h);
+    x.shadowColor = PALETTE[g.t.color]; x.shadowBlur = 16; x.font = "700 30px Rajdhani, Segoe UI, sans-serif"; x.textAlign = "center"; x.fillText(g.t.name, pad + labelW / 2, y + h / 2 + 10); x.textAlign = "left"; x.shadowBlur = 0;
     g.heroes.forEach((hero, i) => { const im = imgs.get(hero.id); if (im) x.drawImage(im, pad + labelW + gap + (i % perRow) * (size + gap), y + gap + Math.floor(i / perRow) * (size + gap), size, size); });
     y += h + 6;
   }

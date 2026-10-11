@@ -6,8 +6,19 @@ window.SITE_TEXT = {
   title1: "Jun plays",
   title2: "Heroes",
   title3: "live on Twitch",
-  intro: "Ranked games, talent picks and drafts explained as they happen. My tier list below is the same one the stream overlay uses, so it updates when I change it on stream.",
+  intro: "Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.",
   twitch_button: "Watch on Twitch",
+
+  // Home page cards
+  card_tierlist_title: "Tier list",
+  card_tierlist_text: "My ranked tier list with counters, synergy and win rates for every hero.",
+  card_maker_title: "Make your own",
+  card_maker_text: "Drag heroes into your own tiers and share it as a link or a picture.",
+  card_overlay_title: "Stream overlay",
+  card_overlay_text: "Live talents, rank, win streak and a draft banner for your stream.",
+  card_builds_title: "Builds",
+  card_builds_badge: "Coming soon",
+  card_builds_text: "Talent builds for each hero, what they're good against, and your own builds.",
 
   tierlist_title: "Tier list",
   tierlist_text: "My picks for ranked. Type !tierlist in chat to see it on stream.",
@@ -21,6 +32,8 @@ window.SITE_TEXT = {
   feature2_text: "Your rank badge, win/loss banner and a header that heats up on a win streak.",
   feature3_title: "Tier list and draft",
   feature3_text: "Viewers type !tierlist, and both teams get tiers and win rates when the match starts.",
+  feature4_title: "Tier list on stream",
+  feature4_text: "When chat types !tierlist between games, the tier list pops up on screen for a few seconds.",
 
   footer_left: "© 2026 Jun · junhots.com",
   footer_right: "Not affiliated with Blizzard Entertainment",
