@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stream overlay for Heroes of the Storm · JunHotS</title>
+<meta name="description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, tier list and match-start draft banner.">
+<meta property="og:title" content="Stream overlay for Heroes of the Storm · JunHotS">
+<meta property="og:description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, tier list and match-start draft banner.">
+<meta property="og:url" content="https://junhots.com/overlay/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<style>
+.shots { display: grid; gap: 40px; margin-top: 8px; }
+.shot { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.shot img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.shot b { display: block; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
+.shot p { margin: 0; color: var(--muted); }
+@media (max-width: 720px) { .shot { grid-template-columns: 1fr; gap: 14px; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">Jun<span>HotS</span></a>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/" aria-current="page">Overlay</a></div>
+    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
+  </nav>
+
+  <header class="page-head">
+    <div>
+      <h1 data-edit="overlay_title">Stream overlay</h1>
+      <p class="sub" data-edit="overlay_text">The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.</p>
+    </div>
+    <span class="soon" data-edit="overlay_badge">Download coming soon</span>
+  </header>
+  <div class="shots">
+    <div class="shot"><img src="/img/previews/overlay-talents.webp" width="840" height="345" alt="Talent panel in the corner of a Heroes of the Storm game"><div><b data-edit="feature1_title">Live talents</b><p data-edit="feature1_text">Shows your talent picks as you take them.</p></div></div>
+    <div class="shot"><img src="/img/previews/overlay-panel.webp" width="520" height="160" alt="Talent panel with rank badge and win streak" loading="lazy"><div><b data-edit="feature2_title">Rank and streak</b><p data-edit="feature2_text">Your rank badge, win/loss banner and a header that heats up on a win streak.</p></div></div>
+    <div class="shot"><img src="/img/previews/overlay-banner.webp" width="1160" height="230" alt="Match start banner with tiers, win rates and match edge" loading="lazy"><div><b data-edit="feature3_title">Tier list and draft</b><p data-edit="feature3_text">Viewers type !tierlist, and both teams get tiers and win rates when the match starts.</p></div></div>
+    <div class="shot"><img src="/img/previews/overlay-popup.webp" width="891" height="343" alt="Tier list popup on stream" loading="lazy"><div><b data-edit="feature4_title">Tier list on stream</b><p data-edit="feature4_text">When chat types !tierlist between games, the tier list pops up on screen for a few seconds.</p></div></div>
+  </div>
+
+  <footer>
+    <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+    <span class="social"><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@its_JJun" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a></span>
+    <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+  </footer>
+</div>
+
+<script src="/text.js"></script>
+<script src="/site.js"></script>
+</body>
+</html>

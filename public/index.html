@@ -3,156 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>JunHotS · Heroes of the Storm tier list</title>
-<meta name="description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates. Live on Twitch.">
-<meta property="og:title" content="JunHotS · Heroes of the Storm tier list">
-<meta property="og:description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates.">
+<title>JunHotS · Heroes of the Storm tier list, overlay and builds</title>
+<meta name="description" content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay.">
+<meta property="og:title" content="JunHotS · Heroes of the Storm tier list, overlay and builds">
+<meta property="og:description" content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay.">
 <meta property="og:url" content="https://junhots.com/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<script>
+// Old links like junhots.com/#tierlist go to the new pages.
+({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash] && location.replace(({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash]);
+</script>
 <style>
-/* Layout: one quiet column, max 1040px. Flat near-black surfaces, hairline borders, one accent used only for links and focus. The hero portraits and tier colors carry the color. */
-:root {
-  color-scheme: dark;
-  --bg: #0b0c0f;
-  --surface: #121419;
-  --surface-2: #181b21;
-  --line: #23262e;
-  --text: #ececef;
-  --muted: #8b8f9a;
-  --accent: #7aa7ff;
-  --brand: #52c7ff;
-  --twitch: #9146ff;
-  --good: #5fcf8f;
-  --bad: #ef7d8b;
-  --sans: "Geist", "Segoe UI", system-ui, sans-serif;
-  --mono: "Geist Mono", ui-monospace, Consolas, monospace;
-}
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body { background: var(--bg); background-image: radial-gradient(900px 380px at 50% -120px, rgba(82, 199, 255, 0.10), transparent 70%); background-repeat: no-repeat; color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
-a { color: inherit; text-decoration: none; }
-.wrap { max-width: 1040px; margin: 0 auto; }
-
-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 20px; border-bottom: 1px solid var(--line); }
-.logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
-.logo span { color: var(--brand); text-shadow: 0 0 14px rgba(82, 199, 255, 0.55); }
-.links { display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
-.links a:hover, .links a:focus-visible { color: var(--text); }
-
-.hero { padding-block: 72px 64px; display: grid; gap: 18px; justify-items: start; }
+.hero { padding-block: 72px 56px; display: grid; gap: 18px; justify-items: start; }
 .eyebrow { font-size: 13px; color: var(--muted); }
 h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; font-weight: 600; letter-spacing: -0.035em; text-wrap: balance; max-width: 16ch; }
 h1 em { font-style: normal; color: var(--brand); text-shadow: 0 0 28px rgba(82, 199, 255, 0.35); }
 .lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
 .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-.btn { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1px solid var(--line); background: var(--surface); }
-.btn:hover { background: var(--surface-2); }
-.btn { gap: 8px; }
-.ico { width: 16px; height: 16px; flex: none; }
-.btn.live { background: var(--twitch); color: #fff; border-color: var(--twitch); }
-.btn.live:hover { background: #9a5cf5; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.6); animation: rec 2s ease-out infinite; }
-@keyframes rec { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.6); } 70%, 100% { box-shadow: 0 0 0 7px rgba(255, 77, 94, 0); } }
-@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-section.block { padding-block: 56px; border-top: 1px solid var(--line); }
-.head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
-h2 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
-.sub { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
-.hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
-
-.controls { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
-.tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { color: var(--text); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
-select.tab { appearance: none; color: var(--text); background: var(--surface-2); text-align: center; text-align-last: center; padding-inline: 12px; }
-select.tab option { background: var(--surface); color: var(--text); text-align: left; }
-
-.tiers { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.row { display: grid; grid-template-columns: 56px 1fr; min-height: 76px; }
-.row + .row { border-top: 1px solid var(--line); }
-.tier { display: grid; place-items: center; font-weight: 700; font-size: 20px; color: #0b0c0f; background: var(--c); }
-.heroes { display: flex; flex-wrap: wrap; gap: 8px; align-content: center; padding: 10px 12px; min-width: 0; background: var(--surface); }
-.hero-card { all: unset; cursor: pointer; width: 56px; text-align: center; border-radius: 6px; }
-.hero-card img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--surface-2); }
-.hero-card span { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hero-card .wr { font: 500 11px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
-.hero-card.sel img { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--text); }
-.hero-card:focus-visible { outline-offset: 3px; }
-.good { color: var(--good); } .bad { color: var(--bad); } .mid { color: var(--muted); }
-.empty { color: var(--muted); font-size: 13px; }
-
-.detail { position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px)); display: grid; gap: 16px; padding: 16px 18px 18px; border: 1px solid #2e323c; border-radius: 12px; background: var(--surface); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); animation: pop .14s ease-out; }
-@keyframes pop { from { opacity: 0; transform: translateY(var(--dy, 4px)) scale(.98); } }
-.detail .x { all: unset; position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
-.detail .x:hover { color: var(--text); background: var(--surface-2); }
-.detail .arrow { position: absolute; left: var(--ax, 50%); width: 12px; height: 12px; background: var(--surface); border: 1px solid #2e323c; transform: translateX(-50%) rotate(45deg); }
-.detail[data-side="below"] .arrow { top: -7px; border-right: 0; border-bottom: 0; }
-.detail[data-side="above"] .arrow { bottom: -7px; border-left: 0; border-top: 0; }
-.scrim { position: fixed; inset: 0; z-index: 19; background: rgba(5, 6, 8, 0.6); }
-.detail .who { display: grid; grid-template-columns: 64px auto; gap: 2px 14px; align-content: start; }
-.detail .who img { grid-row: span 3; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
-.detail .name { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
-.pill { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
-.pill::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
-.stat { font-size: 13px; color: var(--muted); }
-.stat b { font: 500 13px var(--mono); }
-.rel { display: grid; gap: 14px; min-width: 0; padding-top: 14px; border-top: 1px solid var(--line); }
-.rel h3 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--muted) !important; }
-.rel > div:nth-child(1) h3::before, .rel > div:nth-child(2) h3::before, .rel > div:nth-child(3) h3::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
-.rel > div:nth-child(1) h3::before { background: var(--good); }
-.rel > div:nth-child(2) h3::before { background: var(--bad); }
-.rel > div:nth-child(3) h3::before { background: var(--accent); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
-.chip:hover { border-color: #3a3e48; }
-.chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
-.none { color: var(--muted); font-size: 13px; }
-.updated { margin-top: 12px; font-size: 12px; color: var(--muted); }
-@media (max-width: 640px) {
-  .detail { position: fixed; left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-height: 80vh; overflow-y: auto; border-radius: 14px 14px 0 0; padding-bottom: max(18px, env(safe-area-inset-bottom)); --dy: 24px; }
-  .detail .arrow { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .detail { animation: none; } }
-
-.soon { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
-.overlay-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
-.feat { padding-top: 14px; border-top: 1px solid var(--line); }
-.feat b { display: block; font-weight: 600; margin-bottom: 4px; }
-.feat p { margin: 0; color: var(--muted); font-size: 14px; }
-
-footer { padding-block: 28px 48px; border-top: 1px solid var(--line); color: var(--muted); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; }
-
-@media (max-width: 520px) {
-  .row { grid-template-columns: 44px 1fr; }
-  .hero-card, .hero-card img { width: 48px; }
-  .hero-card img { height: 48px; }
-  .hero { padding-block: 48px 40px; }
-}
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; transition: border-color .15s, transform .15s; }
+a.card:hover { border-color: #3a3e48; transform: translateY(-2px); }
+.card .pic { aspect-ratio: 16 / 8; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--line); }
+.card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.card .txt { padding: 16px 18px 18px; }
+.card b { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.card b .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
+a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
+.card p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.card.later .pic { display: grid; place-items: center; background: radial-gradient(420px 160px at 50% 50%, rgba(82, 199, 255, 0.08), transparent 70%), var(--bg); }
+.card.later .pic img { width: 74%; height: auto; object-fit: contain; opacity: .55; filter: saturate(.7); }
+@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } .hero { padding-block: 48px 40px; } }
+@media (prefers-reduced-motion: reduce) { .card, .card b .arr { transition: none; } }
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <nav>
-    <a class="logo" href="#top">Jun<span>HotS</span></a>
-    <div class="links">
-      <a href="#tierlist">Tier list</a>
-      <a href="/tierlist-maker/">Make your own</a>
-      <a href="#overlay">Overlay</a>
-      <a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a>
-      <a href="https://www.youtube.com/@its_JJun" target="_blank" rel="noopener">YouTube</a>
-      <a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a>
-    </div>
+    <a class="logo" href="/">Jun<span>HotS</span></a>
+    <div class="tabs"><a href="/" aria-current="page">Home</a><a href="/tierlist/">Tier list</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
 
-  <header class="hero" id="top">
+  <header class="hero">
     <div class="eyebrow" data-edit="eyebrow">Heroes of the Storm</div>
     <h1><span data-edit="title1">Jun plays</span> <em data-edit="title2">Heroes</em> <span data-edit="title3">live on Twitch</span></h1>
-    <p class="lead" data-edit="intro">Ranked games, talent picks and drafts explained as they happen. My tier list below is the same one the stream overlay uses, so it updates when I change it on stream.</p>
+    <p class="lead" data-edit="intro">Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.</p>
     <div class="cta">
       <a class="btn live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span><span data-edit="twitch_button">Watch on Twitch</span></a>
       <a class="btn" href="https://www.youtube.com/@its_JJun" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a>
@@ -160,163 +60,22 @@ footer { padding-block: 28px 48px; border-top: 1px solid var(--line); color: var
     </div>
   </header>
 
-  <section class="block" id="tierlist">
-    <div class="head">
-      <div>
-        <h2 data-edit="tierlist_title">Tier list</h2>
-        <p class="sub" data-edit="tierlist_text">My picks for ranked. Type !tierlist in chat to see it on stream.</p>
-      </div>
-      <div class="controls" role="group" aria-label="Filter">
-        <button class="tab" data-role="All" aria-pressed="true">All</button>
-        <button class="tab" data-role="Tank" aria-pressed="false">Tank</button>
-        <button class="tab" data-role="Bruiser" aria-pressed="false">Bruiser</button>
-        <button class="tab" data-role="DPS" aria-pressed="false">DPS</button>
-        <button class="tab" data-role="Support" aria-pressed="false">Support</button>
-        <select class="tab" id="map" aria-label="Map"></select>
-      </div>
-    </div>
-    <p class="hint">Click a hero to see counters, synergy and win rate.</p>
-    <div class="tiers" id="tiers"></div>
-    <div class="updated" id="updated"></div>
-  </section>
 
-  <section class="block" id="overlay">
-    <div class="head">
-      <div>
-        <h2 data-edit="overlay_title">Stream overlay</h2>
-        <p class="sub" data-edit="overlay_text">The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.</p>
-      </div>
-      <span class="soon" data-edit="overlay_badge">Download coming soon</span>
-    </div>
-    <div class="overlay-grid">
-      <div class="feat"><b data-edit="feature1_title">Live talents</b><p data-edit="feature1_text">Shows your talent picks as you take them.</p></div>
-      <div class="feat"><b data-edit="feature2_title">Rank and streak</b><p data-edit="feature2_text">Your rank badge, win/loss banner and a header that heats up on a win streak.</p></div>
-      <div class="feat"><b data-edit="feature3_title">Tier list and draft</b><p data-edit="feature3_text">Viewers type !tierlist, and both teams get tiers and win rates when the match starts.</p></div>
-    </div>
+  <section class="cards" aria-label="On this site">
+    <a class="card" href="/tierlist/"><div class="pic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p></div></a>
+    <a class="card" href="/tierlist-maker/"><div class="pic"><img src="/img/previews/maker.webp" alt="Tier list maker"></div><div class="txt"><b><span data-edit="card_maker_title">Make your own</span><span class="arr">→</span></b><p data-edit="card_maker_text">Drag heroes into your own tiers and share it as a link or a picture.</p></div></a>
+    <a class="card" href="/overlay/"><div class="pic"><img src="/img/previews/overlay-talents.webp" alt="Stream overlay in a game"></div><div class="txt"><b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b><p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p></div></a>
+    <div class="card later"><div class="pic"><img src="/img/previews/build-strip.webp" alt=""></div><div class="txt"><b><span data-edit="card_builds_title">Builds</span><span class="soon" data-edit="card_builds_badge">Coming soon</span></b><p data-edit="card_builds_text">Talent builds for each hero, what they're good against, and your own builds.</p></div></div>
   </section>
 
   <footer>
     <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+    <span class="social"><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@its_JJun" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a></span>
     <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
   </footer>
 </div>
 
-<div class="scrim" id="scrim" hidden></div>
-<div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
-
 <script src="/text.js"></script>
-<script>
-// Text from text.js
-for (const el of document.querySelectorAll("[data-edit]")) {
-  const v = (window.SITE_TEXT || {})[el.dataset.edit];
-  if (typeof v === "string") el.textContent = v;
-}
-
-// Tier list: data/tierlist.json is the overlay's own tierlist.json file.
-const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
-let HEROES = [], byId = {}, TL = null, role = "All", map = "Overall", selected = null;
-const img = id => `/img/heroes/${id}.webp`;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const wrOf = id => TL.winrates?.rates?.[id]?.wr;
-const wrClass = v => v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid";
-const wrText = v => v == null ? "" : v.toFixed(1) + "%";
-const beats = id => (TL.counters || {})[id] || [];
-const beatenBy = id => Object.keys(TL.counters || {}).filter(a => TL.counters[a].includes(id));
-const goodWith = id => { const s = TL.synergy || {}; return [...new Set([...(s[id] || []), ...Object.keys(s).filter(a => s[a].includes(id))])]; };
-function tierOf(id) {
-  const m = map !== "Overall" ? (TL.maps || {})[map] : null;
-  if (m && id in m) return m[id] || null;   // "" = not ranked on this map
-  return TL.overall[id] || null;
-}
-function chips(ids) {
-  const list = ids.filter(id => byId[id]);
-  return list.length ? `<div class="chips">${list.map(id => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}</div>` : '<span class="none">None</span>';
-}
-let anchor = null;   // the hero card the popup points at
-const phone = () => matchMedia("(max-width: 640px)").matches;
-function renderDetail() {
-  const box = document.getElementById("detail"), scrim = document.getElementById("scrim");
-  if (!selected) { box.hidden = true; scrim.hidden = true; return; }
-  const h = byId[selected], tid = tierOf(selected), t = TL.tiers.find(x => x.id === tid), wr = wrOf(selected);
-  box.innerHTML = `<span class="arrow"></span><button class="x" aria-label="Close">×</button>
-    <div class="who"><img src="${img(selected)}" alt=""><div class="name">${esc(h.name)}</div>
-      <span class="pill" style="--c:${t ? PALETTE[t.color] : "var(--line)"}">${t ? esc(t.name) + " tier" : "Not ranked"} · ${esc(h.role)}</span>
-      <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}</div></div>
-    <div class="rel">
-      <div><h3>Strong against</h3>${chips(beats(selected))}</div>
-      <div><h3>Weak against</h3>${chips(beatenBy(selected))}</div>
-      <div><h3>Good with</h3>${chips(goodWith(selected))}</div>
-    </div>`;
-  box.hidden = false;
-  scrim.hidden = !phone();
-  place();
-}
-// Desktop: sit just below the clicked hero (above it if there's no room), arrow pointing at it.
-// Phones: a sheet from the bottom of the screen (CSS).
-function place() {
-  const box = document.getElementById("detail");
-  if (box.hidden || phone()) return;
-  const a = anchor && anchor.isConnected ? anchor : document.querySelector(`.hero-card[data-hero="${selected}"]`);
-  if (!a) return;
-  const r = a.getBoundingClientRect(), w = box.offsetWidth, hgt = box.offsetHeight, gap = 12;
-  const left = Math.max(16, Math.min(r.left + r.width / 2 - w / 2, document.documentElement.clientWidth - w - 16));
-  const below = r.bottom + gap + hgt <= innerHeight || r.top - gap - hgt < 0;
-  box.dataset.side = below ? "below" : "above";
-  box.style.setProperty("--dy", below ? "-4px" : "4px");
-  box.style.setProperty("--ax", `${r.left + r.width / 2 - left}px`);
-  box.style.left = `${left + scrollX}px`;
-  box.style.top = `${(below ? r.bottom + gap : r.top - gap - hgt) + scrollY}px`;
-}
-function closeDetail() { selected = null; anchor = null; render(); }
-function render() {
-  const box = document.getElementById("tiers");
-  box.innerHTML = TL.tiers.map(t => {
-    const list = HEROES.filter(h => tierOf(h.id) === t.id && (role === "All" || h.role === role))
-      .sort((a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0));
-    return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
-      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><img src="${img(h.id)}" alt="" loading="lazy"><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
-    }</div></div>`;
-  }).join("");
-  renderDetail();
-}
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-hero]");
-  if (b) {
-    const id = b.dataset.hero;
-    if (b.classList.contains("hero-card") && id === selected) return closeDetail();   // click the same hero again to close
-    selected = id;
-    if (b.classList.contains("hero-card")) anchor = null;   // re-found after render
-    render();
-    anchor = document.querySelector(`.hero-card[data-hero="${id}"]`) || anchor;
-    if (b.classList.contains("chip") && anchor) {   // a chip opens that hero in place and scrolls its card into view
-      anchor.scrollIntoView({ block: "center", behavior: phone() ? "auto" : "smooth" });
-    }
-    place();
-    return;
-  }
-  if (e.target.closest(".x") || (selected && !e.target.closest("#detail"))) closeDetail();
-});
-document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
-addEventListener("resize", place);
-addEventListener("scroll", () => { if (!phone()) place(); }, { passive: true });
-document.querySelectorAll("button.tab[data-role]").forEach(b => b.addEventListener("click", () => {
-  role = b.dataset.role;
-  document.querySelectorAll("button.tab[data-role]").forEach(x => x.setAttribute("aria-pressed", x === b));
-  render();
-}));
-const MAPS = ["Alterac Pass", "Battlefield of Eternity", "Braxis Holdout", "Cursed Hollow", "Dragon Shire", "Garden of Terror", "Hanamura Temple", "Infernal Shrines", "Sky Temple", "Tomb of the Spider Queen", "Towers of Doom", "Volskaya Foundry"];
-const sel = document.getElementById("map");
-sel.innerHTML = ["Overall", ...MAPS].map(m => `<option>${m}</option>`).join("");
-sel.addEventListener("change", () => { map = sel.value; render(); });
-
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json())]).then(([heroes, tl]) => {
-  HEROES = heroes.map(([id, name, r]) => ({ id, name, role: r }));
-  HEROES.forEach(h => byId[h.id] = h);
-  TL = tl;
-  const label = TL.winrates?.label;
-  document.getElementById("updated").textContent = label ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}` : "";
-  render();
-}).catch(() => { document.getElementById("tiers").innerHTML = '<div class="row"><div class="heroes"><span class="empty">The tier list couldn\'t load. Refresh the page to try again.</span></div></div>'; });
-</script>
+<script src="/site.js"></script>
 </body>
 </html>
