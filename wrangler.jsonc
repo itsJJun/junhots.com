@@ -1,0 +1,9 @@
+// Cloudflare settings: serve the files in this repo as a static website.
+{
+  "name": "junhots",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  }
+}
