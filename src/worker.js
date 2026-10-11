@@ -30,6 +30,8 @@ function clean(data) {
     const builds = list.slice(0, 20).map(b => ({
       name: String(b.name || "").slice(0, 40),
       picks: Array.from({ length: 7 }, (_, i) => Math.max(0, Math.min(9, parseInt(b.picks?.[i], 10) || 0))),
+      // Situational swap per level (0 = none), never the same talent as the pick
+      alt: Array.from({ length: 7 }, (_, i) => { const a = Math.max(0, Math.min(9, parseInt(b.alt?.[i], 10) || 0)), p = parseInt(b.picks?.[i], 10) || 0; return p && a !== p ? a : 0; }),
       good: (Array.isArray(b.good) ? b.good : []).filter(g => /^[a-z0-9]{1,30}$/.test(g)).slice(0, 12),
       note: String(b.note || "").slice(0, 300),
     }));
