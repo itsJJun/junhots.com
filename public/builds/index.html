@@ -49,7 +49,8 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .bcard .bh { display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; }
 .bcard .bh b { font-size: 16px; font-weight: 600; }
 .bcard .bh .by { font-size: 12px; color: var(--muted); }
-.bcard .bh .btn2 { margin-left: auto; }
+.bcard .bh .btn2:first-of-type { margin-left: auto; }
+.bcard .bh .btn2 + .btn2 { margin-left: -2px; }
 .strip { display: flex; gap: 6px; flex-wrap: wrap; }
 .slot { display: grid; justify-items: center; gap: 3px; font: 500 10px var(--mono); color: var(--muted); }
 .ic { position: relative; display: block; }
@@ -102,6 +103,19 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .mine .rowx { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .mine .rowx input[type=text] { width: 200px; height: 34px; }
 .mine .rowx input[list] { width: 170px; height: 34px; }
+.junlogin { flex-basis: 100%; font-size: 12px; color: var(--muted); }
+.junlogin button { all: unset; cursor: pointer; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.junlogin button:hover { color: var(--text); }
+.rowx.admin { padding-top: 10px; border-top: 1px dashed #2e323c; }
+.rowx.admin input { flex: 1; min-width: 180px; height: 34px; }
+.btn2.save { background: var(--brand); border-color: var(--brand); color: #06121a; font-weight: 600; }
+dialog { width: min(400px, calc(100% - 32px)); color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+dialog h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+dialog p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+dialog input { width: 100%; font: 400 14px var(--sans); color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; height: 38px; padding: 0 12px; }
+dialog .err { color: var(--bad); margin: 8px 0 0; }
+dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 .toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); padding: 10px 14px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 30; }
 @media (max-width: 760px) {
   .top { grid-template-columns: 1fr; }
@@ -129,21 +143,30 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
     <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
     <span class="social"><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
     <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+    <span class="junlogin" id="junlogin"></span>
   </footer>
 </div>
+<dialog id="loginbox"><form id="loginform">
+  <h2>Jun login</h2>
+  <p>Only for Jun. Lets you save, edit and delete "Jun's builds".</p>
+  <input type="password" id="pw" autocomplete="current-password" aria-label="Password" required oninput="pwerr.hidden = true">
+  <p class="err" id="pwerr" hidden>Wrong password.</p>
+  <div class="row-btns"><button class="btn2" value="cancel" formnovalidate>Cancel</button><button class="btn2 primary" value="ok">Log in</button></div>
+</form></dialog>
 <div class="toast" id="toast" hidden></div>
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script>
 // Hero data: /data/heroes/<id>.json (talents and abilities from the game files, made by tools/update_builds_data.py).
-// Jun's builds: /data/builds.json. "picks" = which talent was taken on each row, counting from 1 (0 = none).
+// Jun's builds: /api/builds (saved in Cloudflare by Jun's editor, see src/worker.js), falling back to /data/builds.json. "picks" = which talent was taken on each row, counting from 1 (0 = none).
 const LEVELS = ["1", "4", "7", "10", "13", "16", "20"];
 const app = document.getElementById("app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const portrait = id => `/img/heroes/${id}.webp`;
 const icon = n => `/img/talents/${n}.webp`;
 const KEY = { Passive: "Passive", Active: "Active", D: "Trait", R: "Heroic" };
+let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
 let HEROES = [], byId = {}, BUILDS = {}, role = "All", hero = null, mine = null;
 
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
@@ -189,7 +212,7 @@ async function openHero(id, state) {
     <h2 class="sec">Jun's builds</h2>
     ${jun.length ? `<div class="builds">${jun.map((b, i) => `
       <div class="bcard">
-        <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><button class="btn2 primary" data-code="${i}">Copy build code</button><button class="btn2" data-copybuild="${i}">Edit as my build</button></div>
+        <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><button class="btn2 primary" data-code="${i}">Copy build code</button>${ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : `<button class="btn2" data-copybuild="${i}">Edit as my build</button>`}</div>
         <div class="strip">${strip(b.picks, true)}</div>
         <code class="code">${esc(code(b.picks))}</code>
         ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
@@ -237,7 +260,12 @@ function drawMine() {
       <span class="good"><span class="lab">Good vs</span>${mine.good.map(g => heroChip(g, true)).join("")}</span>
       <input type="text" list="herolist" id="addgood" placeholder="+ Add hero" aria-label="Add a hero this build is good against">
       <datalist id="herolist">${HEROES.map(h => `<option value="${esc(h.name)}">`).join("")}</datalist>
-    </div>`;
+    </div>
+    ${ADMIN && n ? `<div class="rowx admin">
+      <input type="text" id="bnote" placeholder="Short note (optional)" value="${esc(mine.note || "")}" maxlength="300" aria-label="Note">
+      <button class="btn2 save" id="savejun">${mine.editing != null ? "Update my build" : "Save to Jun's builds"}</button>
+      ${mine.editing != null ? `<button class="btn2" id="canceledit">Cancel edit</button>` : ""}
+    </div>` : ""}`;
   document.getElementById("bname").oninput = e => { mine.name = e.target.value; };
   document.getElementById("addgood").onchange = e => {
     const h = HEROES.find(x => x.name.toLowerCase() === e.target.value.trim().toLowerCase());
@@ -253,7 +281,12 @@ function drawMine() {
     navigator.clipboard?.writeText(url).then(() => toast("Link copied. Anyone with it sees your build."), () => prompt("Copy this link:", url));
   };
   document.getElementById("mycode").onclick = () => copyCode(mine.picks);
-  document.getElementById("clear").onclick = () => { mine.picks = [0, 0, 0, 0, 0, 0, 0]; mine.name = ""; mine.good = []; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
+  if (ADMIN && n) {
+    document.getElementById("bnote").oninput = e => { mine.note = e.target.value; };
+    document.getElementById("savejun").onclick = saveJun;
+    document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], note: "" }; drawMine(); });
+  }
+  document.getElementById("clear").onclick = () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], note: "" }; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
 }
 
 app.addEventListener("click", e => {
@@ -263,11 +296,53 @@ app.addEventListener("click", e => {
   if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const cb = e.target.closest("[data-copybuild]");
   if (cb) { const b = BUILDS[hero.id][+cb.dataset.copybuild]; mine.picks = [...b.picks]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  const ej = e.target.closest("[data-edit-jun]");
+  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i }; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  const dj = e.target.closest("[data-del-jun]");
+  if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
   const cc = e.target.closest("[data-code]");
   if (cc) { copyCode(BUILDS[hero.id][+cc.dataset.code].picks); return; }
   const ug = e.target.closest("[data-ungood]");
   if (ug) { mine.good = mine.good.filter(g => g !== ug.dataset.ungood); drawMine(); }
 });
+
+// ---------- Jun's editor (only shows after "Jun login"; the server checks the password) ----------
+function saveJun() {
+  if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
+  const b = { name: mine.name.trim(), picks: [...mine.picks], good: [...mine.good], note: (mine.note || "").trim() };
+  const list = [...(BUILDS[hero.id] || [])];
+  if (mine.editing != null) list[mine.editing] = b; else list.push(b);
+  putBuilds({ ...BUILDS, [hero.id]: list }, mine.editing != null ? "Updated. It's live." : "Saved. It's live for everyone.");
+}
+async function putBuilds(next, msg) {
+  const r = await fetch("/api/builds", { method: "PUT", headers: { "content-type": "application/json", authorization: "Bearer " + ADMIN }, body: JSON.stringify(next) }).catch(() => null);
+  if (r?.status === 401) { setAdmin(""); toast("Wrong password. Log in again."); return; }
+  if (!r?.ok) { toast("Couldn't save. Try again in a moment."); return; }
+  BUILDS = await r.json();
+  const keep = window.scrollY;
+  await openHero(hero.id, {}); scrollTo(0, keep);
+  toast(msg);
+}
+function setAdmin(pw) {
+  ADMIN = pw;
+  try { pw ? localStorage.setItem("junhots_admin", pw) : localStorage.removeItem("junhots_admin"); } catch {}
+  drawLogin(); if (hero) openHero(hero.id, mine);
+}
+function drawLogin() {
+  const el = document.getElementById("junlogin");
+  el.innerHTML = ADMIN ? `Jun editing on · <button id="logout">Log out</button>` : `<button id="login">Jun login</button>`;
+  document.getElementById("logout")?.addEventListener("click", () => setAdmin(""));
+  document.getElementById("login")?.addEventListener("click", () => { document.getElementById("pw").value = ""; document.getElementById("pwerr").hidden = true; document.getElementById("loginbox").showModal(); });
+}
+document.getElementById("loginform").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (e.submitter?.value === "cancel") { document.getElementById("loginbox").close(); return; }
+  const pw = document.getElementById("pw").value;
+  const r = await fetch("/api/login", { method: "POST", headers: { authorization: "Bearer " + pw } }).catch(() => null);
+  if (r?.ok) { document.getElementById("loginbox").close(); setAdmin(pw); toast("Logged in. You can now save, edit and delete your builds."); }
+  else document.getElementById("pwerr").hidden = false;
+});
+drawLogin();
 
 function applyText() {
   for (const el of app.querySelectorAll("[data-edit]")) { const v = (window.SITE_TEXT || {})[el.dataset.edit]; if (typeof v === "string") el.textContent = v; }
@@ -279,7 +354,7 @@ function route() {
   openHero(id, { picks: [...b].map(Number), name: p.get("n") || "", good: (p.get("g") || "").split(",").filter(g => byId[g]) }).then(() => scrollTo(0, 0));
 }
 addEventListener("hashchange", route);
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/data/builds.json", { cache: "no-cache" }).then(r => r.json()).catch(() => ({}))]).then(([heroes, builds]) => {
+Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()).catch(() => fetch("/data/builds.json", { cache: "no-cache" }).then(r => r.json())).catch(() => ({}))]).then(([heroes, builds]) => {
   HEROES = heroes.map(([id, name, r]) => ({ id, name, role: r })).sort((a, b) => a.name.localeCompare(b.name));
   HEROES.forEach(h => byId[h.id] = h);
   BUILDS = builds;
