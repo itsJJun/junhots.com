@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="/site.css">
 <style>
+:root { --sit: #f0b429; }
 .seg { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .seg button { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
 .seg button:hover { color: var(--text); }
@@ -68,6 +69,21 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .slot button { all: unset; cursor: pointer; border-radius: 7px; }
 .slot button:focus-visible { outline: 2px solid var(--accent); }
 .good { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+/* Situational swap: a second talent for a level, shown as a small amber icon on the slot */
+.slot .ic .alts { position: absolute; right: -5px; bottom: -6px; display: flex; }
+.slot .ic .more { position: absolute; right: -6px; bottom: -6px; min-width: 22px; height: 22px; padding: 0 4px; box-sizing: border-box; border-radius: 11px; background: var(--sit); color: #1a1300; font: 700 11px/22px var(--mono); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+.mine .slot .ic .more { box-shadow: 0 0 0 2px #121419; }
+.slot .ic .alt { position: relative; width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid var(--sit); box-shadow: 0 0 0 2px var(--surface); background: var(--surface-2); }
+.mine .slot .ic .alt { width: 20px; height: 20px; box-shadow: 0 0 0 2px #121419; }
+.strip:has(.alt) .lvl { margin-top: 6px; }
+.slot .tn i { font-style: normal; color: var(--sit); }
+.sit { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+.sit .lab::before, .sitkey::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; border: 1.5px solid var(--sit); margin-right: 7px; vertical-align: 0; }
+.sit .chip { cursor: pointer; font: inherit; color: var(--text); }
+.sit .chip:hover { border-color: var(--sit); }
+.sitbox { display: grid; gap: 6px; }
+.sitrow { display: grid; grid-template-columns: 48px 1fr; align-items: center; }
+.sitrow .sl { font: 500 11px var(--mono); color: var(--muted); }
 .good .lab::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 7px; vertical-align: 1px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
 .chip img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
@@ -78,7 +94,12 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .tier { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding-block: 12px; border-top: 1px solid var(--line); }
 .tier .lvl { font: 600 13px var(--mono); color: var(--muted); padding-top: 12px; text-align: center; }
 .tier .lvl b { display: block; font: 700 20px/1.1 var(--sans); color: var(--text); }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px 10px; padding-top: 6px; }
+.talw { position: relative; display: grid; }
+.altbtn { all: unset; box-sizing: border-box; cursor: pointer; position: absolute; top: -9px; right: 12px; height: 19px; padding: 0 8px; border-radius: 10px; font: 600 10.5px/17px var(--sans); color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
+.altbtn:hover { color: var(--sit); border-color: var(--sit); }
+.altbtn[aria-pressed="true"] { color: #1a1300; background: var(--sit); border-color: var(--sit); }
+.tal.isalt { border-color: var(--sit); box-shadow: 0 0 0 1px var(--sit), 0 0 18px rgba(240, 180, 41, 0.15); }
 .tal { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; align-content: start; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); transition: border-color .12s, box-shadow .12s; }
 .tal:hover { border-color: #3a3e48; }
 .tal .ic { grid-row: span 2; align-self: start; }
@@ -216,6 +237,7 @@ function renderList() {
 async function openHero(id, state) {
   if (!hero || hero.id !== id) hero = await fetch(`/data/heroes/${id}.json`).then(r => r.json());
   mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], ...state };
+  mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
   document.title = `${hero.name} build and talents · JunHotS`;
   const jun = BUILDS[id] || [];
   app.innerHTML = `
@@ -231,15 +253,16 @@ async function openHero(id, state) {
     ${jun.length ? `<div class="builds">${jun.map((b, i) => `
       <div class="bcard">
         <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><button class="btn2 primary" data-code="${i}">Copy build code</button>${ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : `<button class="btn2" data-copybuild="${i}">Edit as my build</button>`}</div>
-        <div class="strip">${strip(b.picks, true)}</div>
+        <div class="strip">${strip(b.picks, true, b.alt)}</div>
         <code class="code">${esc(code(b.picks))}</code>
+        ${sitRow(b.alt)}
         ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
         ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
       </div>`).join("")}</div>` : `<div class="none">No build from Jun for ${esc(hero.name)} yet. Make your own below.</div>`}
 
-    <h2 class="sec">Talents <small>Click one talent per level to make your build. Light blue numbers grow with level.</small></h2>
+    <h2 class="sec">Talents <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.</small></h2>
     <div id="tiers">${LEVELS.map((L, r) => `
-      <div class="tier"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)).join("")}</div></div>`).join("")}</div>
+      <div class="tier"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
 
     <div class="mine" id="mine"></div>`;
   app.querySelectorAll(".ab").forEach(b => b.onclick = () => {
@@ -254,14 +277,25 @@ async function openHero(id, state) {
 function card(t, attrs, tag = "button", no) {
   return `<${tag} class="tal" ${attrs}><span class="ic"><img src="${icon(t.icon)}" alt="" loading="lazy"></span><div class="nm">${no ? `<span class="tn">#${no}</span>` : ""}${esc(t.name)}<span class="key">${KEY[t.key] || t.key}</span></div><div class="meta">${esc(t.meta || "")}</div><div class="tx">${t.text}</div></${tag}>`;
 }
-function strip(picks, jump) {
+function strip(picks, jump, alt = []) {
   return LEVELS.map((L, r) => {
     const t = picks[r] ? hero.talents[L]?.[picks[r] - 1] : null;
-    const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}" title="${esc(t.name)}">` : `<span class="empty"></span>`;
-    const inner = img;
-    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] : "&nbsp;"}</span></span>`;
+    const nums = t ? alts(alt[r]).filter(a => hero.talents[L]?.[a - 1]) : [], as = nums.map(a => hero.talents[L][a - 1]);
+    const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}" title="${esc(t.name)}${as.length ? ` (situational: ${as.map(a => esc(a.name)).join(", ")})` : ""}">` : `<span class="empty"></span>`;
+    // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
+    const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" title="Situational: ${esc(as[0].name)}"></span>`
+      : as.length ? `<span class="more" title="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "");
+    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
+// "Situational" row under a build: which talents to swap in, tap one to see it
+function sitRow(alt = []) {
+  const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
+  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
+}
+// Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
+const noAlt = () => ["", "", "", "", "", "", ""];
+const alts = s => [...String(s || "")].map(Number).filter(Boolean);
 // In-game build code: paste it in the game chat, e.g. [T1311132,Varian]
 const code = picks => `[T${picks.join("")},${hero.gameId}]`;
 function copyCode(picks) {
@@ -271,10 +305,11 @@ function copyCode(picks) {
 function drawMine() {
   const box = document.getElementById("mine");
   const n = mine.picks.filter(Boolean).length;
-  app.querySelectorAll(".tal[data-row]").forEach(c => c.setAttribute("aria-pressed", mine.picks[c.dataset.row] == c.dataset.i));
+  app.querySelectorAll(".tal[data-row]").forEach(c => { c.setAttribute("aria-pressed", mine.picks[c.dataset.row] == c.dataset.i); c.classList.toggle("isalt", alts(mine.alt[c.dataset.row]).includes(+c.dataset.i)); });
+  app.querySelectorAll("[data-alt]").forEach(b => { const [r, i] = b.dataset.alt.split("-").map(Number); b.hidden = !mine.picks[r] || mine.picks[r] === i; b.setAttribute("aria-pressed", alts(mine.alt[r]).includes(i)); });
   box.innerHTML = `
     <div class="lab">Your build<small>${n} of 7 picked</small></div>
-    <div class="strip">${strip(mine.picks)}</div>
+    <div class="strip">${strip(mine.picks, false, mine.alt)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn2 primary" id="mycode"${n ? "" : " disabled"}>Copy build code</button><button class="btn2" id="share">Copy share link</button><button class="btn2" id="clear">Clear</button></div>
     <div class="rowx"${n ? "" : " hidden"}>
       <input type="text" id="bname" placeholder="Build name, like Sleep build" value="${esc(mine.name)}" maxlength="40" aria-label="Build name">
@@ -297,6 +332,7 @@ function drawMine() {
     const p = new URLSearchParams({ b: mine.picks.join("") });
     if (mine.name.trim()) p.set("n", mine.name.trim());
     if (mine.good.length) p.set("g", mine.good.join(","));
+    if (mine.alt.some(Boolean)) p.set("s", mine.alt.join("-"));
     const url = `${location.origin}/builds/#${hero.id}?${p}`;
     history.replaceState(null, "", `#${hero.id}?${p}`);
     navigator.clipboard?.writeText(url).then(() => toast("Link copied. Anyone with it sees your build."), () => prompt("Copy this link:", url));
@@ -305,20 +341,22 @@ function drawMine() {
   if (ADMIN && n) {
     document.getElementById("bnote").oninput = e => { mine.note = e.target.value; };
     document.getElementById("savejun").onclick = saveJun;
-    document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], note: "" }; drawMine(); });
+    document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], note: "" }; drawMine(); });
   }
-  document.getElementById("clear").onclick = () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], note: "" }; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
+  document.getElementById("clear").onclick = () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], note: "" }; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
 }
 
 app.addEventListener("click", e => {
   const t = e.target.closest(".tal[data-row]");
-  if (t) { const r = +t.dataset.row, i = +t.dataset.i; mine.picks[r] = mine.picks[r] === i ? 0 : i; drawMine(); return; }
+  if (t) { const r = +t.dataset.row, i = +t.dataset.i; mine.picks[r] = mine.picks[r] === i ? 0 : i; mine.alt[r] = mine.picks[r] ? alts(mine.alt[r]).filter(a => a !== i).join("") : ""; drawMine(); return; }
+  const al = e.target.closest("[data-alt]");
+  if (al) { const [r, i] = al.dataset.alt.split("-").map(Number); const cur = alts(mine.alt[r]); mine.alt[r] = (cur.includes(i) ? cur.filter(a => a !== i) : [...cur, i].sort()).join(""); drawMine(); return; }
   const j = e.target.closest("[data-jump]");
   if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const cb = e.target.closest("[data-copybuild]");
-  if (cb) { const b = BUILDS[hero.id][+cb.dataset.copybuild]; mine.picks = [...b.picks]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  if (cb) { const b = BUILDS[hero.id][+cb.dataset.copybuild]; mine.picks = [...b.picks]; mine.alt = [...(b.alt || noAlt())]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
   const ej = e.target.closest("[data-edit-jun]");
-  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i }; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i }; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
   const dj = e.target.closest("[data-del-jun]");
   if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
   const cc = e.target.closest("[data-code]");
@@ -330,7 +368,7 @@ app.addEventListener("click", e => {
 // ---------- Jun's editor (only shows after "Jun login"; the server checks the password) ----------
 function saveJun() {
   if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
-  const b = { name: mine.name.trim(), picks: [...mine.picks], good: [...mine.good], note: (mine.note || "").trim() };
+  const b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good], note: (mine.note || "").trim() };
   const list = [...(BUILDS[hero.id] || [])];
   if (mine.editing != null) list[mine.editing] = b; else list.push(b);
   putBuilds({ ...BUILDS, [hero.id]: list }, mine.editing != null ? "Updated. It's live." : "Saved. It's live for everyone.");
@@ -372,7 +410,7 @@ function route() {
   const [id, qs] = location.hash.slice(1).split("?");
   if (!id || !byId[id]) { hero = null; renderList(); return; }
   const p = new URLSearchParams(qs || ""), b = (p.get("b") || "").padEnd(7, "0").slice(0, 7);
-  openHero(id, { picks: [...b].map(Number), name: p.get("n") || "", good: (p.get("g") || "").split(",").filter(g => byId[g]) }).then(() => scrollTo(0, 0));
+  openHero(id, { picks: [...b].map(Number), alt: (p.get("s") || "").split("-"), name: p.get("n") || "", good: (p.get("g") || "").split(",").filter(g => byId[g]) }).then(() => scrollTo(0, 0));
 }
 addEventListener("hashchange", route);
 Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()).catch(() => fetch("/data/builds.json", { cache: "no-cache" }).then(r => r.json())).catch(() => ({}))]).then(([heroes, builds]) => {
