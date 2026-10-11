@@ -28,13 +28,17 @@ input[type=search], input[type=text] { font: 400 14px var(--sans); color: var(--
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; }
 .pick { display: grid; gap: 6px; justify-items: center; padding: 10px 6px 8px; border-radius: 10px; border: 1px solid transparent; text-align: center; font-size: 12px; }
 .pick:hover { background: var(--surface); border-color: var(--line); }
-.pick img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: var(--surface-2); }
+.pick img { display: block; width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: var(--surface-2); }
 .pick .has { color: var(--brand); font-size: 11px; line-height: 1; }
 
 /* Hero page */
 .back { display: inline-flex; gap: 6px; font-size: 13px; color: var(--muted); margin: 28px 0 0; }
 .back:hover { color: var(--text); }
-.top { padding-block: 18px 10px; }
+.top { padding-block: 18px 10px; position: relative; isolation: isolate; }
+/* Hero art from the in-game loading screen, faded into the page behind the header */
+.top .art { position: absolute; z-index: -1; right: 0; top: -40px; height: 300px; width: auto; max-width: 75%; object-fit: cover; object-position: right top; opacity: .5; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 45%), linear-gradient(to bottom, transparent, #000 25%, #000 55%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 45%), linear-gradient(to bottom, transparent, #000 25%, #000 55%, transparent); mask-composite: intersect; }
+@media (max-width: 640px) { .top .art { height: 190px; top: -10px; max-width: 100%; opacity: .22; } }
 .who { display: grid; grid-template-columns: 84px 1fr; gap: 4px 18px; align-items: center; }
 .who img { grid-row: span 3; width: 84px; height: 84px; border-radius: 10px; object-fit: cover; }
 .who h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; }
@@ -90,9 +94,18 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .tx b.n[data-s] { color: #8fd1ff; }
 .tx b.q { color: #e4b800; font-weight: 600; }
 .tx b.h { color: #d8dbe2; font-weight: 600; }
-.abil { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
-.abil .tal { cursor: default; }
-.abil .tal:hover { border-color: var(--line); }
+/* Ability row under the hero name: small chips, tap one to read it */
+.abrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.ab { all: unset; box-sizing: border-box; cursor: pointer; display: grid; justify-items: center; gap: 4px; font: 600 11px/1 var(--mono); color: var(--muted); }
+.ab img { display: block; width: 46px; height: 46px; border-radius: 8px; border: 1px solid var(--line); transition: border-color .12s, box-shadow .12s; }
+.ab:hover img { border-color: #3a3e48; }
+.ab:focus-visible img { outline: 2px solid var(--accent); }
+.ab[aria-expanded="true"] { color: var(--brand); }
+.ab[aria-expanded="true"] img { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), 0 0 14px rgba(82, 199, 255, 0.2); }
+@media (max-width: 480px) { .abrow { gap: 7px; } .ab img { width: 40px; height: 40px; } }
+.abinfo { margin-top: 10px; max-width: 640px; }
+.abinfo .tal { cursor: default; width: 100%; }
+.abinfo .tal:hover { border-color: var(--line); }
 .hint { font-size: 13px; color: var(--muted); margin: -4px 0 8px; }
 
 /* Your build bar */
@@ -165,6 +178,8 @@ const app = document.getElementById("app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const portrait = id => `/img/heroes/${id}.webp`;
 const icon = n => `/img/talents/${n}.webp`;
+// Abilities show in the in-game bar order: Q W E, heroics, then the trait (D).
+const ORDER = ["Q", "W", "E", "R", "D"];
 const KEY = { Passive: "Passive", Active: "Active", D: "Trait", R: "Heroic" };
 let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
 let HEROES = [], byId = {}, BUILDS = {}, role = "All", hero = null, mine = null;
@@ -182,15 +197,15 @@ function renderList() {
     <header class="page-head"><div><h1 data-edit="builds_title">Builds</h1>
       <p class="sub" data-edit="builds_text">Talents and abilities for every hero. See my builds, copy them into the game, or make your own and share it.</p></div></header>
     <div class="bar">
-      <div class="seg" role="group" aria-label="Role">${["All", "Tank", "Bruiser", "DPS", "Support"].map(r => `<button data-role="${r}" aria-pressed="${r === role}">${r}</button>`).join("")}</div>
+      <div class="seg" role="group" aria-label="Role">${["All", ...ROLES].map(r => `<button class="rtab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("")}</div>
       <input type="search" id="q" placeholder="Search heroes" aria-label="Search heroes">
     </div>
     <div class="grid" id="grid"></div>`;
   applyText();
   const draw = () => {
     const q = document.getElementById("q").value.trim().toLowerCase();
-    document.getElementById("grid").innerHTML = HEROES.filter(h => (role === "All" || h.role === role) && h.name.toLowerCase().includes(q))
-      .map(h => `<a class="pick" href="#${h.id}"><img src="${portrait(h.id)}" alt="" loading="lazy">${esc(h.name)}${BUILDS[h.id]?.length ? `<span class="has">${BUILDS[h.id].length} build${BUILDS[h.id].length > 1 ? "s" : ""}</span>` : ""}</a>`).join("");
+    document.getElementById("grid").innerHTML = HEROES.filter(h => (role === "All" || h.grole === role) && h.name.toLowerCase().includes(q))
+      .map(h => `<a class="pick" href="#${h.id}"><span class="port"><img src="${portrait(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}</span>${esc(h.name)}${BUILDS[h.id]?.length ? `<span class="has">${BUILDS[h.id].length} build${BUILDS[h.id].length > 1 ? "s" : ""}</span>` : ""}</a>`).join("");
   };
   document.getElementById("q").addEventListener("input", draw);
   app.querySelectorAll("[data-role]").forEach(b => b.onclick = () => { role = b.dataset.role; app.querySelectorAll("[data-role]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
@@ -206,7 +221,10 @@ async function openHero(id, state) {
   app.innerHTML = `
     <a class="back" href="#">← All heroes</a>
     <section class="top">
-      <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${esc(hero.role)}</div></div>
+      <img class="art" src="/img/art/${id}.webp" alt="" onerror="this.remove()">
+      <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${roleIcon(byId[id].grole)} ${esc(byId[id].grole)}</div></div>
+      <div class="abrow">${hero.abilities.map((a, i) => [a, i]).sort((x, y) => ORDER.indexOf(x[0].key) - ORDER.indexOf(y[0].key)).map(([a, i]) => `<button class="ab" data-ab="${i}" aria-expanded="false" title="${esc(a.name)}" aria-label="${esc(a.name)}"><img src="${icon(a.icon)}" alt="">${a.key}</button>`).join("")}</div>
+      <div class="abinfo" id="abinfo" hidden></div>
     </section>
 
     <h2 class="sec">Jun's builds</h2>
@@ -223,10 +241,13 @@ async function openHero(id, state) {
     <div id="tiers">${LEVELS.map((L, r) => `
       <div class="tier"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)).join("")}</div></div>`).join("")}</div>
 
-    <div class="mine" id="mine"></div>
-
-    <h2 class="sec">Abilities</h2>
-    <div class="abil">${hero.abilities.map(a => card(a, "", "div")).join("")}</div>`;
+    <div class="mine" id="mine"></div>`;
+  app.querySelectorAll(".ab").forEach(b => b.onclick = () => {
+    const box = document.getElementById("abinfo"), open = b.getAttribute("aria-expanded") === "true";
+    app.querySelectorAll(".ab").forEach(x => x.setAttribute("aria-expanded", "false"));
+    box.hidden = open;
+    if (!open) { b.setAttribute("aria-expanded", "true"); box.innerHTML = card(hero.abilities[b.dataset.ab], "", "div"); box.querySelectorAll(".tx b.n[data-s]").forEach(n => n.title = `Grows ${Math.round(n.dataset.s * 100)}% per level`); }
+  });
   app.querySelectorAll(".tx b.n[data-s]").forEach(b => b.title = `Grows ${Math.round(b.dataset.s * 100)}% per level`);
   drawMine();
 }
@@ -355,7 +376,7 @@ function route() {
 }
 addEventListener("hashchange", route);
 Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()).catch(() => fetch("/data/builds.json", { cache: "no-cache" }).then(r => r.json())).catch(() => ({}))]).then(([heroes, builds]) => {
-  HEROES = heroes.map(([id, name, r]) => ({ id, name, role: r })).sort((a, b) => a.name.localeCompare(b.name));
+  HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g })).sort((a, b) => a.name.localeCompare(b.name));
   HEROES.forEach(h => byId[h.id] = h);
   BUILDS = builds;
   route();

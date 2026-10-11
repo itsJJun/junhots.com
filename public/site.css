@@ -59,3 +59,9 @@ footer a:hover { color: var(--text); }
   .tabs a { padding-block: 12px 14px; }
   .nav-live { margin-left: auto; }
 }
+
+/* Role icons (site.js roleIcon) */
+.ri { width: 16px; height: 16px; flex: none; vertical-align: -3px; }
+.rtab { display: inline-flex; align-items: center; gap: 6px; }
+.port { position: relative; display: block; }
+.port .rb { position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; padding: 3px; border-radius: 50%; background: #0b0c0f; box-shadow: 0 0 0 1px var(--line); }
