@@ -71,7 +71,8 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .good { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
 /* Situational swap: a second talent for a level, shown as a small amber icon on the slot */
 .slot .ic .alts { position: absolute; right: -5px; bottom: -6px; display: flex; }
-.slot .ic .alts img + img { margin-left: -8px; }
+.slot .ic .more { position: absolute; right: -6px; bottom: -6px; min-width: 22px; height: 22px; padding: 0 4px; box-sizing: border-box; border-radius: 11px; background: var(--sit); color: #1a1300; font: 700 11px/22px var(--mono); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+.mine .slot .ic .more { box-shadow: 0 0 0 2px #121419; }
 .slot .ic .alt { position: relative; width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid var(--sit); box-shadow: 0 0 0 2px var(--surface); background: var(--surface-2); }
 .mine .slot .ic .alt { width: 20px; height: 20px; box-shadow: 0 0 0 2px #121419; }
 .strip:has(.alt) .lvl { margin-top: 6px; }
@@ -80,7 +81,9 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .sit .lab::before, .sitkey::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; border: 1.5px solid var(--sit); margin-right: 7px; vertical-align: 0; }
 .sit .chip { cursor: pointer; font: inherit; color: var(--text); }
 .sit .chip:hover { border-color: var(--sit); }
-.sit .chip small { font: 500 10px var(--mono); color: var(--muted); }
+.sitbox { display: grid; gap: 6px; }
+.sitrow { display: grid; grid-template-columns: 48px 1fr; align-items: center; }
+.sitrow .sl { font: 500 11px var(--mono); color: var(--muted); }
 .good .lab::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 7px; vertical-align: 1px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
 .chip img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
@@ -279,14 +282,16 @@ function strip(picks, jump, alt = []) {
     const t = picks[r] ? hero.talents[L]?.[picks[r] - 1] : null;
     const nums = t ? alts(alt[r]).filter(a => hero.talents[L]?.[a - 1]) : [], as = nums.map(a => hero.talents[L][a - 1]);
     const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}" title="${esc(t.name)}${as.length ? ` (situational: ${as.map(a => esc(a.name)).join(", ")})` : ""}">` : `<span class="empty"></span>`;
-    const inner = img + (as.length ? `<span class="alts">${[...as].reverse().map(a => `<img class="alt" src="${icon(a.icon)}" alt="Situational: ${esc(a.name)}" title="Situational: ${esc(a.name)}">`).join("")}</span>` : "");
-    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>/${nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
+    // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
+    const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" title="Situational: ${esc(as[0].name)}"></span>`
+      : as.length ? `<span class="more" title="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "");
+    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
 // "Situational" row under a build: which talents to swap in, tap one to see it
 function sitRow(alt = []) {
-  const items = LEVELS.flatMap((L, r) => alts(alt[r]).map(a => [L, r, a, hero.talents[L]?.[a - 1]])).filter(x => x[3]);
-  return items.length ? `<div class="sit"><span class="lab">Situational</span>${items.map(([L, r, a, t]) => `<button class="chip" data-jump="${r}-${a}"><img src="${icon(t.icon)}" alt="">${esc(t.name)}<small>Lvl ${L}</small></button>`).join("")}</div>` : "";
+  const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
+  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
 const noAlt = () => ["", "", "", "", "", "", ""];
