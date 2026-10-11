@@ -207,7 +207,7 @@ for hid, h in items.items():
             icons.add(t['icon'])
         tal[lvl] = row
     life = h.get('life', {}); w = (h.get('weapons') or [{}])[0]
-    doc = {'id': sid, 'name': name, 'title': htitle.get(hid, ''), 'role': role,
+    doc = {'id': sid, 'gameId': hid, 'name': name, 'title': htitle.get(hid, ''), 'role': role,
            'life': [life.get('amount'), life.get('scale', 0)], 'attack': [w.get('damage'), w.get('damageScale', 0), w.get('period')],
            'abilities': abil, 'talents': tal}
     json.dump(doc, open(f'{SITE}/data/heroes/{sid}.json', 'w'), separators=(',', ':'), ensure_ascii=False)

@@ -17,10 +17,10 @@ window.SITE_TEXT = {
   card_overlay_title: "Stream overlay",
   card_overlay_text: "Live talents, rank, win streak and a draft banner for your stream.",
   card_builds_title: "Builds",
-  card_builds_text: "Talents for every hero with numbers for any level, my builds, and your own.",
+  card_builds_text: "Talents for every hero, my builds to copy into the game, and your own.",
 
   builds_title: "Builds",
-  builds_text: "Talents and abilities for every hero, with the numbers for any level. See my builds or make your own and share it.",
+  builds_text: "Talents and abilities for every hero. See my builds, copy them into the game, or make your own and share it.",
 
   tierlist_title: "Tier list",
   tierlist_text: "My picks for ranked. Type !tierlist in chat to see it on stream.",
