@@ -123,6 +123,8 @@ dialog::backdrop { background: rgba(0,0,0,0.6); }
 dialog h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
 dialog p { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
 dialog textarea { width: 100%; min-height: 90px; font: 12px/1.5 ui-monospace, Consolas, monospace; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; word-break: break-all; }
+button.danger { color: #0b0c0f; background: var(--bad); border-color: var(--bad); }
+button.danger:hover { background: #ff9aa6; }
 dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 @media (max-width: 560px) {
   .row { grid-template-columns: 64px 1fr; }
@@ -153,6 +155,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap
     <input type="search" id="search" placeholder="Search heroes" aria-label="Search heroes">
   </div>
   <div class="actions">
+    <button id="reset">Reset</button>
     <button id="addTier">+ Add tier</button>
     <button id="openShared">Open a shared list</button>
     <button id="loadFile">Load overlay file</button>
@@ -184,6 +187,11 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap
   <textarea id="openText" aria-label="Shared link"></textarea>
   <p id="openErr" hidden style="color:var(--bad)"></p>
   <div class="row-btns"><button id="openCancel">Cancel</button><button class="primary" id="openGo">Open</button></div>
+</dialog>
+<dialog id="resetDlg">
+  <h2>Reset your tier list?</h2>
+  <p>This takes every hero out of the tiers and clears your counters and synergy. Tier names and colors go back to S, A, B, C, D. You can't undo this.</p>
+  <div class="row-btns"><button id="resetCancel">Cancel</button><button class="danger" id="resetGo">Reset</button></div>
 </dialog>
 <div class="toast" id="toast" hidden></div>
 
@@ -355,7 +363,11 @@ $("addTier").onclick = () => {
   let n = 1; while (state.tiers.some(t => t.id === "T" + n)) n++;
   state.tiers.push({ id: "T" + n, name: "New", color: state.tiers.length % PALETTE.length }); changed();
 };
-$("startFresh").onclick = () => { state = blank(); isShared = false; $("sharedBanner").hidden = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} save(); render(); };
+function startOver() { state = blank(); isShared = false; picked = null; focusHero = null; paletteOpen = null; confirmDel = null; $("sharedBanner").hidden = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} save(); render(); }
+$("startFresh").onclick = startOver;
+$("reset").onclick = () => $("resetDlg").showModal();
+$("resetCancel").onclick = () => $("resetDlg").close();
+$("resetGo").onclick = () => { $("resetDlg").close(); startOver(); toast("Tier list reset"); };
 
 // ---------- share link: the whole list packed into the link, no server needed ----------
 function b64url(bytes) { let s = ""; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
@@ -450,11 +462,13 @@ $("savePic").onclick = async () => {
   if (shared) { state = shared; showShared(); }
   else {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE)); } catch (e) {}
-    state = saved ? clean(saved) : example();
+    state = saved ? clean(saved) : blank();
+    // Older visits saved the untouched example list; start those people empty too.
+    if (saved && JSON.stringify(state) === JSON.stringify(example())) state = blank();
   }
   render();
 })();
-// First visit: a few heroes already placed so the page shows how it works.
+// The example list earlier versions placed on a first visit (only used to spot it in saved data).
 function example() {
   const d = blank();
   Object.assign(d.overall, { anubarak: "S", stukov: "S", anduin: "S", hanzo: "S", johanna: "A", muradin: "A", malthael: "A", sonya: "A", valla: "A", rehgar: "A", diablo: "B", kerrigan: "B", zeratul: "B", lucio: "B", raynor: "C", thebutcher: "C", tyrande: "D" });
