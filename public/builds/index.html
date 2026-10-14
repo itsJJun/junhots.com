@@ -58,6 +58,10 @@ h2.sec > span { white-space: nowrap; }
 .bcard .bh .by { font-size: 12px; color: var(--muted); }
 .bcard .bh .btn2:first-of-type { margin-left: auto; }
 .bcard .bh .btn2 + .btn2 { margin-left: -2px; }
+.bcard { transition: border-color .15s, box-shadow .15s; }
+.bcard.on { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), 0 0 22px rgba(82, 199, 255, 0.14); }
+.bcard .showing { display: none; font: 600 11px/1 var(--sans); color: #06121a; background: var(--brand); border-radius: 999px; padding: 4px 8px; }
+.bcard.on .showing { display: inline-block; }
 .strip { display: flex; gap: 6px; flex-wrap: wrap; }
 .slot { display: grid; justify-items: center; gap: 3px; font: 500 10px var(--mono); color: var(--muted); }
 .ic { position: relative; display: block; }
@@ -93,6 +97,7 @@ h2.sec > span { white-space: nowrap; }
 .note { font-size: 13px; color: var(--muted); margin: 0; }
 .none { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; }
 
+#tiers { scroll-margin-top: 60px; }
 .tier { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding-block: 12px; border-top: 1px solid var(--line); }
 .tier .lvl { font: 600 13px var(--mono); color: var(--muted); padding-top: 12px; text-align: center; }
 .tier .lvl b { display: block; font: 700 20px/1.1 var(--sans); color: var(--text); }
@@ -112,6 +117,11 @@ h2.sec > span { white-space: nowrap; }
 .tal .tx { grid-column: 1 / -1; font-size: 13px; line-height: 1.55; color: #c3c6ce; margin-top: 4px; }
 .tal[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), 0 0 18px rgba(82, 199, 255, 0.18); }
 .tal.flash { animation: flash 1.2s ease-out; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt) { opacity: .5; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt) img { filter: grayscale(1); }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt):hover { opacity: 1; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt):hover img { filter: none; }
+.tier .tal, .tier .tal img { transition: opacity .2s, filter .2s, border-color .12s, box-shadow .12s; }
 @keyframes flash { 0%, 40% { box-shadow: 0 0 0 2px var(--good), 0 0 22px rgba(95, 207, 143, 0.35); } }
 .tx b.n { font: 500 12.5px var(--mono); color: #bfd4fd; }
 .tx b.n[data-s] { color: #8fd1ff; }
@@ -262,8 +272,8 @@ async function openHero(id, state) {
   document.title = `${hero.name} build and talents · JunHotS`;
   const jun = BUILDS[id] || [];
   const junHtml = jun.length ? `<div class="builds">${jun.map((b, i) => `
-      <div class="bcard">
-        <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><button class="btn2 primary" data-code="${i}">Copy build code</button>${ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : `<button class="btn2" data-copybuild="${i}">Edit as my build</button>`}</div>
+      <div class="bcard" data-b="${i}">
+        <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><span class="showing">On the talents below</span><button class="btn2 primary" data-code="${i}">Copy build code</button>${ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : `<button class="btn2" data-copybuild="${i}">Show on talents</button>`}</div>
         <div class="strip">${strip(b.picks, true, b.alt)}</div>
         <code class="code">${esc(code(b.picks))}</code>
         ${sitRow(b.alt)}
@@ -283,7 +293,7 @@ async function openHero(id, state) {
 
     <h2 class="sec"><span>${MAKE ? "Make your build" : "Talents"}</span> <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.</small></h2>
     <div id="tiers">${LEVELS.map((L, r) => `
-      <div class="tier"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
+      <div class="tier" data-tier="${r}"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
 
     <div class="mine" id="mine"></div>`;
   app.querySelectorAll(".ab").forEach(b => b.onclick = () => {
@@ -328,6 +338,8 @@ function drawMine() {
   const n = mine.picks.filter(Boolean).length;
   app.querySelectorAll(".tal[data-row]").forEach(c => { c.setAttribute("aria-pressed", mine.picks[c.dataset.row] == c.dataset.i); c.classList.toggle("isalt", alts(mine.alt[c.dataset.row]).includes(+c.dataset.i)); });
   app.querySelectorAll("[data-alt]").forEach(b => { const [r, i] = b.dataset.alt.split("-").map(Number); b.hidden = !mine.picks[r] || mine.picks[r] === i; b.setAttribute("aria-pressed", alts(mine.alt[r]).includes(i)); });
+  app.querySelectorAll(".tier[data-tier]").forEach(t => t.classList.toggle("picked", !!mine.picks[t.dataset.tier]));
+  app.querySelectorAll(".bcard[data-b]").forEach(c => { const b = BUILDS[hero.id]?.[c.dataset.b]; c.classList.toggle("on", !!b && b.picks.join("") === mine.picks.join("")); });
   box.innerHTML = `
     <div class="lab">Your build<small>${n} of 7 picked</small></div>
     <div class="strip">${strip(mine.picks, false, mine.alt)}</div>
@@ -375,7 +387,13 @@ app.addEventListener("click", e => {
   const j = e.target.closest("[data-jump]");
   if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const cb = e.target.closest("[data-copybuild]");
-  if (cb) { const b = BUILDS[hero.id][+cb.dataset.copybuild]; mine.picks = [...b.picks]; mine.alt = [...(b.alt || noAlt())]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  if (cb) {
+    // Loads Jun's build into "Your build": its talents light up below and the rest of each row greys out, ready to tweak.
+    const b = BUILDS[hero.id][+cb.dataset.copybuild], cur = mine.picks.join("");
+    if (cur !== "0000000" && cur !== b.picks.join("") && !confirm(`Replace your build with "${b.name}"?`)) return;
+    mine.picks = [...b.picks]; mine.alt = [...(b.alt || noAlt())]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine();
+    document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return;
+  }
   const ej = e.target.closest("[data-edit-jun]");
   if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i }; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
   const dj = e.target.closest("[data-del-jun]");
