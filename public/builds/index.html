@@ -48,6 +48,8 @@ input[type=search], input[type=text] { font: 400 14px var(--sans); color: var(--
 
 h2.sec { margin: 30px 0 12px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 10px; }
 h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
+h2.sec { flex-wrap: wrap; row-gap: 2px; }
+h2.sec > span { white-space: nowrap; }
 
 .builds { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
 .bcard { padding: 14px 16px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); display: grid; gap: 12px; }
@@ -56,6 +58,14 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .bcard .bh .by { font-size: 12px; color: var(--muted); }
 .bcard .bh .btn2:first-of-type { margin-left: auto; }
 .bcard .bh .btn2 + .btn2 { margin-left: -2px; }
+.bcard { transition: border-color .15s, box-shadow .15s; }
+.bcard.on { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), 0 0 22px rgba(82, 199, 255, 0.14); }
+.bcard .showing { display: none; font: 600 11px/1 var(--sans); color: #06121a; background: var(--brand); border-radius: 999px; padding: 4px 8px; }
+.bcard.on .showing { display: inline-block; }
+.bcard[data-b] { cursor: pointer; }
+.bcard[data-b]:hover:not(.on) { border-color: #3a3e48; }
+.bcard .clickhint { font-size: 12px; color: var(--muted); opacity: .7; }
+.bcard.on .clickhint { display: none; }
 .strip { display: flex; gap: 6px; flex-wrap: wrap; }
 .slot { display: grid; justify-items: center; gap: 3px; font: 500 10px var(--mono); color: var(--muted); }
 .ic { position: relative; display: block; }
@@ -91,6 +101,7 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .note { font-size: 13px; color: var(--muted); margin: 0; }
 .none { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; }
 
+#tiers { scroll-margin-top: 60px; }
 .tier { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding-block: 12px; border-top: 1px solid var(--line); }
 .tier .lvl { font: 600 13px var(--mono); color: var(--muted); padding-top: 12px; text-align: center; }
 .tier .lvl b { display: block; font: 700 20px/1.1 var(--sans); color: var(--text); }
@@ -110,6 +121,11 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .tal .tx { grid-column: 1 / -1; font-size: 13px; line-height: 1.55; color: #c3c6ce; margin-top: 4px; }
 .tal[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), 0 0 18px rgba(82, 199, 255, 0.18); }
 .tal.flash { animation: flash 1.2s ease-out; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt) { opacity: .5; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt) img { filter: grayscale(1); }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt):hover { opacity: 1; }
+.tier.picked .tal:not([aria-pressed="true"]):not(.isalt):hover img { filter: none; }
+.tier .tal, .tier .tal img { transition: opacity .2s, filter .2s, border-color .12s, box-shadow .12s; }
 @keyframes flash { 0%, 40% { box-shadow: 0 0 0 2px var(--good), 0 0 22px rgba(95, 207, 143, 0.35); } }
 .tx b.n { font: 500 12.5px var(--mono); color: #bfd4fd; }
 .tx b.n[data-s] { color: #8fd1ff; }
@@ -127,6 +143,21 @@ h2.sec small { font-size: 13px; font-weight: 400; color: var(--muted); }
 .abinfo { margin-top: 10px; max-width: 640px; }
 .abinfo .tal { cursor: default; width: 100%; }
 .abinfo .tal:hover { border-color: var(--line); }
+/* Hover info (mouse only): the full ability or talent card floats next to what you point at */
+.tip { position: fixed; z-index: 40; width: min(380px, calc(100vw - 24px)); pointer-events: none; animation: tipin .1s ease-out; }
+.tip .tal { cursor: default; width: 100%; background: #15171d; border-color: #2e323c; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6); }
+.tip .tsit { margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: #15171d; border: 1px solid var(--sit); font-size: 12px; color: var(--muted); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.tip .tsit b { color: var(--sit); font-weight: 600; }
+@keyframes tipin { from { opacity: 0; transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .tip { animation: none; } }
+/* Build maker ("Make your own" > Build): Jun's builds folded into one line above the talents */
+.junfold { margin-top: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.junfold summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; }
+.junfold summary::-webkit-details-marker { display: none; }
+.junfold summary small { font-weight: 400; color: var(--muted); }
+.junfold summary::after { content: ""; margin-left: auto; width: 7px; height: 7px; border: solid var(--muted); border-width: 0 1.6px 1.6px 0; transform: rotate(45deg); transition: transform .15s; }
+.junfold[open] summary::after { transform: rotate(-135deg); }
+.junfold .builds { padding: 0 12px 12px; }
 .hint { font-size: 13px; color: var(--muted); margin: -4px 0 8px; }
 
 /* Your build bar */
@@ -161,6 +192,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-to
 }
 @media (prefers-reduced-motion: reduce) { .tal.flash { animation: none; } }
 </style>
+<script src="/nav.js" defer></script>
 </head>
 <body>
 
@@ -202,7 +234,12 @@ const icon = n => `/img/talents/${n}.webp`;
 // Abilities show in the in-game bar order: Q W E, heroics, then the trait (D).
 const ORDER = ["Q", "W", "E", "R", "D"];
 const KEY = { Passive: "Passive", Active: "Active", D: "Trait", R: "Heroic" };
+// Builds a visitor saves live only in their own browser (localStorage), per hero.
+let MYB = {}; try { MYB = JSON.parse(localStorage.getItem("junhots_mybuilds") || "{}"); } catch {}
+const saveMYB = () => { try { localStorage.setItem("junhots_mybuilds", JSON.stringify(MYB)); return true; } catch { return false; } };
 let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
+// "Make your own" > Build opens this page as /builds/?make: same page, talents first.
+const MAKE = new URLSearchParams(location.search).has("make");
 let HEROES = [], byId = {}, BUILDS = {}, role = "All", hero = null, mine = null;
 
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
@@ -213,10 +250,11 @@ function heroChip(id, removable) {
 
 // ---------- hero list ----------
 function renderList() {
-  document.title = "Heroes of the Storm builds and talents · JunHotS";
+  document.title = MAKE ? "Make a Heroes of the Storm build · JunHotS" : "Heroes of the Storm builds and talents · JunHotS";
   app.innerHTML = `
-    <header class="page-head"><div><h1 data-edit="builds_title">Builds</h1>
-      <p class="sub" data-edit="builds_text">Talents and abilities for every hero. See my builds, copy them into the game, or make your own and share it.</p></div></header>
+    <header class="page-head"><div>${MAKE ? `<h1>Make a build</h1>
+      <p class="sub">Pick a hero, then click one talent per level. Copy the build code into the game or share the link.</p>` : `<h1 data-edit="builds_title">Builds</h1>
+      <p class="sub" data-edit="builds_text">Talents and abilities for every hero. See my builds, copy them into the game, or make your own and share it.</p>`}</div></header>
     <div class="bar">
       <div class="seg" role="group" aria-label="Role">${["All", ...ROLES].map(r => `<button class="rtab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("")}</div>
       <input type="search" id="q" placeholder="Search heroes" aria-label="Search heroes">
@@ -240,29 +278,25 @@ async function openHero(id, state) {
   mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
   document.title = `${hero.name} build and talents · JunHotS`;
   const jun = BUILDS[id] || [];
+  const you = MYB[id] || [];
+  const junHtml = jun.length ? `<div class="builds">${jun.map((b, i) => buildCard(b, "jun-" + i)).join("")}</div>` : `<div class="none">No build from Jun for ${esc(hero.name)} yet. Make your own below.</div>`;
+  const youHtml = `<h2 class="sec"><span>Your saved builds</span> <small>Kept in this browser on this device. Use Copy share link to keep one anywhere.</small></h2>
+    ${you.length ? `<div class="builds">${you.map((b, i) => buildCard(b, "you-" + i)).join("")}</div>` : `<div class="none">Nothing saved for ${esc(hero.name)} yet. Make a build below, name it and press Save.</div>`}`;
   app.innerHTML = `
     <a class="back" href="#">← All heroes</a>
     <section class="top">
       <img class="art" src="/img/art/${id}.webp" alt="" onerror="this.remove()">
       <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${roleIcon(byId[id].grole)} ${esc(byId[id].grole)}</div></div>
-      <div class="abrow">${hero.abilities.map((a, i) => [a, i]).sort((x, y) => ORDER.indexOf(x[0].key) - ORDER.indexOf(y[0].key)).map(([a, i]) => `<button class="ab" data-ab="${i}" aria-expanded="false" title="${esc(a.name)}" aria-label="${esc(a.name)}"><img src="${icon(a.icon)}" alt="">${a.key}</button>`).join("")}</div>
+      <div class="abrow">${hero.abilities.map((a, i) => [a, i]).sort((x, y) => ORDER.indexOf(x[0].key) - ORDER.indexOf(y[0].key)).map(([a, i]) => `<button class="ab" data-ab="${i}" data-tip="a-${i}" aria-expanded="false" aria-label="${esc(a.name)}"><img src="${icon(a.icon)}" alt="">${a.key}</button>`).join("")}</div>
       <div class="abinfo" id="abinfo" hidden></div>
     </section>
 
-    <h2 class="sec">Jun's builds</h2>
-    ${jun.length ? `<div class="builds">${jun.map((b, i) => `
-      <div class="bcard">
-        <div class="bh"><b>${esc(b.name)}</b><span class="by">by Jun</span><button class="btn2 primary" data-code="${i}">Copy build code</button>${ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : `<button class="btn2" data-copybuild="${i}">Edit as my build</button>`}</div>
-        <div class="strip">${strip(b.picks, true, b.alt)}</div>
-        <code class="code">${esc(code(b.picks))}</code>
-        ${sitRow(b.alt)}
-        ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
-        ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
-      </div>`).join("")}</div>` : `<div class="none">No build from Jun for ${esc(hero.name)} yet. Make your own below.</div>`}
+    ${MAKE ? (jun.length ? `<details class="junfold"><summary>Jun's builds <small>${jun.length} for ${esc(hero.name)}, tap to look or start from one</small></summary>${junHtml}</details>` : "") : `<h2 class="sec">Jun's builds</h2>${junHtml}`}
+    ${!MAKE || you.length ? youHtml : ""}
 
-    <h2 class="sec">Talents <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.</small></h2>
+    <h2 class="sec"><span>${MAKE ? "Make your build" : "Talents"}</span> <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.</small></h2>
     <div id="tiers">${LEVELS.map((L, r) => `
-      <div class="tier"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
+      <div class="tier" data-tier="${r}"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
 
     <div class="mine" id="mine"></div>`;
   app.querySelectorAll(".ab").forEach(b => b.onclick = () => {
@@ -274,6 +308,23 @@ async function openHero(id, state) {
   app.querySelectorAll(".tx b.n[data-s]").forEach(b => b.title = `Grows ${Math.round(b.dataset.s * 100)}% per level`);
   drawMine();
 }
+// A saved build: Jun's ("jun-0") or one the visitor saved in this browser ("you-0"). Click anywhere on it to show it on the talents.
+function buildCard(b, key) {
+  const [kind, i] = key.split("-");
+  const btns = kind === "you" ? `<button class="btn2" data-del-you="${i}">Delete</button>`
+    : ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : "";
+  return `
+      <div class="bcard" data-b="${key}">
+        <div class="bh"><b>${esc(b.name)}</b><span class="by">${kind === "you" ? "by you" : "by Jun"}</span><span class="showing">On the talents below</span><button class="btn2 primary" data-code="${key}">Copy build code</button>${btns}</div>
+        <div class="strip">${strip(b.picks, true, b.alt)}</div>
+        <code class="code">${esc(code(b.picks))}</code>
+        ${sitRow(b.alt)}
+        ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
+        ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
+        <span class="clickhint">Click or tap the card to show it on the talents</span>
+      </div>`;
+}
+const buildOf = key => { const [kind, i] = key.split("-"); return (kind === "you" ? MYB : BUILDS)[hero.id]?.[+i]; };
 function card(t, attrs, tag = "button", no) {
   return `<${tag} class="tal" ${attrs}><span class="ic"><img src="${icon(t.icon)}" alt="" loading="lazy"></span><div class="nm">${no ? `<span class="tn">#${no}</span>` : ""}${esc(t.name)}<span class="key">${KEY[t.key] || t.key}</span></div><div class="meta">${esc(t.meta || "")}</div><div class="tx">${t.text}</div></${tag}>`;
 }
@@ -281,17 +332,17 @@ function strip(picks, jump, alt = []) {
   return LEVELS.map((L, r) => {
     const t = picks[r] ? hero.talents[L]?.[picks[r] - 1] : null;
     const nums = t ? alts(alt[r]).filter(a => hero.talents[L]?.[a - 1]) : [], as = nums.map(a => hero.talents[L][a - 1]);
-    const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}" title="${esc(t.name)}${as.length ? ` (situational: ${as.map(a => esc(a.name)).join(", ")})` : ""}">` : `<span class="empty"></span>`;
+    const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}">` : `<span class="empty"></span>`;
     // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
-    const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" title="Situational: ${esc(as[0].name)}"></span>`
-      : as.length ? `<span class="more" title="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "");
-    return `<span class="slot">${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
+    const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" data-tip="t-${r}-${nums[0]}"></span>`
+      : as.length ? `<span class="more" aria-label="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "");
+    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
 // "Situational" row under a build: which talents to swap in, tap one to see it
 function sitRow(alt = []) {
   const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
-  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
+  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}" data-tip="t-${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
 const noAlt = () => ["", "", "", "", "", "", ""];
@@ -307,10 +358,12 @@ function drawMine() {
   const n = mine.picks.filter(Boolean).length;
   app.querySelectorAll(".tal[data-row]").forEach(c => { c.setAttribute("aria-pressed", mine.picks[c.dataset.row] == c.dataset.i); c.classList.toggle("isalt", alts(mine.alt[c.dataset.row]).includes(+c.dataset.i)); });
   app.querySelectorAll("[data-alt]").forEach(b => { const [r, i] = b.dataset.alt.split("-").map(Number); b.hidden = !mine.picks[r] || mine.picks[r] === i; b.setAttribute("aria-pressed", alts(mine.alt[r]).includes(i)); });
+  app.querySelectorAll(".tier[data-tier]").forEach(t => t.classList.toggle("picked", !!mine.picks[t.dataset.tier]));
+  app.querySelectorAll(".bcard[data-b]").forEach(c => { const b = buildOf(c.dataset.b); c.classList.toggle("on", mine.from === c.dataset.b && !!b && b.picks.join("") === mine.picks.join("")); });
   box.innerHTML = `
     <div class="lab">Your build<small>${n} of 7 picked</small></div>
     <div class="strip">${strip(mine.picks, false, mine.alt)}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn2 primary" id="mycode"${n ? "" : " disabled"}>Copy build code</button><button class="btn2" id="share">Copy share link</button><button class="btn2" id="clear">Clear</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn2 primary" id="mycode"${n ? "" : " disabled"}>Copy build code</button><button class="btn2" id="share">Copy share link</button><button class="btn2" id="savemine"${n ? "" : " disabled"}>Save</button><button class="btn2" id="clear">Clear</button></div>
     <div class="rowx"${n ? "" : " hidden"}>
       <input type="text" id="bname" placeholder="Build name, like Sleep build" value="${esc(mine.name)}" maxlength="40" aria-label="Build name">
       <span class="good"><span class="lab">Good vs</span>${mine.good.map(g => heroChip(g, true)).join("")}</span>
@@ -338,6 +391,17 @@ function drawMine() {
     navigator.clipboard?.writeText(url).then(() => toast("Link copied. Anyone with it sees your build."), () => prompt("Copy this link:", url));
   };
   document.getElementById("mycode").onclick = () => copyCode(mine.picks);
+  document.getElementById("savemine").onclick = () => {
+    if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
+    const list = [...(MYB[hero.id] || [])], b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good] };
+    const at = list.findIndex(x => x.name.toLowerCase() === b.name.toLowerCase());
+    if (at >= 0) list[at] = b; else list.push(b);
+    MYB = { ...MYB, [hero.id]: list };
+    if (!saveMYB()) { toast("This browser won't let the site save. Use Copy share link instead."); return; }
+    mine.from = "you-" + (at >= 0 ? at : list.length - 1);
+    const keep = window.scrollY; openHero(hero.id, mine).then(() => scrollTo(0, keep));
+    toast(at >= 0 ? "Updated in Your saved builds." : "Saved. Find it under Your saved builds.");
+  };
   if (ADMIN && n) {
     document.getElementById("bnote").oninput = e => { mine.note = e.target.value; };
     document.getElementById("savejun").onclick = saveJun;
@@ -351,19 +415,50 @@ app.addEventListener("click", e => {
   if (t) { const r = +t.dataset.row, i = +t.dataset.i; mine.picks[r] = mine.picks[r] === i ? 0 : i; mine.alt[r] = mine.picks[r] ? alts(mine.alt[r]).filter(a => a !== i).join("") : ""; drawMine(); return; }
   const al = e.target.closest("[data-alt]");
   if (al) { const [r, i] = al.dataset.alt.split("-").map(Number); const cur = alts(mine.alt[r]); mine.alt[r] = (cur.includes(i) ? cur.filter(a => a !== i) : [...cur, i].sort()).join(""); drawMine(); return; }
-  const j = e.target.closest("[data-jump]");
-  if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
-  const cb = e.target.closest("[data-copybuild]");
-  if (cb) { const b = BUILDS[hero.id][+cb.dataset.copybuild]; mine.picks = [...b.picks]; mine.alt = [...(b.alt || noAlt())]; mine.name = b.name + " (my version)"; mine.good = [...(b.good || [])]; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
   const ej = e.target.closest("[data-edit-jun]");
-  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i }; drawMine(); document.getElementById("mine").scrollIntoView({ block: "end", behavior: "smooth" }); return; }
+  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
   const dj = e.target.closest("[data-del-jun]");
   if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
+  const dy = e.target.closest("[data-del-you]");
+  if (dy) { const i = +dy.dataset.delYou; if (confirm(`Delete "${MYB[hero.id][i].name}" from this browser?`)) { const list = [...MYB[hero.id]]; list.splice(i, 1); MYB = { ...MYB, [hero.id]: list }; saveMYB(); mine.from = ""; const keep = window.scrollY; openHero(hero.id, mine).then(() => scrollTo(0, keep)); } return; }
   const cc = e.target.closest("[data-code]");
-  if (cc) { copyCode(BUILDS[hero.id][+cc.dataset.code].picks); return; }
+  if (cc) { copyCode(buildOf(cc.dataset.code).picks); return; }
+  const bc = e.target.closest(".bcard[data-b]");
+  const j = e.target.closest("[data-jump]");
+  if (bc) {
+    // Clicking a build loads it into "Your build": its talents light up below and the rest of each row greys out, ready to tweak.
+    // Clicking one of its talent icons does the same, then scrolls to that talent.
+    const key = bc.dataset.b, b = buildOf(key), cur = mine.picks.join("");
+    if (mine.from !== key && cur !== "0000000" && cur !== b.picks.join("") && !confirm(`Replace your build with "${b.name}"?`)) return;
+    if (mine.from !== key) { mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: key.startsWith("jun") ? b.name + " (my version)" : b.name, good: [...(b.good || [])], note: "", from: key }; drawMine(); }
+    if (!j) { document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+  }
+  if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const ug = e.target.closest("[data-ungood]");
   if (ug) { mine.good = mine.good.filter(g => g !== ug.dataset.ungood); drawMine(); }
 });
+
+// ---------- hover info (mouse only; phones keep tap to open / tap to jump) ----------
+const HOVER = matchMedia("(hover: hover) and (pointer: fine)");
+const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; document.body.append(tip);
+function hideTip() { tip.hidden = true; tip.on = null; }
+app.addEventListener("mouseover", e => {
+  if (!HOVER.matches || !hero) return;
+  const el = e.target.closest("[data-tip]");
+  if (!el || el === tip.on) return;
+  if (el.getAttribute("aria-expanded") === "true") { hideTip(); return; } // already open in the panel below
+  const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
+  if (!t) return;
+  const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
+  tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "");
+  tip.on = el; tip.hidden = false;
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px";
+  tip.style.top = (r.bottom + 8 + h < innerHeight - 8 ? r.bottom + 8 : Math.max(8, r.top - h - 8)) + "px";
+});
+app.addEventListener("mouseout", e => { if (tip.on && !tip.on.contains(e.relatedTarget)) hideTip(); });
+addEventListener("scroll", hideTip, { passive: true });
+app.addEventListener("click", hideTip);
 
 // ---------- Jun's editor (only shows after "Jun login"; the server checks the password) ----------
 function saveJun() {
