@@ -93,6 +93,11 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script>
+// YouTube, X and Discord buttons get the hover animation (site.css .hb)
+for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
+  b.classList.add("hb");
+  b.innerHTML = `<span class="hb-dot"></span><span class="hb-a">${b.innerHTML}</span><span class="hb-b" aria-hidden="true">${b.textContent.trim()}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+}
 // Card light follows the mouse (mouse only; phones don't hover)
 for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointermove", e => {
   if (e.pointerType !== "mouse") return;
