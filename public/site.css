@@ -48,9 +48,9 @@ h2 small { font-family: var(--sans); }
 .btn.live { position: relative; overflow: hidden; isolation: isolate; }
 .btn.live::after { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 0; width: 60%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent); transform: translateX(-120%) skewX(-20deg); animation: shine 5s ease-in-out 1.2s infinite; }
 @keyframes shine { 0% { transform: translateX(-120%) skewX(-20deg); } 22%, 100% { transform: translateX(260%) skewX(-20deg); } }
-/* Hover button: a coral dot grows to fill the button while the label slides out and comes back with an arrow */
-.btn.hb { position: relative; overflow: hidden; isolation: isolate; padding-left: 28px; }
-.hb-dot { position: absolute; z-index: -1; left: 13px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--brand); transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
+/* Hover button: a hidden coral dot grows to fill the button while the label slides out and comes back with an arrow */
+.btn.hb { position: relative; overflow: hidden; isolation: isolate; }
+.hb-dot { position: absolute; z-index: -1; left: 13px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--brand); transform: scale(0); transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
 .hb-a { display: inline-flex; align-items: center; gap: 8px; transition: transform .35s, opacity .25s; }
 .hb-b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; color: #1f0b05; font-weight: 600; opacity: 0; transform: translateX(40px); transition: transform .35s, opacity .25s; }
 .hb-b svg { width: 15px; height: 15px; }
