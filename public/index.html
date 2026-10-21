@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="/site.css">
 <script>
 // Old links like junhots.com/#tierlist go to the new pages.
@@ -26,28 +26,28 @@
 .hero { padding-block: 72px 56px; display: grid; gap: 18px; justify-items: start; }
 .eyebrow { font-size: 13px; color: var(--muted); }
 h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; font-weight: 600; letter-spacing: -0.035em; text-wrap: balance; max-width: 16ch; }
-h1 em { font-style: normal; color: var(--brand); text-shadow: 0 0 28px rgba(82, 199, 255, 0.35); }
+h1 em { font-style: normal; color: var(--brand); }
 .lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
 .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
 .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .card { display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; transition: border-color .15s, transform .15s; }
-a.card:hover { border-color: #3a3e48; transform: translateY(-2px); }
+a.card:hover { border-color: #4a413c; transform: translateY(-2px); }
 .card .pic { aspect-ratio: 16 / 8; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--line); }
 .card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
 .card .txt { padding: 16px 18px 18px; }
-.card b { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.card b { font-family: var(--display); display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .card b .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
 a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 .card p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
-.card.later .pic { display: grid; place-items: center; background: radial-gradient(420px 160px at 50% 50%, rgba(82, 199, 255, 0.08), transparent 70%), var(--bg); }
+.card.later .pic { display: grid; place-items: center; background: radial-gradient(420px 160px at 50% 50%, rgba(242, 106, 75, 0.08), transparent 70%), var(--bg); }
 .card.later .pic img { width: 74%; height: auto; object-fit: contain; opacity: .55; filter: saturate(.7); }
 @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } .hero { padding-block: 48px 40px; } }
 /* Soft light that follows the mouse over a card (and lights up its border) */
 .card { position: relative; }
 .card::before, .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; }
-.card::before { z-index: 1; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(82, 199, 255, 0.13), transparent 60%); }
-.card::after { z-index: 2; padding: 1px; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(82, 199, 255, 0.75), transparent 70%);
+.card::before { z-index: 1; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.13), transparent 60%); }
+.card::after { z-index: 2; padding: 1px; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.75), transparent 70%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 a.card:hover::before, a.card:hover::after { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .card, .card b .arr { transition: none; } }
