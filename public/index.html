@@ -145,7 +145,7 @@ for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
   b.classList.add("hb");
   b.innerHTML = `<span class="hb-dot"></span><span class="hb-a">${b.innerHTML}</span><span class="hb-b" aria-hidden="true">${b.textContent.trim()}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
-// The fan shows my S tier (best win rate first) and the numbers come from the same files the other pages use.
+// The fan shows 5 random heroes from my S tier (a different 5 on each visit) and the numbers come from the same files the other pages use.
 Promise.all([
   fetch("/data/heroes.json").then(r => r.json()),
   fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()),
@@ -155,7 +155,9 @@ Promise.all([
   const wr = id => tl.winrates?.rates?.[id]?.wr;
   const top = tl.tiers?.[0]?.id;
   const best = Object.keys(tl.overall || {}).filter(id => tl.overall[id] === top && name[id]).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
-  const show = best.slice(0, 5), mid = (show.length - 1) / 2;
+  const pool = [...best];
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const show = pool.slice(0, 5), mid = (show.length - 1) / 2;
   // Middle card on top, the others fanned out behind it
   document.getElementById("fan").innerHTML = show.map((id, i) => {
     const o = i - mid;
