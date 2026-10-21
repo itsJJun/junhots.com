@@ -1,781 +1,781 @@
 {
- "version": 1,
- "tiers": [
-  {
-   "id": "S",
-   "name": "S",
-   "color": 0
+  "version": 1,
+  "tiers": [
+    {
+      "id": "S",
+      "name": "S",
+      "color": 0
+    },
+    {
+      "id": "A",
+      "name": "A",
+      "color": 3
+    },
+    {
+      "id": "B",
+      "name": "B",
+      "color": 4
+    },
+    {
+      "id": "C",
+      "name": "C",
+      "color": 1
+    },
+    {
+      "id": "D",
+      "name": "D",
+      "color": 6
+    }
+  ],
+  "overall": {
+    "anubarak": "B",
+    "anduin": "A",
+    "artanis": "B",
+    "azmodan": "C",
+    "auriel": "S",
+    "brightwing": "A",
+    "arthas": "A",
+    "chen": "S",
+    "blaze": "A",
+    "chromie": "A",
+    "chogall": "D",
+    "johanna": "S",
+    "stitches": "B",
+    "tyrael": "B",
+    "garrosh": "A",
+    "mei": "C",
+    "muradin": "B",
+    "etc": "B",
+    "malganis": "B",
+    "diablo": "B",
+    "varian": "A",
+    "imperius": "A",
+    "leoric": "B",
+    "malthael": "B",
+    "dva": "D",
+    "deathwing": "B",
+    "gazlowe": "D",
+    "ragnaros": "A",
+    "thrall": "S",
+    "yrel": "S",
+    "xul": "B",
+    "sonya": "B",
+    "rexxar": "B",
+    "hogger": "A",
+    "dehaka": "A",
+    "greymane": "B",
+    "guldan": "A",
+    "genji": "A",
+    "alarak": "A",
+    "junkrat": "A",
+    "jaina": "B",
+    "kaelthas": "B",
+    "falstad": "A",
+    "cassia": "B",
+    "hanzo": "A",
+    "liming": "A",
+    "gall": "D",
+    "probius": "D",
+    "orphea": "B",
+    "raynor": "B",
+    "sgthammer": "B",
+    "sylvanas": "A",
+    "tassadar": "B",
+    "tychus": "A",
+    "valla": "A",
+    "maiev": "S",
+    "mephisto": "C",
+    "murky": "D",
+    "lunara": "C",
+    "fenix": "C",
+    "nova": "D",
+    "valeera": "D",
+    "tracer": "B",
+    "zeratul": "B",
+    "zagara": "B",
+    "thebutcher": "D",
+    "nazeebo": "B",
+    "kerrigan": "C",
+    "illidan": "B",
+    "kelthuzad": "C",
+    "samuro": "C",
+    "zuljin": "B",
+    "qhira": "S",
+    "xalatath": "S",
+    "lucio": "A",
+    "zarya": "S",
+    "medivh": "A",
+    "lostvikings": "D",
+    "ana": "B",
+    "rehgar": "A",
+    "malfurion": "A",
+    "ltmorales": "C",
+    "abathur": "D",
+    "kharazim": "B",
+    "alexstrasza": "C",
+    "lili": "D",
+    "deckard": "B",
+    "stukov": "B",
+    "tyrande": "B",
+    "uther": "C",
+    "whitemane": "A"
   },
-  {
-   "id": "A",
-   "name": "A",
-   "color": 3
+  "maps": {
+    "Alterac Pass": {
+      "hogger": "S",
+      "anubarak": "A",
+      "samuro": "A",
+      "raynor": "A",
+      "junkrat": "S"
+    },
+    "Battlefield of Eternity": {
+      "artanis": "A",
+      "liming": "S",
+      "hanzo": "S",
+      "valla": "S",
+      "chromie": "S",
+      "raynor": "A"
+    },
+    "Braxis Holdout": {
+      "rexxar": "A",
+      "deathwing": "A",
+      "dehaka": "B",
+      "junkrat": "S",
+      "chromie": "S"
+    },
+    "Cursed Hollow": {
+      "lostvikings": "A",
+      "dehaka": "S",
+      "illidan": "A",
+      "sgthammer": "A"
+    },
+    "Dragon Shire": {
+      "lostvikings": "S",
+      "rexxar": "A"
+    },
+    "Volskaya Foundry": {
+      "lostvikings": "S"
+    },
+    "Infernal Shrines": {
+      "junkrat": "S",
+      "alexstrasza": "A",
+      "hogger": "S",
+      "malthael": "A",
+      "sonya": "A",
+      "leoric": "A",
+      "kerrigan": "A"
+    },
+    "Tomb of the Spider Queen": {
+      "nazeebo": "A",
+      "sgthammer": "A",
+      "xul": "A"
+    },
+    "Towers of Doom": {
+      "lostvikings": "S"
+    }
   },
-  {
-   "id": "B",
-   "name": "B",
-   "color": 4
+  "counters": {
+    "lostvikings": [
+      "abathur"
+    ],
+    "genji": [
+      "abathur",
+      "ana",
+      "falstad",
+      "hanzo",
+      "jaina",
+      "kaelthas",
+      "murky"
+    ],
+    "zeratul": [
+      "abathur",
+      "ana",
+      "falstad",
+      "hanzo",
+      "murky"
+    ],
+    "falstad": [
+      "abathur"
+    ],
+    "ragnaros": [
+      "abathur"
+    ],
+    "dehaka": [
+      "abathur",
+      "ana"
+    ],
+    "sylvanas": [
+      "abathur"
+    ],
+    "ana": [
+      "alexstrasza",
+      "rehgar",
+      "auriel",
+      "whitemane",
+      "brightwing",
+      "stukov",
+      "etc",
+      "imperius"
+    ],
+    "illidan": [
+      "ana",
+      "samuro",
+      "falstad"
+    ],
+    "maiev": [
+      "ana"
+    ],
+    "chen": [
+      "ana"
+    ],
+    "chromie": [
+      "ana"
+    ],
+    "greymane": [
+      "ana"
+    ],
+    "tracer": [
+      "ana",
+      "hanzo",
+      "murky"
+    ],
+    "stitches": [
+      "ana",
+      "chogall",
+      "deckard",
+      "mephisto"
+    ],
+    "sonya": [
+      "ana"
+    ],
+    "qhira": [
+      "ana"
+    ],
+    "thebutcher": [
+      "ana"
+    ],
+    "anduin": [
+      "garrosh",
+      "stitches"
+    ],
+    "anubarak": [
+      "liming",
+      "chogall",
+      "mephisto"
+    ],
+    "lucio": [
+      "chen",
+      "alexstrasza",
+      "artanis",
+      "etc",
+      "dehaka",
+      "yrel",
+      "imperius",
+      "valeera",
+      "samuro",
+      "fenix"
+    ],
+    "diablo": [
+      "lucio",
+      "genji",
+      "hanzo"
+    ],
+    "johanna": [
+      "lucio",
+      "illidan",
+      "kerrigan"
+    ],
+    "hogger": [
+      "lucio"
+    ],
+    "varian": [
+      "lucio",
+      "genji"
+    ],
+    "junkrat": [
+      "lucio"
+    ],
+    "malthael": [
+      "chogall",
+      "deathwing",
+      "hogger"
+    ],
+    "tychus": [
+      "chogall",
+      "deathwing",
+      "diablo",
+      "hogger"
+    ],
+    "zagara": [
+      "chogall"
+    ],
+    "azmodan": [
+      "johanna"
+    ],
+    "cassia": [
+      "greymane",
+      "tychus",
+      "valla",
+      "illidan"
+    ],
+    "guldan": [
+      "cassia",
+      "deathwing",
+      "sgthammer"
+    ],
+    "deathwing": [
+      "diablo",
+      "arthas",
+      "anubarak",
+      "etc",
+      "garrosh",
+      "johanna",
+      "mei",
+      "muradin",
+      "malganis",
+      "stitches",
+      "blaze",
+      "maiev",
+      "junkrat",
+      "kerrigan"
+    ],
+    "valla": [
+      "deathwing"
+    ],
+    "leoric": [
+      "deathwing",
+      "chogall"
+    ],
+    "zarya": [
+      "deathwing",
+      "sgthammer"
+    ],
+    "garrosh": [
+      "deckard",
+      "illidan"
+    ],
+    "deckard": [
+      "alexstrasza"
+    ],
+    "brightwing": [
+      "genji"
+    ],
+    "uther": [
+      "genji",
+      "greymane"
+    ],
+    "whitemane": [
+      "genji"
+    ],
+    "samuro": [
+      "chen"
+    ],
+    "hanzo": [
+      "arthas",
+      "garrosh",
+      "sgthammer"
+    ],
+    "arthas": [
+      "illidan"
+    ],
+    "etc": [
+      "illidan"
+    ],
+    "blaze": [
+      "illidan"
+    ],
+    "muradin": [
+      "illidan"
+    ],
+    "imperius": [
+      "diablo",
+      "gall",
+      "chogall"
+    ],
+    "jaina": [
+      "arthas",
+      "garrosh"
+    ],
+    "medivh": [
+      "stitches",
+      "garrosh"
+    ],
+    "murky": [
+      "abathur"
+    ],
+    "gall": [
+      "chogall"
+    ]
   },
-  {
-   "id": "C",
-   "name": "C",
-   "color": 1
-  },
-  {
-   "id": "D",
-   "name": "D",
-   "color": 6
+  "synergy": {},
+  "winrates": {
+    "label": "2.57.0.98348",
+    "updated": 1792616040.469,
+    "rates": {
+      "xalatath": {
+        "wr": 59.37,
+        "games": 3465
+      },
+      "malganis": {
+        "wr": 55.82,
+        "games": 5215
+      },
+      "tyrael": {
+        "wr": 54.12,
+        "games": 8339
+      },
+      "samuro": {
+        "wr": 53.85,
+        "games": 2390
+      },
+      "kerrigan": {
+        "wr": 53.39,
+        "games": 2049
+      },
+      "hogger": {
+        "wr": 53.26,
+        "games": 4384
+      },
+      "whitemane": {
+        "wr": 53.26,
+        "games": 6684
+      },
+      "deathwing": {
+        "wr": 53.24,
+        "games": 4566
+      },
+      "gazlowe": {
+        "wr": 52.86,
+        "games": 3415
+      },
+      "tracer": {
+        "wr": 52.82,
+        "games": 1863
+      },
+      "tyrande": {
+        "wr": 52.81,
+        "games": 6556
+      },
+      "maiev": {
+        "wr": 52.59,
+        "games": 2666
+      },
+      "azmodan": {
+        "wr": 52.57,
+        "games": 8732
+      },
+      "xul": {
+        "wr": 52.57,
+        "games": 2943
+      },
+      "auriel": {
+        "wr": 52.53,
+        "games": 8279
+      },
+      "alarak": {
+        "wr": 52.4,
+        "games": 4286
+      },
+      "sgthammer": {
+        "wr": 52.38,
+        "games": 2146
+      },
+      "rehgar": {
+        "wr": 52.22,
+        "games": 9884
+      },
+      "yrel": {
+        "wr": 52.22,
+        "games": 4376
+      },
+      "dva": {
+        "wr": 52.11,
+        "games": 3416
+      },
+      "johanna": {
+        "wr": 52.06,
+        "games": 12952
+      },
+      "leoric": {
+        "wr": 52.0,
+        "games": 7221
+      },
+      "illidan": {
+        "wr": 51.91,
+        "games": 4275
+      },
+      "tychus": {
+        "wr": 51.85,
+        "games": 9834
+      },
+      "arthas": {
+        "wr": 51.81,
+        "games": 11863
+      },
+      "qhira": {
+        "wr": 51.71,
+        "games": 7243
+      },
+      "falstad": {
+        "wr": 51.28,
+        "games": 10977
+      },
+      "orphea": {
+        "wr": 51.28,
+        "games": 3639
+      },
+      "chogall": {
+        "wr": 51.15,
+        "games": 954
+      },
+      "gall": {
+        "wr": 51.15,
+        "games": 954
+      },
+      "thrall": {
+        "wr": 51.09,
+        "games": 11105
+      },
+      "chromie": {
+        "wr": 50.82,
+        "games": 4660
+      },
+      "junkrat": {
+        "wr": 50.82,
+        "games": 3603
+      },
+      "rexxar": {
+        "wr": 50.79,
+        "games": 1717
+      },
+      "kharazim": {
+        "wr": 50.58,
+        "games": 3181
+      },
+      "murky": {
+        "wr": 50.4,
+        "games": 1994
+      },
+      "tassadar": {
+        "wr": 50.24,
+        "games": 5967
+      },
+      "blaze": {
+        "wr": 50.11,
+        "games": 4392
+      },
+      "nazeebo": {
+        "wr": 50.06,
+        "games": 10896
+      },
+      "alexstrasza": {
+        "wr": 50.04,
+        "games": 2734
+      },
+      "uther": {
+        "wr": 49.99,
+        "games": 3655
+      },
+      "valla": {
+        "wr": 49.98,
+        "games": 14732
+      },
+      "raynor": {
+        "wr": 49.91,
+        "games": 7568
+      },
+      "zarya": {
+        "wr": 49.86,
+        "games": 1480
+      },
+      "mei": {
+        "wr": 49.73,
+        "games": 3139
+      },
+      "sylvanas": {
+        "wr": 49.66,
+        "games": 11498
+      },
+      "lili": {
+        "wr": 49.64,
+        "games": 7329
+      },
+      "chen": {
+        "wr": 49.4,
+        "games": 5668
+      },
+      "greymane": {
+        "wr": 49.36,
+        "games": 3932
+      },
+      "ragnaros": {
+        "wr": 49.34,
+        "games": 6316
+      },
+      "zeratul": {
+        "wr": 49.31,
+        "games": 2549
+      },
+      "anduin": {
+        "wr": 49.28,
+        "games": 12917
+      },
+      "thebutcher": {
+        "wr": 49.24,
+        "games": 2681
+      },
+      "artanis": {
+        "wr": 49.23,
+        "games": 7656
+      },
+      "lunara": {
+        "wr": 49.23,
+        "games": 3884
+      },
+      "brightwing": {
+        "wr": 49.22,
+        "games": 12877
+      },
+      "varian": {
+        "wr": 49.06,
+        "games": 8353
+      },
+      "kelthuzad": {
+        "wr": 49.05,
+        "games": 3637
+      },
+      "liming": {
+        "wr": 49.05,
+        "games": 10707
+      },
+      "dehaka": {
+        "wr": 48.97,
+        "games": 4819
+      },
+      "probius": {
+        "wr": 48.78,
+        "games": 654
+      },
+      "deckard": {
+        "wr": 48.74,
+        "games": 4296
+      },
+      "etc": {
+        "wr": 48.61,
+        "games": 7133
+      },
+      "jaina": {
+        "wr": 48.61,
+        "games": 5301
+      },
+      "zagara": {
+        "wr": 48.55,
+        "games": 2721
+      },
+      "mephisto": {
+        "wr": 48.48,
+        "games": 1446
+      },
+      "imperius": {
+        "wr": 48.24,
+        "games": 4768
+      },
+      "lostvikings": {
+        "wr": 48.19,
+        "games": 1021
+      },
+      "malfurion": {
+        "wr": 48.18,
+        "games": 4844
+      },
+      "muradin": {
+        "wr": 48.06,
+        "games": 10640
+      },
+      "ltmorales": {
+        "wr": 48.05,
+        "games": 3351
+      },
+      "garrosh": {
+        "wr": 47.96,
+        "games": 4896
+      },
+      "fenix": {
+        "wr": 47.89,
+        "games": 1491
+      },
+      "abathur": {
+        "wr": 47.85,
+        "games": 6257
+      },
+      "sonya": {
+        "wr": 47.83,
+        "games": 4424
+      },
+      "cassia": {
+        "wr": 47.81,
+        "games": 2734
+      },
+      "zuljin": {
+        "wr": 47.52,
+        "games": 3565
+      },
+      "stukov": {
+        "wr": 47.5,
+        "games": 5072
+      },
+      "stitches": {
+        "wr": 47.32,
+        "games": 8668
+      },
+      "kaelthas": {
+        "wr": 47.3,
+        "games": 10048
+      },
+      "malthael": {
+        "wr": 47.22,
+        "games": 2681
+      },
+      "guldan": {
+        "wr": 46.7,
+        "games": 6828
+      },
+      "lucio": {
+        "wr": 46.5,
+        "games": 3445
+      },
+      "anubarak": {
+        "wr": 46.34,
+        "games": 5466
+      },
+      "valeera": {
+        "wr": 46.3,
+        "games": 1974
+      },
+      "genji": {
+        "wr": 46.29,
+        "games": 2834
+      },
+      "hanzo": {
+        "wr": 45.64,
+        "games": 5745
+      },
+      "ana": {
+        "wr": 45.34,
+        "games": 3350
+      },
+      "nova": {
+        "wr": 45.02,
+        "games": 2017
+      },
+      "diablo": {
+        "wr": 43.96,
+        "games": 7313
+      },
+      "medivh": {
+        "wr": 41.52,
+        "games": 1845
+      }
+    }
   }
- ],
- "overall": {
-  "anubarak": "B",
-  "anduin": "A",
-  "artanis": "B",
-  "azmodan": "C",
-  "auriel": "S",
-  "brightwing": "A",
-  "arthas": "A",
-  "chen": "S",
-  "blaze": "A",
-  "chromie": "A",
-  "chogall": "D",
-  "johanna": "S",
-  "stitches": "B",
-  "tyrael": "B",
-  "garrosh": "A",
-  "mei": "C",
-  "muradin": "B",
-  "etc": "B",
-  "malganis": "B",
-  "diablo": "B",
-  "varian": "A",
-  "imperius": "A",
-  "leoric": "B",
-  "malthael": "B",
-  "dva": "D",
-  "deathwing": "B",
-  "gazlowe": "D",
-  "ragnaros": "A",
-  "thrall": "S",
-  "yrel": "S",
-  "xul": "B",
-  "sonya": "B",
-  "rexxar": "B",
-  "hogger": "A",
-  "dehaka": "A",
-  "greymane": "B",
-  "guldan": "A",
-  "genji": "A",
-  "alarak": "A",
-  "junkrat": "A",
-  "jaina": "B",
-  "kaelthas": "B",
-  "falstad": "A",
-  "cassia": "B",
-  "hanzo": "A",
-  "liming": "A",
-  "gall": "D",
-  "probius": "D",
-  "orphea": "B",
-  "raynor": "B",
-  "sgthammer": "B",
-  "sylvanas": "A",
-  "tassadar": "B",
-  "tychus": "A",
-  "valla": "A",
-  "maiev": "S",
-  "mephisto": "C",
-  "murky": "D",
-  "lunara": "C",
-  "fenix": "C",
-  "nova": "D",
-  "valeera": "D",
-  "tracer": "B",
-  "zeratul": "B",
-  "zagara": "B",
-  "thebutcher": "D",
-  "nazeebo": "B",
-  "kerrigan": "C",
-  "illidan": "B",
-  "kelthuzad": "C",
-  "samuro": "C",
-  "zuljin": "B",
-  "qhira": "S",
-  "xalatath": "S",
-  "lucio": "S",
-  "zarya": "S",
-  "medivh": "A",
-  "lostvikings": "D",
-  "ana": "B",
-  "rehgar": "A",
-  "malfurion": "A",
-  "ltmorales": "C",
-  "abathur": "D",
-  "kharazim": "B",
-  "alexstrasza": "C",
-  "lili": "D",
-  "deckard": "B",
-  "stukov": "B",
-  "tyrande": "B",
-  "uther": "C",
-  "whitemane": "A"
- },
- "maps": {
-  "Alterac Pass": {
-   "hogger": "S",
-   "anubarak": "A",
-   "samuro": "A",
-   "raynor": "A",
-   "junkrat": "S"
-  },
-  "Battlefield of Eternity": {
-   "artanis": "A",
-   "liming": "S",
-   "hanzo": "S",
-   "valla": "S",
-   "chromie": "S",
-   "raynor": "A"
-  },
-  "Braxis Holdout": {
-   "rexxar": "A",
-   "deathwing": "A",
-   "dehaka": "B",
-   "junkrat": "S",
-   "chromie": "S"
-  },
-  "Cursed Hollow": {
-   "lostvikings": "A",
-   "dehaka": "S",
-   "illidan": "A",
-   "sgthammer": "A"
-  },
-  "Dragon Shire": {
-   "lostvikings": "S",
-   "rexxar": "A"
-  },
-  "Volskaya Foundry": {
-   "lostvikings": "S"
-  },
-  "Infernal Shrines": {
-   "junkrat": "S",
-   "alexstrasza": "A",
-   "hogger": "S",
-   "malthael": "A",
-   "sonya": "A",
-   "leoric": "A",
-   "kerrigan": "A"
-  },
-  "Tomb of the Spider Queen": {
-   "nazeebo": "A",
-   "sgthammer": "A",
-   "xul": "A"
-  },
-  "Towers of Doom": {
-   "lostvikings": "S"
-  }
- },
- "counters": {
-  "lostvikings": [
-   "abathur"
-  ],
-  "genji": [
-   "abathur",
-   "ana",
-   "falstad",
-   "hanzo",
-   "jaina",
-   "kaelthas",
-   "murky"
-  ],
-  "zeratul": [
-   "abathur",
-   "ana",
-   "falstad",
-   "hanzo",
-   "murky"
-  ],
-  "falstad": [
-   "abathur"
-  ],
-  "ragnaros": [
-   "abathur"
-  ],
-  "dehaka": [
-   "abathur",
-   "ana"
-  ],
-  "sylvanas": [
-   "abathur"
-  ],
-  "ana": [
-   "alexstrasza",
-   "rehgar",
-   "auriel",
-   "whitemane",
-   "brightwing",
-   "stukov",
-   "etc",
-   "imperius"
-  ],
-  "illidan": [
-   "ana",
-   "samuro",
-   "falstad"
-  ],
-  "maiev": [
-   "ana"
-  ],
-  "chen": [
-   "ana"
-  ],
-  "chromie": [
-   "ana"
-  ],
-  "greymane": [
-   "ana"
-  ],
-  "tracer": [
-   "ana",
-   "hanzo",
-   "murky"
-  ],
-  "stitches": [
-   "ana",
-   "chogall",
-   "deckard",
-   "mephisto"
-  ],
-  "sonya": [
-   "ana"
-  ],
-  "qhira": [
-   "ana"
-  ],
-  "thebutcher": [
-   "ana"
-  ],
-  "anduin": [
-   "garrosh",
-   "stitches"
-  ],
-  "anubarak": [
-   "liming",
-   "chogall",
-   "mephisto"
-  ],
-  "lucio": [
-   "chen",
-   "alexstrasza",
-   "artanis",
-   "etc",
-   "dehaka",
-   "yrel",
-   "imperius",
-   "valeera",
-   "samuro",
-   "fenix"
-  ],
-  "diablo": [
-   "lucio",
-   "genji",
-   "hanzo"
-  ],
-  "johanna": [
-   "lucio",
-   "illidan",
-   "kerrigan"
-  ],
-  "hogger": [
-   "lucio"
-  ],
-  "varian": [
-   "lucio",
-   "genji"
-  ],
-  "junkrat": [
-   "lucio"
-  ],
-  "malthael": [
-   "chogall",
-   "deathwing",
-   "hogger"
-  ],
-  "tychus": [
-   "chogall",
-   "deathwing",
-   "diablo",
-   "hogger"
-  ],
-  "zagara": [
-   "chogall"
-  ],
-  "azmodan": [
-   "johanna"
-  ],
-  "cassia": [
-   "greymane",
-   "tychus",
-   "valla",
-   "illidan"
-  ],
-  "guldan": [
-   "cassia",
-   "deathwing",
-   "sgthammer"
-  ],
-  "deathwing": [
-   "diablo",
-   "arthas",
-   "anubarak",
-   "etc",
-   "garrosh",
-   "johanna",
-   "mei",
-   "muradin",
-   "malganis",
-   "stitches",
-   "blaze",
-   "maiev",
-   "junkrat",
-   "kerrigan"
-  ],
-  "valla": [
-   "deathwing"
-  ],
-  "leoric": [
-   "deathwing",
-   "chogall"
-  ],
-  "zarya": [
-   "deathwing",
-   "sgthammer"
-  ],
-  "garrosh": [
-   "deckard",
-   "illidan"
-  ],
-  "deckard": [
-   "alexstrasza"
-  ],
-  "brightwing": [
-   "genji"
-  ],
-  "uther": [
-   "genji",
-   "greymane"
-  ],
-  "whitemane": [
-   "genji"
-  ],
-  "samuro": [
-   "chen"
-  ],
-  "hanzo": [
-   "arthas",
-   "garrosh",
-   "sgthammer"
-  ],
-  "arthas": [
-   "illidan"
-  ],
-  "etc": [
-   "illidan"
-  ],
-  "blaze": [
-   "illidan"
-  ],
-  "muradin": [
-   "illidan"
-  ],
-  "imperius": [
-   "diablo",
-   "gall",
-   "chogall"
-  ],
-  "jaina": [
-   "arthas",
-   "garrosh"
-  ],
-  "medivh": [
-   "stitches",
-   "garrosh"
-  ],
-  "murky": [
-   "abathur"
-  ],
-  "gall": [
-   "chogall"
-  ]
- },
- "synergy": {},
- "winrates": {
-  "label": "2.57.0.98348",
-  "updated": 1791624915.238,
-  "rates": {
-   "xalatath": {
-    "wr": 59.87,
-    "games": 902
-   },
-   "samuro": {
-    "wr": 56.22,
-    "games": 555
-   },
-   "malganis": {
-    "wr": 55.66,
-    "games": 1069
-   },
-   "deathwing": {
-    "wr": 55.17,
-    "games": 968
-   },
-   "kerrigan": {
-    "wr": 54.41,
-    "games": 408
-   },
-   "gazlowe": {
-    "wr": 53.8,
-    "games": 632
-   },
-   "rehgar": {
-    "wr": 53.58,
-    "games": 2260
-   },
-   "hogger": {
-    "wr": 53.33,
-    "games": 960
-   },
-   "tyrael": {
-    "wr": 53.33,
-    "games": 1800
-   },
-   "rexxar": {
-    "wr": 53.16,
-    "games": 348
-   },
-   "leoric": {
-    "wr": 53.07,
-    "games": 1564
-   },
-   "illidan": {
-    "wr": 52.99,
-    "games": 887
-   },
-   "johanna": {
-    "wr": 52.93,
-    "games": 2783
-   },
-   "alexstrasza": {
-    "wr": 52.85,
-    "games": 579
-   },
-   "probius": {
-    "wr": 52.71,
-    "games": 129
-   },
-   "qhira": {
-    "wr": 52.62,
-    "games": 1663
-   },
-   "whitemane": {
-    "wr": 52.57,
-    "games": 1598
-   },
-   "arthas": {
-    "wr": 52.49,
-    "games": 2393
-   },
-   "tyrande": {
-    "wr": 52.41,
-    "games": 1412
-   },
-   "alarak": {
-    "wr": 52.24,
-    "games": 869
-   },
-   "chogall": {
-    "wr": 52.24,
-    "games": 201
-   },
-   "gall": {
-    "wr": 52.24,
-    "games": 201
-   },
-   "yrel": {
-    "wr": 52.23,
-    "games": 1053
-   },
-   "sgthammer": {
-    "wr": 52.1,
-    "games": 453
-   },
-   "kelthuzad": {
-    "wr": 51.94,
-    "games": 722
-   },
-   "kharazim": {
-    "wr": 51.87,
-    "games": 669
-   },
-   "azmodan": {
-    "wr": 51.86,
-    "games": 1882
-   },
-   "tracer": {
-    "wr": 51.79,
-    "games": 419
-   },
-   "maiev": {
-    "wr": 51.72,
-    "games": 611
-   },
-   "zarya": {
-    "wr": 51.52,
-    "games": 328
-   },
-   "blaze": {
-    "wr": 51.32,
-    "games": 947
-   },
-   "auriel": {
-    "wr": 51.22,
-    "games": 1796
-   },
-   "lostvikings": {
-    "wr": 50.94,
-    "games": 212
-   },
-   "falstad": {
-    "wr": 50.74,
-    "games": 2357
-   },
-   "dehaka": {
-    "wr": 50.68,
-    "games": 1026
-   },
-   "orphea": {
-    "wr": 50.43,
-    "games": 815
-   },
-   "sonya": {
-    "wr": 50.32,
-    "games": 952
-   },
-   "greymane": {
-    "wr": 50.31,
-    "games": 797
-   },
-   "zagara": {
-    "wr": 50.25,
-    "games": 607
-   },
-   "tassadar": {
-    "wr": 50.24,
-    "games": 1264
-   },
-   "junkrat": {
-    "wr": 50.13,
-    "games": 756
-   },
-   "tychus": {
-    "wr": 50.09,
-    "games": 2134
-   },
-   "valla": {
-    "wr": 50.02,
-    "games": 3183
-   },
-   "thrall": {
-    "wr": 49.98,
-    "games": 2309
-   },
-   "raynor": {
-    "wr": 49.94,
-    "games": 1598
-   },
-   "fenix": {
-    "wr": 49.86,
-    "games": 347
-   },
-   "mephisto": {
-    "wr": 49.85,
-    "games": 341
-   },
-   "brightwing": {
-    "wr": 49.8,
-    "games": 2791
-   },
-   "zeratul": {
-    "wr": 49.63,
-    "games": 542
-   },
-   "ragnaros": {
-    "wr": 49.61,
-    "games": 1409
-   },
-   "guldan": {
-    "wr": 49.58,
-    "games": 1442
-   },
-   "muradin": {
-    "wr": 49.54,
-    "games": 2287
-   },
-   "lili": {
-    "wr": 49.45,
-    "games": 1628
-   },
-   "nazeebo": {
-    "wr": 49.45,
-    "games": 2348
-   },
-   "chromie": {
-    "wr": 49.41,
-    "games": 931
-   },
-   "valeera": {
-    "wr": 49.23,
-    "games": 455
-   },
-   "artanis": {
-    "wr": 49.15,
-    "games": 1760
-   },
-   "xul": {
-    "wr": 48.95,
-    "games": 668
-   },
-   "dva": {
-    "wr": 48.89,
-    "games": 718
-   },
-   "chen": {
-    "wr": 48.78,
-    "games": 1275
-   },
-   "sylvanas": {
-    "wr": 48.76,
-    "games": 2590
-   },
-   "malthael": {
-    "wr": 48.69,
-    "games": 573
-   },
-   "ana": {
-    "wr": 48.68,
-    "games": 717
-   },
-   "anduin": {
-    "wr": 48.53,
-    "games": 2864
-   },
-   "deckard": {
-    "wr": 48.41,
-    "games": 878
-   },
-   "jaina": {
-    "wr": 48.37,
-    "games": 1040
-   },
-   "mei": {
-    "wr": 48.26,
-    "games": 717
-   },
-   "thebutcher": {
-    "wr": 48.18,
-    "games": 604
-   },
-   "etc": {
-    "wr": 48.13,
-    "games": 1604
-   },
-   "anubarak": {
-    "wr": 48.05,
-    "games": 1228
-   },
-   "malfurion": {
-    "wr": 47.98,
-    "games": 963
-   },
-   "liming": {
-    "wr": 47.91,
-    "games": 2350
-   },
-   "cassia": {
-    "wr": 47.78,
-    "games": 540
-   },
-   "abathur": {
-    "wr": 47.73,
-    "games": 1364
-   },
-   "murky": {
-    "wr": 47.63,
-    "games": 422
-   },
-   "genji": {
-    "wr": 47.5,
-    "games": 621
-   },
-   "stitches": {
-    "wr": 47.43,
-    "games": 1923
-   },
-   "hanzo": {
-    "wr": 47.32,
-    "games": 1251
-   },
-   "lucio": {
-    "wr": 47.26,
-    "games": 730
-   },
-   "zuljin": {
-    "wr": 47.21,
-    "games": 752
-   },
-   "uther": {
-    "wr": 47.1,
-    "games": 775
-   },
-   "lunara": {
-    "wr": 47.05,
-    "games": 848
-   },
-   "imperius": {
-    "wr": 46.83,
-    "games": 995
-   },
-   "stukov": {
-    "wr": 46.41,
-    "games": 918
-   },
-   "varian": {
-    "wr": 46.37,
-    "games": 1762
-   },
-   "kaelthas": {
-    "wr": 46.26,
-    "games": 2181
-   },
-   "ltmorales": {
-    "wr": 46.26,
-    "games": 709
-   },
-   "garrosh": {
-    "wr": 45.95,
-    "games": 1099
-   },
-   "diablo": {
-    "wr": 44.89,
-    "games": 1653
-   },
-   "nova": {
-    "wr": 44.74,
-    "games": 409
-   },
-   "medivh": {
-    "wr": 41.09,
-    "games": 387
-   }
-  }
- }
 }

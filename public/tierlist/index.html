@@ -8,16 +8,23 @@
 <meta property="og:title" content="Heroes of the Storm tier list · JunHotS">
 <meta property="og:description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero.">
 <meta property="og:url" content="https://junhots.com/tierlist/">
+<meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JunHotS">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="/site.css">
 <style>
 .hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
 .controls { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
 .tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { color: var(--text); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.tab[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
+.tab[aria-pressed="true"] .ri { color: #1f0b05 !important; }
 select.tab { appearance: none; color: var(--text); background: var(--surface-2); text-align: center; text-align-last: center; padding-inline: 12px; }
 select.tab option { background: var(--surface); color: var(--text); text-align: left; }
 
@@ -36,11 +43,11 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 .good { color: var(--good); } .bad { color: var(--bad); } .mid { color: var(--muted); }
 .empty { color: var(--muted); font-size: 13px; }
 
-.detail { position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px)); display: grid; gap: 16px; padding: 16px 18px 18px; border: 1px solid #2e323c; border-radius: 12px; background: var(--surface); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); animation: pop .14s ease-out; }
+.detail { position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px)); display: grid; gap: 16px; padding: 16px 18px 18px; border: 1px solid #3d3531; border-radius: 12px; background: var(--surface); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); animation: pop .14s ease-out; }
 @keyframes pop { from { opacity: 0; transform: translateY(var(--dy, 4px)) scale(.98); } }
 .detail .x { all: unset; position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
 .detail .x:hover { color: var(--text); background: var(--surface-2); }
-.detail .arrow { position: absolute; left: var(--ax, 50%); width: 12px; height: 12px; background: var(--surface); border: 1px solid #2e323c; transform: translateX(-50%) rotate(45deg); }
+.detail .arrow { position: absolute; left: var(--ax, 50%); width: 12px; height: 12px; background: var(--surface); border: 1px solid #3d3531; transform: translateX(-50%) rotate(45deg); }
 .detail[data-side="below"] .arrow { top: -7px; border-right: 0; border-bottom: 0; }
 .detail[data-side="above"] .arrow { bottom: -7px; border-left: 0; border-top: 0; }
 .scrim { position: fixed; inset: 0; z-index: 19; background: rgba(5, 6, 8, 0.6); }
@@ -59,7 +66,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 .rel > div:nth-child(3) h3::before { background: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
-.chip:hover { border-color: #3a3e48; }
+.chip:hover { border-color: #4a413c; }
 .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
 .none { color: var(--muted); font-size: 13px; }
 .updated { margin-top: 12px; font-size: 12px; color: var(--muted); }
@@ -113,7 +120,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 <div class="scrim" id="scrim" hidden></div>
 <div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
 <script>
-// Tier list: data/tierlist.json is the overlay's own tierlist.json file.
+// Tier list: the overlay's own tierlist.json, uploaded when Jun saves it (site.js loadTierlist).
 const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
 let HEROES = [], byId = {}, TL = null, role = "All", map = "Overall", selected = null;
 const img = id => `/img/heroes/${id}.webp`;
@@ -198,6 +205,19 @@ document.addEventListener("click", e => {
   if (e.target.closest(".x") || (selected && !e.target.closest("#detail"))) closeDetail();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
+// /tierlist/#jaina opens Jaina's info (links from the search box)
+function showHash() {
+  const id = location.hash.slice(1);
+  if (!byId[id]) return;
+  if (!tierOf(id)) { map = "Overall"; document.getElementById("map").value = map; }
+  if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
+  selected = id;
+  render();
+  anchor = document.querySelector(`.hero-card[data-hero="${id}"]`);
+  anchor?.scrollIntoView({ block: "center" });
+  place();
+}
+addEventListener("hashchange", () => TL && showHash());
 addEventListener("resize", place);
 addEventListener("scroll", () => { if (!phone()) place(); }, { passive: true });
 document.getElementById("roletabs").innerHTML = ROLES.map(r => `<button class="tab rtab" data-role="${r}" aria-pressed="false" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("");
@@ -211,13 +231,14 @@ const sel = document.getElementById("map");
 sel.innerHTML = ["Overall", ...MAPS].map(m => `<option>${m}</option>`).join("");
 sel.addEventListener("change", () => { map = sel.value; render(); });
 
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json())]).then(([heroes, tl]) => {
+Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;
   const label = TL.winrates?.label;
   document.getElementById("updated").textContent = label ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}` : "";
   render();
+  showHash();
 }).catch(() => { document.getElementById("tiers").innerHTML = '<div class="row"><div class="heroes"><span class="empty">The tier list couldn\'t load. Refresh the page to try again.</span></div></div>'; });
 </script>
 </body>

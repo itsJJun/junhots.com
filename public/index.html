@@ -8,36 +8,92 @@
 <meta property="og:title" content="JunHotS · Heroes of the Storm tier list, overlay and builds">
 <meta property="og:description" content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay.">
 <meta property="og:url" content="https://junhots.com/">
+<meta property="og:image" content="https://junhots.com/img/og/_home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JunHotS">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="/site.css">
 <script>
 // Old links like junhots.com/#tierlist go to the new pages.
 ({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash] && location.replace(({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash]);
 </script>
 <style>
-.hero { padding-block: 72px 56px; display: grid; gap: 18px; justify-items: start; }
+.hero { padding-block: 64px 48px; display: grid; grid-template-columns: minmax(0, 1fr) 470px; gap: 24px 40px; align-items: center; }
+.hero-txt { display: grid; gap: 18px; justify-items: start; }
 .eyebrow { font-size: 13px; color: var(--muted); }
 h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; font-weight: 600; letter-spacing: -0.035em; text-wrap: balance; max-width: 16ch; }
-h1 em { font-style: normal; color: var(--brand); text-shadow: 0 0 28px rgba(82, 199, 255, 0.35); }
+h1 em { font-style: normal; color: var(--brand); }
 .lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
 .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
-.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.card { display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; transition: border-color .15s, transform .15s; }
-a.card:hover { border-color: #3a3e48; transform: translateY(-2px); }
-.card .pic { aspect-ratio: 16 / 8; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--line); }
+/* Numbers under the buttons; they count up when the page opens */
+.stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
+.stats:empty { display: none; }
+.stat { display: grid; gap: 2px; }
+.stat b { font: 600 26px/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+
+/* Fan of hero art: Jun's S tier, straight from the tier list */
+.fan { position: relative; height: 380px; }
+.fan > a { position: absolute; left: 50%; bottom: 56px; width: 168px; aspect-ratio: 414 / 600; margin-left: -84px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  transform-origin: 50% 100%; transform: translateX(var(--x)) rotate(var(--r)) translateY(var(--y)); transition: transform .3s cubic-bezier(.3, .7, .3, 1), border-color .2s; animation: fan-in .7s cubic-bezier(.3, .7, .3, 1) both; animation-delay: var(--d); }
+.fan > a img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; }
+.fan > a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 8, 7, 0.85), transparent 45%); }
+.fan > a span { position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 10px; font: 600 14px/1.2 var(--display); color: #fff; }
+.fan > a span small { display: block; font: 500 11px var(--mono); color: var(--good); margin-top: 3px; }
+/* Hovered card straightens, grows and comes to the front; the others dim and lean away */
+.fan > a:hover { transform: translateX(var(--x)) rotate(0deg) translateY(-26px) scale(1.08); border-color: var(--brand); z-index: 20 !important; box-shadow: 0 26px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--brand); }
+.fan > a { filter: brightness(1); transition: transform .35s cubic-bezier(.3, .7, .3, 1), border-color .2s, filter .25s, box-shadow .25s; }
+.fan:has(> a:hover) > a:not(:hover) { filter: brightness(.55) saturate(.8); transform: translateX(calc(var(--x) * 1.12)) rotate(calc(var(--r) * 1.3)) translateY(var(--y)); }
+@keyframes fan-in { from { transform: translateY(30px); opacity: 0; } }
+.fan .cap { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 12px; color: var(--muted); }
+.fan .cap a { all: unset; cursor: pointer; color: var(--brand); }
+.fan .cap a:hover { text-decoration: underline; }
+
+/* Bento: one big Tier list card, Builds and Maker beside it, Overlay across the bottom */
+.cards { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); grid-template-areas: "tier builds" "tier maker" "overlay overlay"; gap: 16px; }
+.card { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; transition: border-color .15s, transform .15s; }
+.c-tier { grid-area: tier; } .c-builds { grid-area: builds; } .c-maker { grid-area: maker; } .c-overlay { grid-area: overlay; flex-direction: row; }
+a.card:hover { border-color: #4a413c; transform: translateY(-2px); }
+.card .pic { flex: 1; min-height: 0; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--line); }
 .card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.c-overlay .pic { flex: none; width: 58%; aspect-ratio: 840 / 345; border-bottom: 0; border-right: 1px solid var(--line); }
+.c-overlay .pic img { object-position: left center; }
+.c-overlay .txt { flex: 1; align-self: center; }
 .card .txt { padding: 16px 18px 18px; }
-.card b { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.c-tier .txt { padding: 20px 22px 22px; }
+.c-tier b { font-size: 22px !important; }
+.card b { font-family: var(--display); display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .card b .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
 a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 .card p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
-.card.later .pic { display: grid; place-items: center; background: radial-gradient(420px 160px at 50% 50%, rgba(82, 199, 255, 0.08), transparent 70%), var(--bg); }
-.card.later .pic img { width: 74%; height: auto; object-fit: contain; opacity: .55; filter: saturate(.7); }
-@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } .hero { padding-block: 48px 40px; } }
-@media (prefers-reduced-motion: reduce) { .card, .card b .arr { transition: none; } }
+/* Builds card: three hero art slices */
+.c-builds .pic, .c-maker .pic { flex: none; height: 150px; }
+.c-builds .pic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--line); }
+.c-builds .pic img { min-height: 0; object-position: center 15%; transition: transform .4s; }
+a.c-builds:hover .pic img { transform: scale(1.05); }
+@media (max-width: 960px) { .hero { grid-template-columns: 1fr; } .fan { height: 330px; max-width: 470px; width: 100%; justify-self: center; } }
+@media (max-width: 720px) {
+  .cards { grid-template-columns: 1fr; grid-template-areas: "tier" "builds" "maker" "overlay"; }
+  .c-overlay { flex-direction: column; } .c-overlay .pic { width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .hero { padding-block: 40px 32px; }
+  .fan { height: 260px; } .fan > a { width: 118px; margin-left: -59px; bottom: 60px; --x: calc(var(--o) * 46px) !important; }
+  .fan > a span { font-size: 12px; left: 9px; bottom: 8px; } .fan > a span small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .fan > a { animation: none; transition: none; } }
+/* Soft light that follows the mouse over a card (and lights up its border) */
+.card { position: relative; }
+.card::before, .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; }
+.card::before { z-index: 1; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.13), transparent 60%); }
+.card::after { z-index: 2; padding: 1px; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.75), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+a.card:hover::before, a.card:hover::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .card, .card b .arr, .c-builds .pic img { transition: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -51,6 +107,7 @@ a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
   </nav>
 
   <header class="hero">
+    <div class="hero-txt">
     <div class="eyebrow" data-edit="eyebrow">Heroes of the Storm</div>
     <h1><span data-edit="title1">Jun plays</span> <em data-edit="title2">Heroes</em> <span data-edit="title3">live on Twitch</span></h1>
     <p class="lead" data-edit="intro">Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.</p>
@@ -60,14 +117,17 @@ a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
       <a class="btn" href="https://x.com/junhots_" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X / Twitter</a>
       <a class="btn" href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.44.87-.61 1.25a18.3 18.3 0 0 0-5.49 0 12.6 12.6 0 0 0-.62-1.25.08.08 0 0 0-.08-.04 19.7 19.7 0 0 0-4.89 1.52.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-1.99a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.89.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.24.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.22.65-1.87.89a.08.08 0 0 0-.04.11c.36.7.78 1.36 1.23 1.99a.08.08 0 0 0 .08.03 19.8 19.8 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.67-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.33c-1.18 0-2.16-1.09-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.09-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.95 2.42-2.16 2.42z"/></svg>Discord</a>
     </div>
+    <div class="stats" id="stats"></div>
+    </div>
+    <div class="fan" id="fan" aria-label="My S tier heroes"></div>
   </header>
 
 
   <section class="cards" aria-label="On this site">
-    <a class="card" href="/tierlist/"><div class="pic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p></div></a>
-    <a class="card" href="/tierlist-maker/"><div class="pic"><img src="/img/previews/maker.webp" alt="Tier list maker"></div><div class="txt"><b><span data-edit="card_maker_title">Make your own</span><span class="arr">→</span></b><p data-edit="card_maker_text">Drag heroes into your own tiers and share it as a link or a picture.</p></div></a>
-    <a class="card" href="/overlay/"><div class="pic"><img src="/img/previews/overlay-talents.webp" alt="Stream overlay in a game"></div><div class="txt"><b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b><p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p></div></a>
-    <a class="card later" href="/builds/"><div class="pic"><img src="/img/previews/build-strip.webp" alt=""></div><div class="txt"><b><span data-edit="card_builds_title">Builds</span><span class="arr">→</span></b><p data-edit="card_builds_text">Talents for every hero, my builds to copy into the game, and your own.</p></div></a>
+    <a class="card c-tier" href="/tierlist/"><div class="pic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p></div></a>
+    <a class="card c-builds" href="/builds/"><div class="pic" id="buildpics"><img src="/img/art/jaina.webp" alt=""><img src="/img/art/muradin.webp" alt=""><img src="/img/art/malfurion.webp" alt=""></div><div class="txt"><b><span data-edit="card_builds_title">Builds</span><span class="arr">→</span></b><p data-edit="card_builds_text">Talents for every hero, my builds to copy into the game, and your own.</p></div></a>
+    <a class="card c-maker" href="/tierlist-maker/"><div class="pic"><img src="/img/previews/maker.webp" alt="Tier list maker"></div><div class="txt"><b><span data-edit="card_maker_title">Make your own</span><span class="arr">→</span></b><p data-edit="card_maker_text">Drag heroes into your own tiers and share it as a link or a picture.</p></div></a>
+    <a class="card c-overlay" href="/overlay/"><div class="pic"><img src="/img/previews/overlay-talents.webp" alt="Stream overlay in a game"></div><div class="txt"><b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b><p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p></div></a>
   </section>
 
   <footer>
@@ -79,5 +139,54 @@ a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script>
+// YouTube, X and Discord buttons get the hover animation (site.css .hb)
+for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
+  b.classList.add("hb");
+  b.innerHTML = `<span class="hb-dot"></span><span class="hb-a">${b.innerHTML}</span><span class="hb-b" aria-hidden="true">${b.textContent.trim()}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+}
+// The fan shows 5 random heroes from my S tier (a different 5 on each visit) and the numbers come from the same files the other pages use.
+Promise.all([
+  fetch("/data/heroes.json").then(r => r.json()),
+  loadTierlist(),
+  fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+]).then(([heroes, tl, builds]) => {
+  const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
+  const wr = id => tl.winrates?.rates?.[id]?.wr;
+  const top = tl.tiers?.[0]?.id;
+  const best = Object.keys(tl.overall || {}).filter(id => tl.overall[id] === top && name[id]).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+  const pool = [...best];
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const show = pool.slice(0, 5), mid = (show.length - 1) / 2;
+  // Middle card on top, the others fanned out behind it
+  document.getElementById("fan").innerHTML = show.map((id, i) => {
+    const o = i - mid;
+    return `<a href="/builds/#${id}" style="--o:${o};--x:${o * 60}px;--r:${o * 6}deg;--y:${Math.abs(o) * 16}px;--d:${Math.abs(o) * 80}ms;z-index:${9 - Math.abs(o) * 2}"><img src="/img/art/${id}.webp" alt=""><span>${name[id]}${wr(id) == null ? "" : `<small>${wr(id).toFixed(1)}% win rate</small>`}</span></a>`;
+  }).join("") + (show.length ? `<div class="cap">My ${tl.tiers[0].name} tier right now · <a href="/tierlist/">see the full list</a></div>` : "");
+  const patch = (tl.winrates?.label || "").split(".").slice(0, 2).join(".");
+  const nHeroes = Object.values(builds).filter(l => Array.isArray(l) && l.length).length;
+  const stats = [[heroes.length, "heroes"], nHeroes && [nHeroes, "heroes with my builds"], [best.length, `in my ${tl.tiers?.[0]?.name || "S"} tier`], patch && [patch, "patch"]].filter(Boolean);
+  const box = document.getElementById("stats");
+  box.innerHTML = stats.map(([v, label]) => `<div class="stat"><b data-to="${v}">${typeof v === "number" ? 0 : v}</b><span>${label}</span></div>`).join("");
+  // Count the numbers up
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (const el of box.querySelectorAll("b")) {
+    const to = +el.dataset.to;
+    if (isNaN(to) || !Number.isInteger(to)) continue;
+    if (still) { el.textContent = to; continue; }
+    const t0 = performance.now();
+    const step = t => { const k = Math.min(1, (t - t0) / 1100); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+}).catch(() => {});
+
+// Card light follows the mouse (mouse only; phones don't hover)
+for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  const r = c.getBoundingClientRect();
+  c.style.setProperty("--mx", e.clientX - r.left + "px");
+  c.style.setProperty("--my", e.clientY - r.top + "px");
+});
+</script>
 </body>
 </html>
