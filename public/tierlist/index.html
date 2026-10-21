@@ -120,7 +120,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 <div class="scrim" id="scrim" hidden></div>
 <div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
 <script>
-// Tier list: data/tierlist.json is the overlay's own tierlist.json file.
+// Tier list: the overlay's own tierlist.json, uploaded when Jun saves it (site.js loadTierlist).
 const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
 let HEROES = [], byId = {}, TL = null, role = "All", map = "Overall", selected = null;
 const img = id => `/img/heroes/${id}.webp`;
@@ -231,7 +231,7 @@ const sel = document.getElementById("map");
 sel.innerHTML = ["Overall", ...MAPS].map(m => `<option>${m}</option>`).join("");
 sel.addEventListener("change", () => { map = sel.value; render(); });
 
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json())]).then(([heroes, tl]) => {
+Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;

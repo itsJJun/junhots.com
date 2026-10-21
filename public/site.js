@@ -4,6 +4,12 @@ for (const el of document.querySelectorAll("[data-edit]")) {
   if (typeof v === "string") el.textContent = v;
 }
 
+// Jun's tier list: the copy the overlay uploads when Jun saves, or the file in the repo if that isn't there.
+window.loadTierlist = () => fetch("/api/tierlist", { cache: "no-store" })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => d && Array.isArray(d.tiers) ? d : Promise.reject())
+  .catch(() => fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()));
+
 // Role icons (the game's six roles), drawn as small SVGs so they stay sharp at any size.
 const ROLE_COLORS = { "Tank": "#f5c03b", "Bruiser": "#ff8a3d", "Ranged Assassin": "#b98aff", "Melee Assassin": "#ff5f5f", "Healer": "#4cd471", "Support": "#55aaff" };
 const ROLE_PATHS = {

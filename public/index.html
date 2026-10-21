@@ -148,7 +148,7 @@ for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
 // The fan shows 5 random heroes from my S tier (a different 5 on each visit) and the numbers come from the same files the other pages use.
 Promise.all([
   fetch("/data/heroes.json").then(r => r.json()),
-  fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()),
+  loadTierlist(),
   fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
 ]).then(([heroes, tl, builds]) => {
   const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));

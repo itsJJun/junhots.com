@@ -3,11 +3,15 @@
 //   GET  /api/builds  -> everyone: the saved builds
 //   PUT  /api/builds  -> Jun only (password): replace the saved builds
 //   POST /api/login   -> Jun only: check the password
+//   GET  /api/tierlist -> everyone: Jun's tier list as the overlay last sent it (404 until it has)
+//   PUT  /api/tierlist -> Jun only (password): the overlay sends tierlist.json here when Jun saves
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture.
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
+const TIER_KEY = "tierlist";
+const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates"];
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -63,6 +67,15 @@ async function heroPage(id, url, env) {
     .transform(page);
 }
 
+// The overlay's tierlist.json, keeping only the parts the site reads.
+function cleanTierlist(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("bad data");
+  if (!Array.isArray(data.tiers) || !data.tiers.length || !data.overall || typeof data.overall !== "object") throw new Error("not a tier list");
+  const out = {};
+  for (const k of TIER_FIELDS) if (k in data) out[k] = data[k];
+  return out;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -78,6 +91,24 @@ export default {
         try { data = clean(JSON.parse(text)); } catch (e) { return json({ error: e.message }, 400); }
         await env.BUILDS.put(KEY, JSON.stringify(data));
         return json(data);
+      }
+      return json({ error: "method not allowed" }, 405);
+    }
+
+    if (url.pathname === "/api/tierlist") {
+      if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
+      if (request.method === "GET") {
+        const saved = await env.BUILDS.get(TIER_KEY);
+        return saved ? new Response(saved, { headers: { "content-type": "application/json", "cache-control": "no-store" } }) : json({ error: "not uploaded yet" }, 404);
+      }
+      if (request.method === "PUT") {
+        if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
+        const text = await request.text();
+        if (text.length > MAX_BYTES) return json({ error: "too big" }, 413);
+        let data;
+        try { data = cleanTierlist(JSON.parse(text)); } catch (e) { return json({ error: e.message }, 400); }
+        await env.BUILDS.put(TIER_KEY, JSON.stringify(data));
+        return json({ ok: true, heroes: Object.keys(data.overall).length });
       }
       return json({ error: "method not allowed" }, 405);
     }
