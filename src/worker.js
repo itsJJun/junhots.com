@@ -3,6 +3,7 @@
 //   GET  /api/builds  -> everyone: the saved builds
 //   PUT  /api/builds  -> Jun only (password): replace the saved builds
 //   POST /api/login   -> Jun only: check the password
+// It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture.
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
 
 const KEY = "builds";
@@ -40,6 +41,28 @@ function clean(data) {
   return out;
 }
 
+// /builds/jaina?b=1311132&n=Burn -> the Builds page, with titles and picture for Jaina so link previews show her.
+async function heroPage(id, url, env) {
+  const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
+  const h = heroes.find(x => x[0] === id);
+  if (!h) return null;
+  const page = await env.ASSETS.fetch(new URL("/builds/", url));
+  const name = (url.searchParams.get("n") || "").trim().slice(0, 40);
+  const shared = /[1-9]/.test(url.searchParams.get("b") || "");
+  const title = shared ? `${name ? name + " · " : ""}${h[1]} build · JunHotS` : `${h[1]} builds and talents · JunHotS`;
+  const desc = shared ? `A ${h[1]} talent build made on junhots.com. Open it to see every pick and copy it into Heroes of the Storm.`
+    : `${h[1]} talents, abilities and Jun's builds to copy into Heroes of the Storm.`;
+  const set = (attr, value) => ({ element: el => el.setAttribute(attr, value) });
+  return new HTMLRewriter()
+    .on("title", { element: el => el.setInnerContent(title) })
+    .on('meta[property="og:title"]', set("content", title))
+    .on('meta[name="description"]', set("content", desc))
+    .on('meta[property="og:description"]', set("content", desc))
+    .on('meta[property="og:url"]', set("content", url.origin + url.pathname + url.search))
+    .on('meta[property="og:image"]', set("content", `${url.origin}/img/og/${id}.jpg`))
+    .transform(page);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -63,6 +86,12 @@ export default {
       const ok = await passwordOk(request, env);
       if (!ok) await new Promise(r => setTimeout(r, 800));   // slow down guessing
       return json({ ok }, ok ? 200 : 401);
+    }
+
+    const hero = url.pathname.match(/^\/builds\/([a-z0-9]{1,30})\/?$/);
+    if (hero && request.method === "GET") {
+      const page = await heroPage(hero[1], url, env);
+      if (page) return page;
     }
 
     return env.ASSETS.fetch(request);

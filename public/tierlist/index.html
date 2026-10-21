@@ -8,6 +8,12 @@
 <meta property="og:title" content="Heroes of the Storm tier list · JunHotS">
 <meta property="og:description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero.">
 <meta property="og:url" content="https://junhots.com/tierlist/">
+<meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JunHotS">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
@@ -198,6 +204,19 @@ document.addEventListener("click", e => {
   if (e.target.closest(".x") || (selected && !e.target.closest("#detail"))) closeDetail();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
+// /tierlist/#jaina opens Jaina's info (links from the search box)
+function showHash() {
+  const id = location.hash.slice(1);
+  if (!byId[id]) return;
+  if (!tierOf(id)) { map = "Overall"; document.getElementById("map").value = map; }
+  if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
+  selected = id;
+  render();
+  anchor = document.querySelector(`.hero-card[data-hero="${id}"]`);
+  anchor?.scrollIntoView({ block: "center" });
+  place();
+}
+addEventListener("hashchange", () => TL && showHash());
 addEventListener("resize", place);
 addEventListener("scroll", () => { if (!phone()) place(); }, { passive: true });
 document.getElementById("roletabs").innerHTML = ROLES.map(r => `<button class="tab rtab" data-role="${r}" aria-pressed="false" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("");
@@ -218,6 +237,7 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/data/tierli
   const label = TL.winrates?.label;
   document.getElementById("updated").textContent = label ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}` : "";
   render();
+  showHash();
 }).catch(() => { document.getElementById("tiers").innerHTML = '<div class="row"><div class="heroes"><span class="empty">The tier list couldn\'t load. Refresh the page to try again.</span></div></div>'; });
 </script>
 </body>

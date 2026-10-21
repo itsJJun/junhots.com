@@ -8,6 +8,12 @@
 <meta property="og:title" content="Heroes of the Storm builds and talents · JunHotS">
 <meta property="og:description" content="Talents and abilities for every hero, Jun's builds, and your own builds to share.">
 <meta property="og:url" content="https://junhots.com/builds/">
+<meta property="og:image" content="https://junhots.com/img/og/_builds.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JunHotS">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
@@ -238,6 +244,9 @@ const KEY = { Passive: "Passive", Active: "Active", D: "Trait", R: "Heroic" };
 let MYB = {}; try { MYB = JSON.parse(localStorage.getItem("junhots_mybuilds") || "{}"); } catch {}
 const saveMYB = () => { try { localStorage.setItem("junhots_mybuilds", JSON.stringify(MYB)); return true; } catch { return false; } };
 let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
+// Share links look like /builds/jaina?b=... so Discord and X show that hero's picture (the server fills in the preview).
+// The page itself works with #jaina, so turn the address back into that.
+{ const m = location.pathname.match(/^\/builds\/([a-z0-9]+)\/?$/); if (m) history.replaceState(null, "", `/builds/#${m[1]}${location.search ? "?" + location.search.slice(1) : ""}`); }
 // "Make your own" > Build opens this page as /builds/?make: same page, talents first.
 const MAKE = new URLSearchParams(location.search).has("make");
 let HEROES = [], byId = {}, BUILDS = {}, role = "All", hero = null, mine = null;
@@ -386,7 +395,7 @@ function drawMine() {
     if (mine.name.trim()) p.set("n", mine.name.trim());
     if (mine.good.length) p.set("g", mine.good.join(","));
     if (mine.alt.some(Boolean)) p.set("s", mine.alt.join("-"));
-    const url = `${location.origin}/builds/#${hero.id}?${p}`;
+    const url = `${location.origin}/builds/${hero.id}?${p}`;
     history.replaceState(null, "", `#${hero.id}?${p}`);
     navigator.clipboard?.writeText(url).then(() => toast("Link copied. Anyone with it sees your build."), () => prompt("Copy this link:", url));
   };

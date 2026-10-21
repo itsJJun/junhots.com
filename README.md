@@ -15,3 +15,7 @@ To update it: open `public/data/tierlist.json` on GitHub, click the pencil, past
 - `tierlist-maker/index.html` – make your own tier list (share links need no server, so it costs nothing)
 - `data/heroes.json` – hero list: id, name, role
 - `img/heroes/` – hero portraits
+
+## Link preview pictures
+`public/img/og/` holds the pictures Discord, X and Twitch chat show for junhots.com links (one per hero, plus `_home`, `_tierlist`, `_builds`, `_maker`, `_overlay`).
+After a new hero or new hero art: `node tools/make_link_previews.mjs` (needs Playwright). Share links like `junhots.com/builds/jaina?b=...` get that hero's picture from `src/worker.js`.

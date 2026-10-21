@@ -1,4 +1,4 @@
-// Cloudflare settings: serve public/ as the website, and run src/worker.js for /api/* (Jun's builds editor).
+// Cloudflare settings: serve public/ as the website, and run src/worker.js for /api/* (Jun's builds editor) and /builds/* (hero link previews).
 {
   "name": "junhots",
   "main": "src/worker.js",
@@ -7,7 +7,7 @@
     "directory": "./public",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/builds/*"]
   },
   // Storage for "Jun's builds". The id comes from Cloudflare: Storage & databases -> KV.
   "kv_namespaces": [
