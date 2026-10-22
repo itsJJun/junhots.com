@@ -75,8 +75,15 @@
   css.textContent = `
 .qk { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px 0 10px; border-radius: 8px; border: 1px solid var(--line, #332d2a); background: var(--surface, #1a1716); color: var(--muted, #a89f99); font: 13px/1 var(--sans, "Geist", system-ui, sans-serif); cursor: pointer; }
 .qk:hover { color: var(--text, #f4efec); border-color: #4a413c; }
+/* Wider box that reads like a search field: "Search Abathur" with the hero name taking turns */
+.qk { width: 236px; } .qk kbd { margin-left: auto; }
+.qk span { display: flex; gap: .3em; min-width: 0; overflow: hidden; white-space: nowrap; }
+.qk i { font-style: normal; color: #7d736d; display: inline-block; overflow: hidden; text-overflow: ellipsis; transition: transform .4s cubic-bezier(.22, 1, .36, 1), opacity .3s, filter .3s; }
+.qk i.out { transform: translateY(-60%); opacity: 0; filter: blur(3px); transition-timing-function: cubic-bezier(.5, 0, .75, 0); transition-duration: .25s; }
+.qk i.in { transform: translateY(60%); opacity: 0; filter: blur(3px); transition: none; }
 .qk svg { width: 15px; height: 15px; }
 .qk kbd, .qk-foot kbd { font: 500 11px/1 var(--mono, ui-monospace, monospace); padding: 3px 5px; border-radius: 4px; border: 1px solid var(--line, #332d2a); background: var(--bg, #12100f); color: var(--muted, #a89f99); }
+@media (max-width: 900px) { .qk { width: auto; } .qk i { display: none; } }
 @media (max-width: 640px) { .qk { margin-left: auto; width: 34px; padding: 0; justify-content: center; } .qk span, .qk kbd { display: none; } .qk + .nav-live { margin-left: 14px; } }
 .qk-box { position: fixed; inset: 0; z-index: 60; display: grid; justify-items: center; align-items: start; padding: 12vh 16px 16px; background: rgba(5, 6, 8, 0.6); backdrop-filter: blur(3px); animation: qk-fade .12s ease-out; }
 @keyframes qk-fade { from { opacity: 0; } }
@@ -111,7 +118,7 @@
   btn.className = "qk";
   btn.type = "button";
   btn.setAttribute("aria-label", "Search heroes and pages");
-  btn.innerHTML = `${glass}<span>Search</span><kbd>${mac ? "⌘" : "Ctrl"} K</kbd>`;
+  btn.innerHTML = `${glass}<span>Search<i></i></span><kbd>${mac ? "⌘" : "Ctrl"} K</kbd>`;
   live.before(btn);
 
   const PAGES = [
@@ -123,6 +130,29 @@
   const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
   let heroes = null, box = null, rows = [], at = 0;
   const load = () => heroes ? Promise.resolve(heroes) : fetch("/data/heroes.json").then(r => r.json()).then(list => heroes = list.map(([id, name, , grole]) => ({ id, name, grole, key: norm(name), words: name.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean) })).sort((a, b) => a.name.localeCompare(b.name))).catch(() => heroes = []);
+
+  // Hero names take turns in the button ("Search Abathur", "Search Valla"...), in a random order, every few seconds.
+  // Home already cycles names in its headline, so there the button just says "Search heroes".
+  const home = location.pathname === "/" || location.pathname === "/index.html";
+  if (home) btn.querySelector("i").textContent = "heroes";
+  else if (!matchMedia("(prefers-reduced-motion: reduce)").matches) load().then(list => {
+    const names = list.map(h => h.name);
+    for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
+    const el = btn.querySelector("i");
+    if (!el || !names.length) return;
+    let k = 0;
+    el.textContent = names[0];
+    setInterval(() => {
+      if (document.hidden || box) return;
+      el.classList.add("out");
+      setTimeout(() => {
+        el.textContent = names[k = (k + 1) % names.length];
+        el.classList.replace("out", "in");
+        el.offsetWidth;   // place it below before it rises
+        el.classList.remove("in");
+      }, 250);
+    }, 2600);
+  });
 
   function find(q) {
     const k = norm(q);
