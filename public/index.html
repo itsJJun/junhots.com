@@ -106,6 +106,39 @@ a.c-builds:hover .pic img { transform: scale(1.05); }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 a.card:hover::before, a.card:hover::after { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .card, .card b .arr, .c-builds .pic img, .c-maker .pic img { transition: none; } }
+/* Latest YouTube video + Twitch, under the intro. Pictures only until clicked (the real players are heavy), then the player loads in place. */
+.media { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); grid-template-areas: "a b"; gap: 16px; margin-bottom: 16px; }
+.media .m-yt { grid-area: a; } .media .m-tw { grid-area: b; }
+.media.live .m-tw { grid-area: a; } .media.live .m-yt { grid-area: b; }
+.mcard { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; min-width: 0; }
+.mhead { display: flex; align-items: center; gap: 8px; padding: 12px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.mhead svg { width: 15px; height: 15px; flex: none; }
+.mhead .yt { color: #ff3b3b; } .mhead .tw { color: var(--twitch); }
+.mhead a { margin-left: auto; color: var(--muted); } .mhead a:hover { color: var(--text); }
+.thumb { all: unset; position: relative; display: block; aspect-ratio: 16 / 9; background: #000; cursor: pointer; overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s, filter .25s; }
+.thumb:hover img { transform: scale(1.03); filter: brightness(1.08); }
+.thumb iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.play { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; display: grid; place-items: center; background: rgba(18, 16, 15, 0.72); border: 1px solid rgba(255, 255, 255, 0.18); color: #fff; transition: background .2s, transform .2s; }
+.play svg { width: 24px; height: 24px; margin-left: 3px; }
+.thumb:hover .play, .thumb:focus-visible .play { background: var(--brand); transform: scale(1.06); }
+.mtxt { padding: 14px 16px 16px; display: grid; gap: 4px; }
+.mtxt b { font: 600 16px/1.35 var(--display); letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mtxt span { font-size: 13px; color: var(--muted); }
+/* Twitch while offline: a quiet card with a follow button */
+.off { position: relative; overflow: hidden; flex: 1; display: grid; align-content: center; justify-items: start; gap: 10px; padding: 22px 20px; background: radial-gradient(420px 220px at 100% 0%, rgba(145, 70, 255, 0.14), transparent 70%); }
+.off .state { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+.off .state i { width: 7px; height: 7px; border-radius: 50%; background: #6b625d; }
+.off b { font: 600 20px/1.25 var(--display); letter-spacing: -0.02em; }
+.off p { margin: 0; color: var(--muted); font-size: 14px; max-width: 40ch; }
+.off .btn { margin-top: 4px; }
+.off > svg { position: absolute; right: -28px; bottom: -34px; width: 190px; height: 190px; color: var(--twitch); opacity: .07; pointer-events: none; }
+.off > :not(svg) { position: relative; }
+.badge { position: absolute; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 6px; background: #e91916; color: #fff; font: 700 12px/1.4 var(--sans); letter-spacing: .04em; }
+.badge .dot { width: 6px; height: 6px; background: #fff; animation: none; }
+.nav-live.on { color: var(--text); }
+@media (max-width: 720px) { .media, .media.live { grid-template-columns: 1fr; grid-template-areas: "a" "b"; } }
+@media (prefers-reduced-motion: reduce) { .thumb img, .play { transition: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -133,6 +166,11 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
     </div>
     <div class="fan" id="fan" aria-label="My S tier heroes"></div>
   </header>
+
+  <section class="media" id="media" aria-label="Latest video and stream" hidden>
+    <div class="mcard m-yt" id="m-yt" hidden></div>
+    <div class="mcard m-tw" id="m-tw"></div>
+  </section>
 
 
   <section class="cards" aria-label="On this site">
@@ -234,6 +272,58 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
   c.style.setProperty("--mx", e.clientX - r.left + "px");
   c.style.setProperty("--my", e.clientY - r.top + "px");
 });
+</script>
+<script>
+// Latest YouTube video and Twitch (from /api/media, see src/worker.js). Only pictures load at first;
+// a click swaps the picture for the real player, so the page stays fast.
+(() => {
+  const T = window.SITE_TEXT || {};
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const ago = d => {
+    const s = (new Date(d) - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    for (const [u, n] of [["year", 31536000], ["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]])
+      if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+    return "just now";
+  };
+  const PLAY = '<span class="play"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg></span>';
+  const YT = '<svg class="yt" viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>';
+  const TW = '<svg class="tw" viewBox="0 0 24 24"><path fill="currentColor" d="M4.3 1.5 2.5 6v15h5.2v2.8h2.9l2.8-2.8h4.2l5.9-5.9V1.5zm16 12.6-3.3 3.3h-5.2l-2.8 2.8v-2.8H4.6V3.6h15.7zM16.8 6.4v5.6h-2.1V6.4zm-5.7 0v5.6H9V6.4z"/></svg>';
+  const box = document.getElementById("media"), yt = document.getElementById("m-yt"), tw = document.getElementById("m-tw");
+  // Clicking a picture puts the real player in its place
+  box.addEventListener("click", e => {
+    const t = e.target.closest(".thumb[data-src]");
+    if (!t) return;
+    t.innerHTML = `<iframe src="${t.dataset.src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${esc(t.dataset.title || "Player")}"></iframe>`;
+    t.removeAttribute("data-src");
+  });
+  fetch("/api/media").then(r => r.ok ? r.json() : Promise.reject()).then(m => {
+    const v = m.youtube?.videos || [], ch = m.twitch?.channel || "junhots_", live = !!m.twitch?.live;
+    const channel = `https://www.youtube.com/@${m.youtube?.handle || "junhots"}`;
+    if (v.length) {
+      const a = v[0];
+      yt.innerHTML = `<div class="mhead">${YT}<span>${esc(T.media_video || "Latest video")}</span><a href="${channel}/videos" target="_blank" rel="noopener">All videos →</a></div>
+        <button class="thumb" type="button" data-src="https://www.youtube-nocookie.com/embed/${a.id}?autoplay=1&rel=0" data-title="${esc(a.title)}" aria-label="Play ${esc(a.title)}"><img src="https://i.ytimg.com/vi/${a.id}/hqdefault.jpg" alt="" loading="lazy">${PLAY}</button>
+        <div class="mtxt"><b>${esc(a.title)}</b><span>${ago(a.date)}${a.views ? ` · ${a.views.toLocaleString("en")} views` : ""}</span></div>
+`;
+      yt.hidden = false;
+    }
+    const twUrl = `https://www.twitch.tv/${ch}`;
+    if (live) {
+      // Twitch's own preview picture of the stream right now (the time in the link stops old copies)
+      tw.innerHTML = `<div class="mhead">${TW}<span>${esc(T.media_live || "Live now on Twitch")}</span><a href="${twUrl}" target="_blank" rel="noopener">Open on Twitch →</a></div>
+        <button class="thumb" type="button" data-src="https://player.twitch.tv/?channel=${ch}&parent=${location.hostname}&autoplay=true" data-title="Twitch stream" aria-label="Watch the stream here"><img src="https://static-cdn.jtvnw.net/previews-ttv/live_user_${ch}-640x360.jpg?t=${Math.floor(Date.now() / 60000)}" alt=""><span class="badge"><span class="dot"></span>LIVE</span>${PLAY}</button>
+        ${m.twitch.title ? `<div class="mtxt"><b>${esc(m.twitch.title)}</b><span>Click to watch here, or chat on Twitch</span></div>` : ""}`;
+      box.classList.add("live");
+      const nl = document.querySelector(".nav-live");
+      nl.classList.add("on"); nl.lastChild.textContent = "Live now";
+    } else {
+      tw.innerHTML = `<div class="mhead">${TW}<span>Twitch</span></div>
+        <div class="off">${TW}<span class="state"><i></i>${esc(T.media_offline_state || "Offline right now")}</span><b>${esc(T.media_offline_title || "Catch the next stream")}</b><p>${esc(T.media_offline_text || "Ranked games with talent picks and drafts explained. Follow on Twitch to get a ping when I go live.")}</p>
+        <a class="btn live" href="${twUrl}" target="_blank" rel="noopener"><span class="dot"></span>${esc(T.media_follow || "Follow on Twitch")}</a></div>`;
+    }
+    box.hidden = false;
+  }).catch(() => {});
+})();
 </script>
 </body>
 </html>

@@ -9,6 +9,14 @@ window.SITE_TEXT = {
   intro: "Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.",
   twitch_button: "Watch on Twitch",
 
+  // Home page: latest video and Twitch
+  media_video: "Latest video",
+  media_live: "Live now on Twitch",
+  media_offline_state: "Offline right now",
+  media_offline_title: "Catch the next stream",
+  media_offline_text: "Ranked games with talent picks and drafts explained. Follow on Twitch to get a ping when I go live.",
+  media_follow: "Follow on Twitch",
+
   // Home page cards
   card_tierlist_title: "Tier list",
   card_tierlist_text: "My ranked tier list with counters, synergy and win rates for every hero.",
