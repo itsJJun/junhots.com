@@ -558,7 +558,7 @@ app.addEventListener("click", e => {
   const al = e.target.closest("[data-alt]");
   if (al) { const [r, i] = al.dataset.alt.split("-").map(Number); const cur = alts(mine.alt[r]); mine.alt[r] = (cur.includes(i) ? cur.filter(a => a !== i) : [...cur, i].sort()).join(""); drawMine(); return; }
   const ej = e.target.closest("[data-edit-jun]");
-  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); return; }
   const dj = e.target.closest("[data-del-jun]");
   if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
   const dy = e.target.closest("[data-del-you]");
@@ -569,11 +569,11 @@ app.addEventListener("click", e => {
   const j = e.target.closest("[data-jump]");
   if (bc) {
     // Clicking a build loads it into "Your build": its talents light up below and the rest of each row greys out, ready to tweak.
-    // Clicking one of its talent icons does the same, then scrolls to that talent.
+    // Clicking one of its talent icons does the same, then scrolls to that talent. (No scroll otherwise: the Your build bar shows it.)
     const key = bc.dataset.b, b = buildOf(key), cur = mine.picks.join("");
     if (mine.from !== key && cur !== "0000000" && cur !== b.picks.join("") && !confirm(`Replace your build with "${b.name}"?`)) return;
     if (mine.from !== key) { mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: key.startsWith("jun") ? b.name + " (my version)" : b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: "", from: key }; drawMine(); }
-    if (!j) { document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (!j) return;
   }
   if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const ug = e.target.closest("[data-ungood]");
