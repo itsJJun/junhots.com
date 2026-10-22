@@ -30,6 +30,12 @@ window.SITE_TEXT = {
   tierlist_title: "Tier list",
   tierlist_text: "My picks for ranked. Type !tierlist in chat to see it on stream.",
 
+  draft_title: "Draft helper",
+  draft_text: "Add the bans and picks so far and get the best picks for your team, from my tier list, counters and win rates.",
+
+  // Home page: my last games, sent by the overlay when a match ends
+  games_title: "My recent games",
+
   overlay_title: "Stream overlay",
   overlay_text: "The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.",
   overlay_badge: "Download coming soon",
