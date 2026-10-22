@@ -18,15 +18,21 @@
 }
 * { box-sizing: border-box; }
 html { background: var(--bg); }
-/* Going from page to page: the new page fades in over the old one (no white flash), the top bar stays still.
+/* Going from page to page: the new page fades in over the old one (no white flash), the top bar stays still
+   and the coral line under the tabs slides to the new tab. The switch that turns this on sits at the very top of
+   each page (an inline <style>): when it only lived in this file, the browser sometimes decided before reading it.
    Browsers without this just change pages the normal way. */
-@view-transition { navigation: auto; }
 nav { view-transition-name: topbar; }
+.tab-ind { view-transition-name: tab-ind; }
+/* The top bar switches at once (no blend between the old and new bar), so only the line moves */
+::view-transition-group(topbar), ::view-transition-new(topbar) { animation: none; }
+::view-transition-old(topbar) { display: none; }
+::view-transition-group(tab-ind) { animation-duration: .45s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
 ::view-transition-old(root) { animation: vt-out .22s ease-in both; }
 ::view-transition-new(root) { animation: vt-in .42s cubic-bezier(.22, 1, .36, 1) .06s both; }
 @keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
 @keyframes vt-in { from { opacity: 0; transform: translateY(14px); } }
-@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); background-image: radial-gradient(900px 380px at 50% -120px, rgba(242, 106, 75, 0.10), transparent 70%); background-repeat: no-repeat; color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
@@ -44,6 +50,10 @@ h2 small { font-family: var(--sans); }
 .tabs a:hover { color: var(--text); }
 .tabs a[aria-current="page"] { color: var(--text); }
 .tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: var(--brand); }
+/* The line is its own element (placed under the current tab by a tiny script in each page) so it can slide */
+.tabs { position: relative; }
+.tab-ind { position: absolute; bottom: 0; left: 0; width: 0; height: 2px; border-radius: 2px; background: var(--brand); pointer-events: none; }
+.tabs:has(.tab-ind) a[aria-current="page"]::after { display: none; }
 .nav-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
 .nav-live:hover { color: var(--text); }
 

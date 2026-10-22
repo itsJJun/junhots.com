@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Heroes of the Storm builds and talents · JunHotS</title>
 <meta name="description" content="Talent builds for every Heroes of the Storm hero: talents, abilities, Jun's builds, and your own builds to share.">
@@ -266,6 +267,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-to
     <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/" aria-current="page">Builds</a><a href="/draft/">Draft</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
     <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
+  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
 
   <main id="app"></main>
 
