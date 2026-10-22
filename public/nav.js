@@ -131,8 +131,11 @@
   let heroes = null, box = null, rows = [], at = 0;
   const load = () => heroes ? Promise.resolve(heroes) : fetch("/data/heroes.json").then(r => r.json()).then(list => heroes = list.map(([id, name, , grole]) => ({ id, name, grole, key: norm(name), words: name.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean) })).sort((a, b) => a.name.localeCompare(b.name))).catch(() => heroes = []);
 
-  // Hero names take turns in the button ("Search Abathur", "Search Valla"...), in a random order, every few seconds
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) load().then(list => {
+  // Hero names take turns in the button ("Search Abathur", "Search Valla"...), in a random order, every few seconds.
+  // Home already cycles names in its headline, so there the button just says "Search heroes".
+  const home = location.pathname === "/" || location.pathname === "/index.html";
+  if (home) btn.querySelector("i").textContent = "heroes";
+  else if (!matchMedia("(prefers-reduced-motion: reduce)").matches) load().then(list => {
     const names = list.map(h => h.name);
     for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
     const el = btn.querySelector("i");
