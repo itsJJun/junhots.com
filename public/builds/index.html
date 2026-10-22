@@ -154,6 +154,30 @@ h2.sec > span { white-space: nowrap; }
 .tx b.q { color: #e4b800; font-weight: 600; }
 .tx b.h { color: #e6dfda; font-weight: 600; }
 /* Ability row under the hero name: small chips, tap one to read it */
+/* Matchups from Jun's tier list: three short rows of small portraits under the abilities */
+.mu { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
+.mu:empty { display: none; }
+.mug { display: grid; gap: 7px; }
+.mug .lab { font-size: 12px; color: var(--muted); }
+.mug .lab::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--c); }
+.mug .ps { display: flex; gap: 5px; flex-wrap: wrap; }
+.mug a { display: block; position: relative; border-radius: 7px; transition: transform .12s; }
+.mug a img { display: block; width: 34px; height: 34px; border-radius: 7px; object-fit: cover; border: 1px solid var(--line); }
+.mug a:hover { transform: translateY(-2px); }
+.mug a:hover img { border-color: var(--c); }
+.mug .more { all: unset; cursor: pointer; height: 34px; min-width: 34px; box-sizing: border-box; padding: 0 6px; border-radius: 7px; border: 1px dashed var(--line); font: 600 11px/32px var(--mono); color: var(--muted); text-align: center; }
+.mug .more:hover { color: var(--text); border-color: var(--c); }
+/* Wide screens: matchups fill the empty space between the hero name and the hero art */
+@media (min-width: 900px) {
+  .top { display: grid; grid-template-columns: auto 1fr; column-gap: 0; }
+  .top > .who, .top > .abrow { grid-column: 1; }
+  .top > .abinfo { grid-column: 1 / -1; }
+  .top > .mu { grid-column: 2; grid-row: 1 / span 2; align-self: center; flex-direction: column; gap: 14px; margin: 0 0 0 56px; padding-left: 28px; border-left: 1px solid var(--line); max-width: 300px; }
+  .top > .mu .ps { flex-wrap: nowrap; }
+}
+.who .role .tierx { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--line); }
+.who .role .tierx b { color: var(--text); font-weight: 600; }
+.who .role .wrx b { font: 500 13px var(--mono); }
 .abrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 .ab { all: unset; box-sizing: border-box; cursor: pointer; display: grid; justify-items: center; gap: 4px; font: 600 11px/1 var(--mono); color: var(--muted); }
 .ab img { display: block; width: 46px; height: 46px; border-radius: 8px; border: 1px solid var(--line); transition: border-color .12s, box-shadow .12s; }
@@ -169,6 +193,7 @@ h2.sec > span { white-space: nowrap; }
 .tip { position: fixed; z-index: 40; width: min(380px, calc(100vw - 24px)); pointer-events: none; animation: tipin .1s ease-out; }
 .tip .tal { cursor: default; width: 100%; background: #1d1a18; border-color: #3d3531; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6); }
 .tip .tsit { margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid var(--sit); font-size: 12px; color: var(--muted); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.tip .hname { display: inline-block; padding: 5px 9px; border-radius: 6px; background: #1d1a18; border: 1px solid #3d3531; font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
 .tip .tsit b { color: var(--sit); font-weight: 600; }
 @keyframes tipin { from { opacity: 0; transform: translateY(3px); } }
 @media (prefers-reduced-motion: reduce) { .tip { animation: none; } }
@@ -318,9 +343,10 @@ async function openHero(id, state) {
     <a class="back" href="#">← All heroes</a>
     <section class="top">
       <img class="art" src="/img/art/${id}.webp" alt="" onerror="this.remove()">
-      <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${roleIcon(byId[id].grole)} ${esc(byId[id].grole)}</div></div>
+      <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${roleIcon(byId[id].grole)} ${esc(byId[id].grole)}<span id="tierx"></span></div></div>
       <div class="abrow">${hero.abilities.map((a, i) => [a, i]).sort((x, y) => ORDER.indexOf(x[0].key) - ORDER.indexOf(y[0].key)).map(([a, i]) => `<button class="ab" data-ab="${i}" data-tip="a-${i}" aria-expanded="false" aria-label="${esc(a.name)}"><img src="${icon(a.icon)}" alt="">${a.key}</button>`).join("")}</div>
       <div class="abinfo" id="abinfo" hidden></div>
+      <div class="mu" id="mu"></div>
     </section>
 
     ${MAKE ? (jun.length ? `<details class="junfold"><summary>Jun's builds <small>${jun.length} for ${esc(hero.name)}, tap to look or start from one</small></summary>${junHtml}</details>` : "") : `<h2 class="sec">Jun's builds</h2>${junHtml}`}
@@ -339,6 +365,27 @@ async function openHero(id, state) {
   });
   app.querySelectorAll(".tx b.n[data-s]").forEach(b => b.title = `Grows ${Math.round(b.dataset.s * 100)}% per level`);
   drawMine();
+  drawMatchups();
+}
+// Tier, win rate, counters and synergy from Jun's tier list (same data as the Tier list page). Loads after the page, never holds it up.
+let TL = null;
+const tlReady = (window.loadTierlist ? loadTierlist() : Promise.reject()).then(d => { TL = d; if (hero) drawMatchups(); }).catch(() => {});
+function drawMatchups() {
+  const box = document.getElementById("mu"), tx = document.getElementById("tierx");
+  if (!box || !TL || !hero) return;
+  const id = hero.id, c = TL.counters || {}, sy = TL.synergy || {};
+  const t = TL.tiers?.find(x => x.id === TL.overall?.[id]), wr = TL.winrates?.rates?.[id]?.wr;
+  tx.innerHTML = (t ? `<span class="tierx"><b>${esc(t.name)}</b> tier</span>` : "")
+    + (wr != null ? `<span class="tierx wrx">Win rate <b style="color:${wr >= 51 ? "var(--good)" : wr < 49 ? "var(--bad)" : "var(--text)"}">${wr.toFixed(1)}%</b></span>` : "");
+  const groups = [
+    ["Strong against", "var(--good)", c[id] || []],
+    ["Weak against", "var(--bad)", Object.keys(c).filter(a => c[a].includes(id))],
+    ["Good with", "var(--accent)", [...new Set([...(sy[id] || []), ...Object.keys(sy).filter(a => sy[a].includes(id))])]],
+  ].map(([lab, col, ids]) => [lab, col, ids.filter(h => byId[h])]).filter(g => g[2].length);
+  // Up to 6 faces per row; "+N" opens the rest, so a long list never takes over the page.
+  box.innerHTML = groups.map(([lab, col, ids]) => `<div class="mug" style="--c:${col}"><span class="lab">${lab}</span><span class="ps">${ids.map((h, i) =>
+    `<a href="#${h}" data-tip="h-${h}" aria-label="${esc(byId[h].name)}"${i >= 6 && ids.length > 7 ? " hidden" : ""}><img src="${portrait(h)}" alt="" loading="lazy"></a>`).join("")}${ids.length > 7 ? `<button class="more" data-muall>+${ids.length - 6}</button>` : ""}</span></div>`).join("");
+  box.querySelectorAll("[data-muall]").forEach(b => b.onclick = () => { b.parentNode.querySelectorAll("a[hidden]").forEach(a => a.hidden = false); b.remove(); });
 }
 // A saved build: Jun's ("jun-0") or one the visitor saved in this browser ("you-0"). Click anywhere on it to show it on the talents.
 function buildCard(b, key) {
@@ -517,6 +564,7 @@ app.addEventListener("mouseover", e => {
   const el = e.target.closest("[data-tip]");
   if (!el || el === tip.on) return;
   if (el.getAttribute("aria-expanded") === "true") { hideTip(); return; } // already open in the panel below
+  if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
   const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
