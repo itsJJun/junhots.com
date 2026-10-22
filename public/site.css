@@ -1,3 +1,8 @@
+/* Fonts live on junhots.com (no trip to Google before the page can draw). Variable fonts: one file per family
+   covers every weight. Licenses in /fonts. */
+@font-face { font-family: "Geist"; src: url("/fonts/geist.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Sora"; src: url("/fonts/sora.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
 /* Shared look for every junhots.com page: one quiet column, flat near-black surfaces, hairline borders, one accent used only for links and focus. The hero portraits and tier colors carry the color. */
 :root {
   color-scheme: dark;
@@ -17,7 +22,7 @@
   --display: "Sora", "Geist", "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html { background: var(--bg); }
+html { background: var(--bg); scrollbar-gutter: stable; }   /* pages with and without a scrollbar line up, so nothing jumps sideways */
 /* Going from page to page: the new page fades in over the old one (no white flash), the top bar stays still
    and the coral line under the tabs slides to the new tab. The switch that turns this on sits at the very top of
    each page (an inline <style>): when it only lived in this file, the browser sometimes decided before reading it.
@@ -27,11 +32,11 @@ nav { view-transition-name: topbar; }
 /* The top bar switches at once (no blend between the old and new bar), so only the line moves */
 ::view-transition-group(topbar), ::view-transition-new(topbar) { animation: none; }
 ::view-transition-old(topbar) { display: none; }
-::view-transition-group(tab-ind) { animation-duration: .45s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
-::view-transition-old(root) { animation: vt-out .22s ease-in both; }
-::view-transition-new(root) { animation: vt-in .42s cubic-bezier(.22, 1, .36, 1) .06s both; }
-@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
-@keyframes vt-in { from { opacity: 0; transform: translateY(14px); } }
+::view-transition-group(tab-ind) { animation-duration: .38s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+::view-transition-old(root) { animation: vt-out .16s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-in .32s cubic-bezier(.22, 1, .36, 1) .04s both; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
 
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); background-image: radial-gradient(900px 380px at 50% -120px, rgba(242, 106, 75, 0.10), transparent 70%); background-repeat: no-repeat; color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
@@ -53,6 +58,11 @@ h2 small { font-family: var(--sans); }
 /* The line is its own element (placed under the current tab by a tiny script in each page) so it can slide */
 .tabs { position: relative; }
 .tab-ind { position: absolute; bottom: 0; left: 0; width: 0; height: 2px; border-radius: 2px; background: var(--brand); pointer-events: none; }
+.tab-ind.moving { transition: left .38s cubic-bezier(.22, 1, .36, 1), width .38s cubic-bezier(.22, 1, .36, 1); }
+.tabs a { transition: color .2s; }
+.tabs a.going { color: var(--text); }
+.tabs a.leaving { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .tab-ind.moving, .tabs a { transition: none; } }
 .tabs:has(.tab-ind) a[aria-current="page"]::after { display: none; }
 .nav-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
 .nav-live:hover { color: var(--text); }

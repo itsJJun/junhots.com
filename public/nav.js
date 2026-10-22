@@ -214,15 +214,47 @@
 
 // The coral line under the current tab (made by a tiny script at the top of each page) stays under its tab
 // when the fonts finish loading, the window changes size, or "Make your own" becomes the current tab.
+// Clicking another tab slides it there straight away, before the next page has even loaded; the page change
+// (site.css view transitions) then carries on from wherever the line is, so it's one smooth move.
 (() => {
   const ind = document.querySelector(".tabs .tab-ind");
   if (!ind) return;
-  const place = () => {
-    const a = document.querySelector('.tabs a[aria-current="page"]');
+  const tabs = ind.parentNode;
+  const place = a => {
+    a = a || tabs.querySelector('a[aria-current="page"]');
     ind.hidden = !a;
     if (a) ind.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
   };
   place();
-  document.fonts?.ready.then(place);
-  addEventListener("resize", place);
+  document.fonts?.ready.then(() => place());
+  addEventListener("resize", () => place());
+  const go = a => {
+    if (!a || a.getAttribute("aria-current") === "page") return;
+    ind.classList.add("moving");
+    place(a);
+    tabs.querySelector('a[aria-current="page"]')?.classList.add("leaving");
+    a.classList.add("going");
+  };
+  document.addEventListener("click", e => {
+    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest("a[href]");
+    if (!a || a.target === "_blank" || a.origin !== location.origin) return;
+    if (a.closest(".tabs") && a.getAttribute("aria-haspopup") !== "true") go(a);
+    else if (a.closest(".mk-menu")) go(tabs.querySelector('a[aria-haspopup="true"]'));
+  });
+  // Back/forward from the cache: put the line back where it belongs
+  addEventListener("pageshow", e => { if (e.persisted) { ind.classList.remove("moving"); tabs.querySelectorAll(".going, .leaving").forEach(x => x.classList.remove("going", "leaving")); place(); } });
+})();
+
+// Get the next page ready while the mouse is still on its link (Chrome and Edge: "prerender"), so clicking
+// opens it instantly. Only pages on this site, never the API, and only after a short hover or a touch.
+(() => {
+  if (!HTMLScriptElement.supports?.("speculationrules")) return;
+  const s = document.createElement("script");
+  s.type = "speculationrules";
+  s.textContent = JSON.stringify({ prerender: [{
+    where: { and: [{ href_matches: "/*" }, { not: { href_matches: "/api/*" } }, { not: { selector_matches: "[target=_blank]" } }] },
+    eagerness: "moderate",
+  }] });
+  document.head.append(s);
 })();

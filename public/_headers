@@ -2,3 +2,6 @@
   Cache-Control: no-cache
 /img/*
   Cache-Control: public, max-age=604800
+# Fonts never change: a new font gets a new file name
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
