@@ -5,6 +5,7 @@
 //   POST /api/login   -> Jun only: check the password
 //   GET  /api/tierlist -> everyone: Jun's tier list as the overlay last sent it (404 until it has)
 //   PUT  /api/tierlist -> Jun only (password): the overlay sends tierlist.json here when Jun saves
+//   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture.
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
 
@@ -77,9 +78,69 @@ function cleanTierlist(data) {
   return out;
 }
 
+// Home page: latest YouTube uploads (from the channel's public RSS feed) and whether the Twitch channel is live.
+// No API keys needed. Cached by Cloudflare so YouTube and Twitch get asked at most every few minutes.
+const YT_HANDLE = "junhots";
+const YT_CHANNEL = "UCwBBJyB6UqE44Fhok-NZ3fQ";   // @junhots (found again from the handle if the feed stops working)
+const TWITCH = "junhots_";
+const UA = { "user-agent": "Mozilla/5.0 (compatible; junhots.com)", "accept-language": "en-US,en;q=0.9" };
+
+const xmlText = s => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+
+async function feed(id) {
+  // "UULF" + channel = the uploads list without Shorts and live streams; fall back to every upload
+  for (const q of ["playlist_id=UULF" + id.slice(2), "channel_id=" + id]) {
+    const r = await fetch("https://www.youtube.com/feeds/videos.xml?" + q, { headers: UA, cf: { cacheTtl: 600 } }).catch(() => null);
+    if (!r?.ok) continue;
+    const xml = await r.text();
+    const videos = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].slice(0, 4).map(([, e]) => ({
+      id: (e.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/) || [])[1],
+      title: xmlText((e.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || ""),
+      date: (e.match(/<published>([^<]+)<\/published>/) || [])[1] || "",
+      views: +((e.match(/<media:statistics views="(\d+)"/) || [])[1] || 0),
+    })).filter(v => v.id);
+    if (videos.length) return videos;
+  }
+  return null;
+}
+
+async function youtube() {
+  let videos = await feed(YT_CHANNEL);
+  if (!videos) {
+    const page = await fetch("https://www.youtube.com/@" + YT_HANDLE, { headers: UA }).then(r => r.text()).catch(() => "");
+    const id = (page.match(/"externalId":"(UC[\w-]{22})"/) || page.match(/channel\/(UC[\w-]{22})/) || [])[1];
+    if (id && id !== YT_CHANNEL) videos = await feed(id);
+  }
+  return videos || [];
+}
+
+// Twitch's channel page says "isLiveBroadcast" in its search-engine data only while the stream is on.
+async function twitch() {
+  const page = await fetch("https://www.twitch.tv/" + TWITCH, { headers: UA }).then(r => r.ok ? r.text() : "").catch(() => "");
+  const live = /"isLiveBroadcast":\s*true/.test(page);
+  // The stream title sits in the same data; if Twitch changes it, the card just shows no title
+  let title = "";
+  if (live) try { title = JSON.parse('"' + ((page.match(/"description":"((?:[^"\\]|\\.)*)"/) || [])[1] || "") + '"').slice(0, 140); } catch {}
+  return { channel: TWITCH, live, title };
+}
+
+async function media(request, ctx) {
+  const cache = caches.default, key = new Request(new URL("/api/media", request.url).toString());
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  const [videos, tw] = await Promise.all([youtube().catch(() => []), twitch().catch(() => ({ channel: TWITCH, live: false, title: "" }))]);
+  const res = new Response(JSON.stringify({ youtube: { handle: YT_HANDLE, videos }, twitch: tw }), {
+    headers: { "content-type": "application/json", "cache-control": "public, max-age=60" },
+  });
+  ctx.waitUntil(cache.put(key, res.clone()));
+  return res;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/media" && request.method === "GET") return media(request, ctx);
 
     if (url.pathname === "/api/builds") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);

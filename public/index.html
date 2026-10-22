@@ -28,6 +28,11 @@
 .eyebrow { font-size: 13px; color: var(--muted); }
 h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; font-weight: 600; letter-spacing: -0.035em; text-wrap: balance; max-width: 16ch; }
 h1 em { font-style: normal; color: var(--brand); }
+/* The coral word takes turns with the S tier heroes in the fan: it slides up and out, the next name rises in */
+h1 em { display: inline-block; transition: transform .45s cubic-bezier(.22, 1, .36, 1), opacity .35s, filter .35s; }
+h1 em.out { transform: translateY(-0.35em); opacity: 0; filter: blur(6px); transition-timing-function: cubic-bezier(.5, 0, .75, 0); transition-duration: .3s; }
+h1 em.in { transform: translateY(0.35em); opacity: 0; filter: blur(6px); transition: none; }
+.fan > a.cued { transform: translateX(var(--x)) rotate(calc(var(--r) * .4)) translateY(calc(var(--y) - 18px)) scale(1.04); border-color: var(--brand); }
 .lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
 .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
@@ -106,6 +111,26 @@ a.c-builds:hover .pic img { transform: scale(1.05); }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 a.card:hover::before, a.card:hover::after { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .card, .card b .arr, .c-builds .pic img, .c-maker .pic img { transition: none; } }
+/* The Twitch and YouTube buttons tell what's new themselves: "Live now" / a NEW tag,
+   and on hover a small peek of the stream or the latest video drops down under the button. */
+.pk { position: relative; display: inline-flex; }
+.peek { position: absolute; z-index: 40; top: 100%; left: 0; padding-top: 10px; width: 300px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .2s, transform .2s, visibility 0s .2s; }
+.pk:hover .peek, .pk:focus-within .peek { opacity: 1; visibility: visible; transform: none; transition: opacity .2s, transform .2s; }
+.peek a { display: block; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6); transition: border-color .15s; }
+.peek a:hover { border-color: var(--brand); }
+.peek .pic { position: relative; display: block; aspect-ratio: 16 / 9; background: #000; }
+.peek .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.peek .t { display: grid; gap: 2px; padding: 10px 12px 11px; }
+.peek .t small { font-size: 12px; color: var(--muted); }
+.peek .t b { font: 600 13px/1.35 var(--display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.badge { position: absolute; left: 8px; top: 8px; display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border-radius: 5px; background: #e91916; color: #fff; font: 700 11px/1.5 var(--sans); letter-spacing: .05em; }
+.badge .dot { width: 6px; height: 6px; background: #fff; }
+.new { padding: 0 6px; border-radius: 5px; background: var(--brand); color: #1f0b05; font: 700 10px/1.6 var(--sans); letter-spacing: .06em; }
+/* Offline: the red recording dot rests as a grey dot, so it only "records" when I'm really live */
+.dot.off { background: #8a807a; animation: none; }
+.btn.live .dot.off { background: rgba(255, 255, 255, 0.55); }
+.nav-live.on { color: var(--text); }
+@media (hover: none) { .peek { display: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -133,6 +158,7 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
     </div>
     <div class="fan" id="fan" aria-label="My S tier heroes"></div>
   </header>
+
 
 
   <section class="cards" aria-label="On this site">
@@ -200,6 +226,32 @@ Promise.all([
     pick(Math.max(0, Math.min(cards.length - 1, Math.round((e.clientX - (r.left + r.width / 2)) / step + mid))));
   });
   fan.addEventListener("pointerleave", () => pick(-1));
+  // Headline: "Jun plays Heroes" -> "Jun plays Jaina" -> ... through the fan's heroes and back to "Heroes",
+  // and the card of the named hero lifts a little. Stops while the mouse is on the fan, off for reduced motion.
+  const word = document.querySelector("h1 em"), first = document.querySelector("h1 span"), base = word.textContent;
+  if (show.length && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const order = [-1, ...show.map((_, i) => i)];
+    let k = 0, hovering = false;
+    fan.addEventListener("pointerenter", () => { hovering = true; cards.forEach(c => c.classList.remove("cued")); });
+    fan.addEventListener("pointerleave", () => hovering = false);
+    const next = () => {
+      if (hovering || document.hidden) return setTimeout(next, 1000);
+      // Skip a name that's too long to stay on the first line (it would push the page down), e.g. on phones
+      const fits = t => { const old = word.textContent; word.textContent = t; const ok = Math.abs(word.offsetTop - first.offsetTop) < word.offsetHeight / 2; word.textContent = old; return ok; };
+      do k = (k + 1) % order.length; while (order[k] >= 0 && !fits(name[show[order[k]]]));
+      const i = order[k];
+      word.classList.add("out");
+      setTimeout(() => {
+        word.textContent = i < 0 ? base : name[show[i]];
+        word.classList.replace("out", "in");
+        word.offsetWidth;   // let the browser place it below before it rises
+        word.classList.remove("in");
+        cards.forEach((c, n) => { c.classList.toggle("cued", n === i); if (n === i) c.style.zIndex = ++topZ; });
+      }, 300);
+      setTimeout(next, i < 0 ? 3200 : 2200);
+    };
+    setTimeout(next, 3200);
+  }
   // A click opens the picked card, even if another card's edge was under the mouse
   fan.addEventListener("click", e => {
     const on = fan.querySelector(":scope > a.on");
@@ -234,6 +286,49 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
   c.style.setProperty("--mx", e.clientX - r.left + "px");
   c.style.setProperty("--my", e.clientY - r.top + "px");
 });
+</script>
+<script>
+// What's new on YouTube and Twitch, from /api/media (src/worker.js), shown on the buttons that are already there:
+// Twitch says "Live now" while I'm live, YouTube gets a NEW tag for a fresh video, and hovering either one
+// shows a small peek (the stream right now / the latest video). Pictures and links only, so Home stays fast.
+(() => {
+  const T = window.SITE_TEXT || {};
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const ago = d => {
+    const s = (new Date(d) - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    for (const [u, n] of [["year", 31536000], ["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]])
+      if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+    return "just now";
+  };
+  // Wrap a button so a peek card can hang under it
+  const peek = (btn, html) => {
+    const pk = document.createElement("span");
+    pk.className = "pk";
+    btn.replaceWith(pk);
+    pk.append(btn);
+    pk.insertAdjacentHTML("beforeend", `<span class="peek">${html}</span>`);
+  };
+  fetch("/api/media").then(r => r.ok ? r.json() : Promise.reject()).then(m => {
+    const v = m.youtube?.videos?.[0], ch = m.twitch?.channel || "junhots_";
+    const tw = document.querySelector(".cta .btn.live"), yt = document.querySelector('.cta a[href*="youtube.com"]');
+    if (v && yt) {
+      // NEW tag for two weeks after an upload
+      if (Date.now() - new Date(v.date) < 14 * 864e5) yt.querySelector(".hb-a")?.insertAdjacentHTML("beforeend", '<span class="new">NEW</span>');
+      peek(yt, `<a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener"><span class="pic"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt=""></span>
+        <span class="t"><small>${esc(T.media_video || "Latest video")} · ${ago(v.date)}</small><b>${esc(v.title)}</b></span></a>`);
+    }
+    if (m.twitch?.live) {
+      tw.querySelector("[data-edit]").textContent = T.media_live_button || "Live now";
+      document.querySelector(".nav-live").classList.add("on");
+      document.querySelector(".nav-live").lastChild.textContent = "Live now";
+      // Twitch's own picture of the stream right now (the time in the link stops old copies)
+      peek(tw, `<a href="https://www.twitch.tv/${ch}" target="_blank" rel="noopener"><span class="pic"><img src="https://static-cdn.jtvnw.net/previews-ttv/live_user_${ch}-640x360.jpg?t=${Math.floor(Date.now() / 60000)}" alt="My stream right now"><span class="badge"><span class="dot"></span>LIVE</span></span>
+        <span class="t"><small>${esc(T.media_live || "Live now on Twitch")}</small><b>${esc(m.twitch.title || "Come say hi")}</b></span></a>`);
+    } else {
+      document.querySelectorAll(".cta .dot, .nav-live .dot").forEach(d => d.classList.add("off"));
+    }
+  }).catch(() => {});
+})();
 </script>
 </body>
 </html>
