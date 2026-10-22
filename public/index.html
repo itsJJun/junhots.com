@@ -14,6 +14,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JunHotS">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://junhots.com/">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
@@ -131,6 +133,27 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 .btn.live .dot.off { background: rgba(255, 255, 255, 0.55); }
 .nav-live.on { color: var(--text); }
 @media (hover: none) { .peek { display: none; } }
+/* My recent games: the last 10 the overlay sent, newest on the left. Hidden until there are any. */
+.games { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px 28px; margin-bottom: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.games h2 { margin: 0; font: 600 17px/1.2 var(--display); letter-spacing: -0.01em; }
+.g-rec { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.g-rec b { font: 600 13px var(--mono); }
+.g-rec .w { color: var(--good); } .g-rec .l { color: var(--bad); }
+.g-rec .streak { padding: 1px 8px; border-radius: 999px; font-size: 12px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.g-row { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px; }
+.g { position: relative; display: block; border-radius: 9px; }
+.g img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px 9px 3px 3px; background: var(--surface-2); transition: transform .15s; }
+.g::after { content: ""; display: block; height: 3px; margin-top: 3px; border-radius: 3px; background: var(--c); }
+.g.loss img { filter: saturate(.55) brightness(.8); }
+.g:hover img, .g:focus-visible img { transform: translateY(-2px); filter: none; }
+.g .tip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); width: max-content; max-width: 220px; padding: 7px 10px; border-radius: 8px; border: 1px solid #3d3531; background: var(--surface); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55); font-size: 12px; line-height: 1.4; color: var(--muted); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s, transform .15s, visibility 0s .15s; }
+.g .tip b { display: block; color: var(--text); font-weight: 600; font-size: 13px; }
+.g .tip i { font-style: normal; font-weight: 600; color: var(--c); }
+.g:hover .tip, .g:focus-visible .tip { opacity: 1; visibility: visible; transform: translateX(-50%); transition: opacity .15s, transform .15s; }
+.g-row .g:first-child .tip { left: 0; transform: translateY(4px); } .g-row .g:first-child:hover .tip { transform: none; }
+.g-row .g:last-child .tip { left: auto; right: 0; transform: translateY(4px); } .g-row .g:last-child:hover .tip { transform: none; }
+@media (max-width: 720px) { .games { grid-template-columns: 1fr; } .g-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .g img, .g .tip { transition: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -139,7 +162,7 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 <div class="wrap">
   <nav>
     <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/" aria-current="page">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <div class="tabs"><a href="/" aria-current="page">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
     <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
 
@@ -160,6 +183,8 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
   </header>
 
 
+
+  <section class="games" id="games" aria-label="My recent games" hidden></section>
 
   <section class="cards" aria-label="On this site">
     <a class="card c-tier" href="/tierlist/"><div class="pic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p></div></a>
@@ -286,6 +311,32 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
   c.style.setProperty("--mx", e.clientX - r.left + "px");
   c.style.setProperty("--my", e.clientY - r.top + "px");
 });
+</script>
+<script>
+// My recent games, from /api/games (the overlay sends each one when a match ends). Win rate and streak from the last 10.
+(() => {
+  const T = window.SITE_TEXT || {};
+  const ago = d => {
+    const s = (d - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    for (const [u, n] of [["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]])
+      if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+    return "just now";
+  };
+  Promise.all([fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(([d, heroes]) => {
+    const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
+    const last = (d.games || []).filter(g => name[g.hero]).slice(0, 10);
+    if (!last.length) return;
+    const w = last.filter(g => g.result === "win").length, l = last.length - w;
+    let n = 0;
+    while (n < last.length && last[n].result === last[0].result) n++;
+    const streak = n >= 2 ? `<span class="streak" style="--c:var(--${last[0].result === "win" ? "good" : "bad"})">${n} ${last[0].result === "win" ? "win" : "loss"} streak</span>` : "";
+    const box = document.getElementById("games");
+    box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}</div></div>
+      <div class="g-row">${last.map(g => `<a class="g ${g.result}" href="/builds/${g.hero}" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
+        <span class="tip"><b>${name[g.hero]}</b>${g.map ? g.map + "<br>" : ""}<i>${g.result === "win" ? "Win" : "Loss"}</i> · ${ago(g.at)}</span></a>`).join("")}</div>`;
+    box.hidden = false;
+  }).catch(() => {});
+})();
 </script>
 <script>
 // What's new on YouTube and Twitch, from /api/media (src/worker.js), shown on the buttons that are already there:

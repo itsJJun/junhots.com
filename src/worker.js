@@ -5,14 +5,22 @@
 //   POST /api/login   -> Jun only: check the password
 //   GET  /api/tierlist -> everyone: Jun's tier list as the overlay last sent it (404 until it has)
 //   PUT  /api/tierlist -> Jun only (password): the overlay sends tierlist.json here when Jun saves
+//                         (the server adds "updated" and "changes": which heroes moved tier in the last 2 weeks)
+//   GET  /api/games    -> everyone: my recent games (hero, map, win/loss), newest first
+//   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
-// It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture.
+// It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
+// and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
 const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates"];
+const GAMES_KEY = "games";
+const MAX_GAMES = 500;
+const DAY = 864e5;
+const SITE = "https://junhots.com";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -66,6 +74,7 @@ async function heroPage(id, url, env) {
     .on('meta[property="og:description"]', set("content", desc))
     .on('meta[property="og:url"]', set("content", url.origin + url.pathname + url.search))
     .on('meta[property="og:image"]', set("content", `${url.origin}/img/og/${id}.jpg`))
+    .on('link[rel="canonical"]', set("href", `${SITE}/builds/${id}`))
     .transform(page);
 }
 
@@ -76,6 +85,47 @@ function cleanTierlist(data) {
   const out = {};
   for (const k of TIER_FIELDS) if (k in data) out[k] = data[k];
   return out;
+}
+
+// Which heroes changed tier, so the Tier list page can show "Chen A → S" for a while.
+// Kept for 2 weeks; a hero that moves back to where it started drops off. "updated" only moves when a tier really changed
+// (the overlay uploads on every Save, even when nothing moved).
+function withChanges(next, old, now = Date.now()) {
+  if (!old) return { ...next, updated: now, changes: {} };
+  const changes = {};
+  for (const [h, c] of Object.entries(old.changes || {})) if (now - c.at < 14 * DAY) changes[h] = c;
+  for (const h of new Set([...Object.keys(old.overall || {}), ...Object.keys(next.overall)])) {
+    const before = old.overall?.[h] || "", after = next.overall[h] || "";
+    if (before === after) continue;
+    const from = h in changes ? changes[h].from : before;
+    if (from === after) delete changes[h];
+    else changes[h] = { from, to: after, at: now };
+  }
+  const moved = JSON.stringify([old.overall, old.maps, old.tiers]) !== JSON.stringify([next.overall, next.maps, next.tiers]);
+  return { ...next, updated: moved || !old.updated ? now : old.updated, changes };
+}
+
+// One finished game from the overlay. Only what the site shows: hero, map, win or loss, when.
+function cleanGame(g) {
+  if (!g || typeof g !== "object") throw new Error("bad game");
+  const hero = String(g.hero || ""), result = String(g.result || "");
+  if (!/^[a-z0-9]{1,30}$/.test(hero)) throw new Error("bad hero");
+  if (result !== "win" && result !== "loss") throw new Error("bad result");
+  const at = Number(g.at) || Date.now();
+  return {
+    id: String(g.id || at).slice(0, 40),
+    hero, result,
+    map: String(g.map || "").slice(0, 40),
+    at: Math.min(at, Date.now()),
+  };
+}
+
+// Every page and every hero's builds page, for search engines.
+async function sitemap(url, env) {
+  const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
+  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/tierlist-maker/", "/overlay/", ...heroes.map(h => `/builds/${h[0]}`)];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}\n</urlset>\n`;
+  return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
 
 // Home page: latest YouTube uploads (from the channel's public RSS feed) and whether the Twitch channel is live.
@@ -169,11 +219,33 @@ export default {
         if (text.length > MAX_BYTES) return json({ error: "too big" }, 413);
         let data;
         try { data = cleanTierlist(JSON.parse(text)); } catch (e) { return json({ error: e.message }, 400); }
+        let old = null;
+        try { old = JSON.parse((await env.BUILDS.get(TIER_KEY)) || "null"); } catch {}
+        data = withChanges(data, old);
         await env.BUILDS.put(TIER_KEY, JSON.stringify(data));
         return json({ ok: true, heroes: Object.keys(data.overall).length });
       }
       return json({ error: "method not allowed" }, 405);
     }
+
+    if (url.pathname === "/api/games") {
+      if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
+      const games = () => env.BUILDS.get(GAMES_KEY).then(t => JSON.parse(t || "[]")).catch(() => []);
+      if (request.method === "GET") return json({ games: await games() });
+      if (request.method === "POST") {
+        if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
+        let game;
+        try { game = cleanGame(JSON.parse(await request.text())); } catch (e) { return json({ error: e.message }, 400); }
+        const list = (await games()).filter(g => g.id !== game.id);   // sending the same game twice keeps one
+        list.push(game);
+        list.sort((a, b) => b.at - a.at);
+        await env.BUILDS.put(GAMES_KEY, JSON.stringify(list.slice(0, MAX_GAMES)));
+        return json({ ok: true, games: Math.min(list.length, MAX_GAMES) });
+      }
+      return json({ error: "method not allowed" }, 405);
+    }
+
+    if (url.pathname === "/sitemap.xml") return sitemap(url, env);
 
     if (url.pathname === "/api/login" && request.method === "POST") {
       const ok = await passwordOk(request, env);

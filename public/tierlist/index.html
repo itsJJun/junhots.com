@@ -14,6 +14,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JunHotS">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://junhots.com/tierlist/">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
@@ -70,6 +72,20 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
 .none { color: var(--muted); font-size: 13px; }
 .updated { margin-top: 12px; font-size: 12px; color: var(--muted); }
+/* What moved: "Updated Oct 21" and the heroes that changed tier this week, plus a small arrow on their portraits */
+.moved { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: -2px 0 14px; font-size: 13px; color: var(--muted); }
+.moved:empty { display: none; }
+.moved .when { margin-right: 4px; }
+.moved .when b { color: var(--text); font-weight: 500; }
+.moved .chip { gap: 6px; padding-right: 9px; }
+.moved .chip .to { font: 500 12px var(--mono); color: var(--muted); }
+.moved .chip .to b { font-weight: 600; }
+.up { color: var(--good); } .down { color: var(--bad); }
+.port .mv { position: absolute; left: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
+.port .mv .ar { color: #12100f; }
+.hero-card .port { overflow: visible; }
+.port .mv svg, .chip .ar, .stat .ar { width: 9px; height: 9px; }
+.stat .mvd b { font: inherit; }
 @media (max-width: 640px) {
   .detail { position: fixed; left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-height: 80vh; overflow-y: auto; border-radius: 14px 14px 0 0; padding-bottom: max(18px, env(safe-area-inset-bottom)); --dy: 24px; }
   .detail .arrow { display: none; }
@@ -89,7 +105,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 <div class="wrap">
   <nav>
     <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/">Home</a><a href="/tierlist/" aria-current="page">Tier list</a><a href="/builds/">Builds</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/" aria-current="page">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
     <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
 
@@ -104,6 +120,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
     </div>
   </header>
   <p class="hint">Click a hero to see counters, synergy and win rate.</p>
+  <div class="moved" id="moved"></div>
   <div class="tiers" id="tiers"></div>
   <div class="updated" id="updated"></div>
 
@@ -131,6 +148,25 @@ const wrText = v => v == null ? "" : v.toFixed(1) + "%";
 const beats = id => (TL.counters || {})[id] || [];
 const beatenBy = id => Object.keys(TL.counters || {}).filter(a => TL.counters[a].includes(id));
 const goodWith = id => { const s = TL.synergy || {}; return [...new Set([...(s[id] || []), ...Object.keys(s).filter(a => s[a].includes(id))])]; };
+// Heroes that changed tier in the last 7 days (the server keeps them in "changes", see src/worker.js)
+const WEEK = 7 * 864e5;
+const tierIdx = id => TL.tiers.findIndex(t => t.id === id);
+const tierName = id => TL.tiers.find(t => t.id === id)?.name ?? "";
+function moveOf(id) {
+  const c = TL.changes?.[id];
+  if (!c || Date.now() - c.at > WEEK) return null;
+  const a = tierIdx(c.from), b = tierIdx(c.to);
+  return { ...c, up: b >= 0 && (a < 0 || b < a) };
+}
+const arrow = up => `<svg class="ar ${up ? "up" : "down"}" viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
+const fmtDay = t => new Date(t).toLocaleDateString("en", { month: "short", day: "numeric" });
+function drawMoved() {
+  const box = document.getElementById("moved");
+  const list = Object.keys(TL.changes || {}).filter(id => byId[id] && moveOf(id)).sort((a, b) => TL.changes[b].at - TL.changes[a].at);
+  const when = TL.updated ? `<span class="when">Updated <b>${fmtDay(TL.updated)}</b>${list.length ? " · moved this week:" : ""}</span>` : "";
+  box.innerHTML = when + list.map(id => { const m = moveOf(id);
+    return `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}<span class="to">${m.from ? esc(tierName(m.from)) : "new"} ${arrow(m.up)} <b class="${m.up ? "up" : "down"}">${m.to ? esc(tierName(m.to)) : "out"}</b></span></button>`; }).join("");
+}
 function tierOf(id) {
   const m = map !== "Overall" ? (TL.maps || {})[map] : null;
   if (m && id in m) return m[id] || null;   // "" = not ranked on this map
@@ -149,7 +185,7 @@ function renderDetail() {
   box.innerHTML = `<span class="arrow"></span><button class="x" aria-label="Close">×</button>
     <div class="who"><img src="${img(selected)}" alt=""><div class="name">${esc(h.name)}</div>
       <span class="pill" style="--c:${t ? PALETTE[t.color] : "var(--line)"}">${t ? esc(t.name) + " tier" : "Not ranked"} · ${roleIcon(h.grole)} ${esc(h.grole)}</span>
-      <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}</div></div>
+      <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}${(m => m ? `<div class="mvd ${m.up ? "up" : "down"}">${arrow(m.up)} ${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New on the list"} · ${fmtDay(m.at)}</div>` : "")(moveOf(selected))}</div></div>
     <div class="rel">
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
       <div><h3>Weak against</h3>${chips(beatenBy(selected))}</div>
@@ -182,7 +218,7 @@ function render() {
     const list = HEROES.filter(h => tierOf(h.id) === t.id && (role === "All" || h.grole === role))
       .sort((a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0));
     return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
-      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
+      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${(m => m && map === "Overall" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
     }</div></div>`;
   }).join("");
   renderDetail();
@@ -235,6 +271,7 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).th
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;
+  drawMoved();
   const label = TL.winrates?.label;
   document.getElementById("updated").textContent = label ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}` : "";
   render();

@@ -122,7 +122,7 @@
   live.before(btn);
 
   const PAGES = [
-    ["Home", "/", "Start page"], ["Tier list", "/tierlist/", "Jun's ranked tier list"], ["Builds", "/builds/", "Talent builds for every hero"],
+    ["Home", "/", "Start page"], ["Tier list", "/tierlist/", "Jun's ranked tier list"], ["Builds", "/builds/", "Talent builds for every hero"], ["Draft helper", "/draft/", "Best picks against the enemy team"],
     ["Make a tier list", "/tierlist-maker/", "Rank every hero and share it"], ["Make a build", "/builds/?make", "Pick a hero, make a talent build"], ["Overlay", "/overlay/", "The stream overlay"],
   ];
   const pageIc = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';

@@ -14,6 +14,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JunHotS">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://junhots.com/builds/">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
@@ -261,7 +263,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-to
 <div class="wrap">
   <nav>
     <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/" aria-current="page">Builds</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/" aria-current="page">Builds</a><a href="/draft/">Draft</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
     <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
 
@@ -378,13 +380,17 @@ async function openHero(id, state) {
 // Tier, win rate, counters and synergy from Jun's tier list (same data as the Tier list page). Loads after the page, never holds it up.
 let TL = null;
 const tlReady = (window.loadTierlist ? loadTierlist() : Promise.reject()).then(d => { TL = d; if (hero) drawMatchups(); }).catch(() => {});
+// My own record on this hero, from the games the overlay sends (/api/games). Shown next to the tier once I've played it.
+let GAMES = null;
+fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()).then(d => { GAMES = d.games || []; if (hero) drawMatchups(); }).catch(() => {});
 function drawMatchups() {
   const box = document.getElementById("mu"), tx = document.getElementById("tierx");
   if (!box || !TL || !hero) return;
   const id = hero.id, c = TL.counters || {}, sy = TL.synergy || {};
   const t = TL.tiers?.find(x => x.id === TL.overall?.[id]), wr = TL.winrates?.rates?.[id]?.wr;
   tx.innerHTML = (t ? `<span class="tierx"><b>${esc(t.name)}</b> tier</span>` : "")
-    + (wr != null ? `<span class="tierx wrx">Win rate <b style="color:${wr >= 51 ? "var(--good)" : wr < 49 ? "var(--bad)" : "var(--text)"}">${wr.toFixed(1)}%</b></span>` : "");
+    + (wr != null ? `<span class="tierx wrx">Win rate <b style="color:${wr >= 51 ? "var(--good)" : wr < 49 ? "var(--bad)" : "var(--text)"}">${wr.toFixed(1)}%</b></span>` : "")
+    + ((mine => mine.length ? `<span class="tierx wrx" title="My games on ${esc(hero.name)}, sent by the stream overlay">My games <b style="color:var(--good)">${mine.filter(g => g.result === "win").length}</b>–<b style="color:var(--bad)">${mine.filter(g => g.result !== "win").length}</b></span>` : "")((GAMES || []).filter(g => g.hero === id)));
   const groups = [
     ["Strong against", "var(--good)", c[id] || []],
     ["Weak against", "var(--bad)", Object.keys(c).filter(a => c[a].includes(id))],

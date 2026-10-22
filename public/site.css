@@ -17,6 +17,16 @@
   --display: "Sora", "Geist", "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+html { background: var(--bg); }
+/* Going from page to page: the new page fades in over the old one (no white flash), the top bar stays still.
+   Browsers without this just change pages the normal way. */
+@view-transition { navigation: auto; }
+nav { view-transition-name: topbar; }
+::view-transition-old(root) { animation: vt-out .16s ease-in both; }
+::view-transition-new(root) { animation: vt-in .24s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); background-image: radial-gradient(900px 380px at 50% -120px, rgba(242, 106, 75, 0.10), transparent 70%); background-repeat: no-repeat; color: var(--text); font: 15px/1.6 var(--sans); padding-inline: 16px; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
