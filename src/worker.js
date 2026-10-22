@@ -38,7 +38,7 @@ function clean(data) {
       // Situational talents per level as a string of talent numbers ("23" = #2 and #3), never the main pick
       alt: Array.from({ length: 7 }, (_, i) => { const p = String(parseInt(b.picks?.[i], 10) || 0); return p === "0" ? "" : [...new Set(String(b.alt?.[i] ?? "").replace(/[^1-9]/g, ""))].filter(a => a !== p).sort().join(""); }),
       good: (Array.isArray(b.good) ? b.good : []).filter(g => /^[a-z0-9]{1,30}$/.test(g)).slice(0, 12),
-      note: String(b.note || "").slice(0, 300),
+      note: String(b.note || "").replace(/\r\n?/g, "\n").slice(0, 1500),
     }));
     if (builds.length) out[hero] = builds;
   }

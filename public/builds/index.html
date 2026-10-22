@@ -111,7 +111,16 @@ h2.sec > span { white-space: nowrap; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
 .chip img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
 .chip button { all: unset; cursor: pointer; color: var(--muted); padding-left: 2px; }
-.note { font-size: 13px; color: var(--muted); margin: 0; }
+.note { font-size: 13px; line-height: 1.55; color: #cdc6c1; margin: 0; white-space: pre-line; }
+/* Level notes: "Lvl 13: ..." lines of a build's note, shown per level and as a small coral dot on that level's icon */
+.lnotes { display: grid; gap: 6px; }
+.lnotes .lab { font-size: 12px; color: var(--muted); }
+.lnotes .lab::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); margin-right: 7px; vertical-align: 0; }
+.lnrow { display: grid; grid-template-columns: 48px 1fr; align-items: baseline; font-size: 13px; line-height: 1.5; color: #cdc6c1; white-space: pre-line; }
+.lnrow .sl { font: 500 11px var(--mono); color: var(--muted); }
+.slot .ic .ndot { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--surface); }
+.tip .tnote { margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid var(--brand); font-size: 12.5px; line-height: 1.5; color: #cdc6c1; white-space: pre-line; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.tip .tnote b { color: var(--brand); font-weight: 600; }
 .none { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; }
 
 #tiers { scroll-margin-top: 60px; }
@@ -185,7 +194,14 @@ h2.sec > span { white-space: nowrap; }
 .junlogin button { all: unset; cursor: pointer; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 .junlogin button:hover { color: var(--text); }
 .rowx.admin { padding-top: 10px; border-top: 1px dashed #3d3531; }
-.rowx.admin input { flex: 1; min-width: 180px; height: 34px; }
+.rowx.admin { align-items: flex-start; }
+.rowx.admin .notebox { flex: 1; min-width: 220px; display: grid; gap: 6px; }
+.rowx.admin textarea { box-sizing: border-box; width: 100%; min-height: 60px; max-height: 180px; resize: vertical; font: 400 13px/1.5 var(--sans); color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+.rowx.admin textarea:focus { outline: none; border-color: var(--brand); }
+.lvlbtns { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; font-size: 11px; color: var(--muted); }
+.lvlbtns button { all: unset; cursor: pointer; font: 500 11px/20px var(--mono); padding: 0 7px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); }
+.lvlbtns button:hover { color: var(--text); border-color: var(--brand); }
+.lvlbtns button.has { color: #1f0b05; background: var(--brand); border-color: var(--brand); }
 .btn2.save { background: var(--brand); border-color: var(--brand); color: #1f0b05; font-weight: 600; }
 dialog { width: min(400px, calc(100% - 32px)); color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
 dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
@@ -331,12 +347,12 @@ function buildCard(b, key) {
     : ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : "";
   return `
       <div class="bcard" data-b="${key}">
-        <div class="bh"><b>${esc(b.name)}</b><span class="by">${kind === "you" ? "by you" : "by Jun"}</span><span class="showing">On the talents below</span><button class="btn2 primary" data-code="${key}">Copy build code</button>${btns}</div>
-        <div class="strip">${strip(b.picks, true, b.alt)}</div>
+        <div class="bh"><b>${esc(b.name)}</b>${kind === "you" ? `<span class="by">by you</span>` : ""}<span class="showing">On the talents below</span><button class="btn2 primary" data-code="${key}">Copy build code</button>${btns}</div>
+        <div class="strip">${strip(b.picks, true, b.alt, splitNote(b.note).lv)}</div>
         <code class="code">${esc(code(b.picks))}</code>
         ${sitRow(b.alt)}
         ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
-        ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
+        ${noteHtml(b.note)}
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
 }
@@ -344,21 +360,43 @@ const buildOf = key => { const [kind, i] = key.split("-"); return (kind === "you
 function card(t, attrs, tag = "button", no) {
   return `<${tag} class="tal" ${attrs}><span class="ic"><img src="${icon(t.icon)}" alt="" loading="lazy"></span><div class="nm">${no ? `<span class="tn">#${no}</span>` : ""}${esc(t.name)}<span class="key">${KEY[t.key] || t.key}</span></div><div class="meta">${esc(t.meta || "")}</div><div class="tx">${t.text}</div></${tag}>`;
 }
-function strip(picks, jump, alt = []) {
+function strip(picks, jump, alt = [], lv = {}) {
   return LEVELS.map((L, r) => {
     const t = picks[r] ? hero.talents[L]?.[picks[r] - 1] : null;
     const nums = t ? alts(alt[r]).filter(a => hero.talents[L]?.[a - 1]) : [], as = nums.map(a => hero.talents[L][a - 1]);
     const img = t ? `<img src="${icon(t.icon)}" alt="${esc(t.name)}">` : `<span class="empty"></span>`;
     // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
     const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" data-tip="t-${r}-${nums[0]}"></span>`
-      : as.length ? `<span class="more" aria-label="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "");
-    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
+      : as.length ? `<span class="more" aria-label="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "") + (t && lv[r] ? `<span class="ndot" aria-label="Note"></span>` : "");
+    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}${lv[r] ? ` data-note="${esc(lv[r])}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
 // "Situational" row under a build: which talents to swap in, tap one to see it
 function sitRow(alt = []) {
   const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
   return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}" data-tip="t-${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
+}
+// A build's note is one text. Lines that start with a level ("Lvl 13: ...", "lv13 - ...", "13: ...") are notes for that level;
+// every other line is the general comment, line breaks kept. Old notes have no level lines, so they show exactly as before.
+const LVRE = /^\s*(?:(?:lvl|lv|level|l)\s*\.?\s*)?(1|4|7|10|13|16|20)\s*(?:[:.)\-–—]\s*|\s+(?=\D))(.*)$/i;
+// Plain "13: ..." counts too, but only with a colon, so a sentence like "4 stacks is enough" stays general.
+function lineLevel(line) {
+  const m = line.match(LVRE);
+  return m && m[2].trim() && (/^\s*l/i.test(line) || /^\s*\d+\s*:/.test(line)) ? m : null;
+}
+function splitNote(note) {
+  const gen = [], lv = {};
+  String(note || "").split(/\r?\n/).forEach(line => {
+    const m = lineLevel(line);
+    if (m) { const r = LEVELS.indexOf(m[1]); lv[r] = (lv[r] ? lv[r] + "\n" : "") + m[2].trim(); }
+    else gen.push(line);
+  });
+  return { gen: gen.join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n"), lv };
+}
+function noteHtml(note) {
+  const { gen, lv } = splitNote(note), rows = LEVELS.map((L, r) => [L, lv[r]]).filter(x => x[1]);
+  return (gen ? `<p class="note">${esc(gen)}</p>` : "")
+    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span>${rows.map(([L, t]) => `<div class="lnrow"><small class="sl">Lvl ${L}</small><span>${esc(t)}</span></div>`).join("")}</div>` : "");
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
 const noAlt = () => ["", "", "", "", "", "", ""];
@@ -387,7 +425,10 @@ function drawMine() {
       <datalist id="herolist">${HEROES.map(h => `<option value="${esc(h.name)}">`).join("")}</datalist>
     </div>
     ${ADMIN && n ? `<div class="rowx admin">
-      <input type="text" id="bnote" placeholder="Short note (optional)" value="${esc(mine.note || "")}" maxlength="300" aria-label="Note">
+      <div class="notebox">
+        <textarea id="bnote" rows="3" maxlength="1500" aria-label="Note" placeholder="Comment (optional). Enter makes a new line.&#10;Start a line with a level for a level note, like:&#10;Lvl 13: Dragon Scales if they have lots of stuns">${esc(mine.note || "")}</textarea>
+        <div class="lvlbtns">Add a level note:${LEVELS.map((L, r) => `<button type="button" data-lvnote="${L}"${splitNote(mine.note).lv[r] ? ' class="has"' : ""}>${L}</button>`).join("")}</div>
+      </div>
       <button class="btn2 save" id="savejun">${mine.editing != null ? "Update my build" : "Save to Jun's builds"}</button>
       ${mine.editing != null ? `<button class="btn2" id="canceledit">Cancel edit</button>` : ""}
     </div>` : ""}`;
@@ -419,7 +460,20 @@ function drawMine() {
     toast(at >= 0 ? "Updated in Your saved builds." : "Saved. Find it under Your saved builds.");
   };
   if (ADMIN && n) {
-    document.getElementById("bnote").oninput = e => { mine.note = e.target.value; };
+    const nb = document.getElementById("bnote"), grow = () => { nb.style.height = "auto"; nb.style.height = nb.scrollHeight + 2 + "px"; };
+    const marks = () => app.querySelectorAll("[data-lvnote]").forEach(b => b.classList.toggle("has", !!splitNote(mine.note).lv[LEVELS.indexOf(b.dataset.lvnote)]));
+    nb.oninput = () => { mine.note = nb.value; grow(); marks(); }; grow();
+    // Level buttons: jump to that level's line, or add "Lvl 13: " on a new line, in level order
+    app.querySelectorAll("[data-lvnote]").forEach(b => b.onclick = () => {
+      const L = b.dataset.lvnote, lines = nb.value.split("\n"), lvOf = l => { const m = l.match(LVRE); return m && (/^\s*l/i.test(l) || /^\s*\d+\s*:/.test(l)) ? +m[1] : null; };
+      let at = lines.findIndex(l => lvOf(l) === +L), pos;
+      if (at < 0) {
+        const pre = `Lvl ${L}: `; at = lines.findIndex(l => lvOf(l) > +L); if (at < 0) at = lines.length;
+        if (at === lines.length && lines.length && lines[lines.length - 1] === "") at--, lines[at] = pre; else lines.splice(at, 0, pre);
+      }
+      nb.value = lines.join("\n"); pos = lines.slice(0, at + 1).join("\n").length;
+      nb.focus(); nb.setSelectionRange(pos, pos); nb.oninput();
+    });
     document.getElementById("savejun").onclick = saveJun;
     document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], note: "" }; drawMine(); });
   }
@@ -466,7 +520,8 @@ app.addEventListener("mouseover", e => {
   const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
-  tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "");
+  tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "")
+    + (el.dataset.note ? `<div class="tnote"><b>Jun's note:</b> ${esc(el.dataset.note)}</div>` : "");
   tip.on = el; tip.hidden = false;
   const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
   tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px";
