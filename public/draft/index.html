@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/map-picker.css">
 <style>
 .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .seg { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
@@ -29,13 +30,11 @@
 .tab[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
 .tab[aria-pressed="true"] .ri { color: #1f0b05 !important; }
 .tab .ri { width: 14px; height: 14px; }
-select.tab { appearance: none; color: var(--text); background: var(--surface-2); text-align: center; text-align-last: center; }
-select.tab option { background: var(--surface); color: var(--text); text-align: left; }
 .reset { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); font: 500 13px var(--sans); color: var(--text); transition: border-color .15s, background .15s; }
 .reset svg { width: 14px; height: 14px; color: var(--muted); transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
 .reset:hover { border-color: var(--brand); background: rgba(242, 106, 75, 0.08); }
 .reset:hover svg { color: var(--brand); transform: rotate(-180deg); }
-.controls select.tab { height: 36px; border: 1px solid var(--line); border-radius: 9px; }
+.controls .mp-btn { height: 36px; border-radius: 9px; }
 .kind { padding: 2px; }
 .kind .tab { font: 600 14px/1 var(--display); height: 30px; }
 .kind .tab[aria-pressed="false"] { color: var(--muted); }
@@ -142,7 +141,7 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
       <p class="sub" data-edit="draft_text">Add the bans and picks so far and get the best picks for your team, from my tier list, counters and win rates.</p>
     </div>
     <div class="controls">
-      <select class="tab" id="map" aria-label="Map"></select>
+      <span id="map"></span>
       <button class="reset" id="clear" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reset</button>
     </div>
   </header>
@@ -177,11 +176,11 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script src="/map-picker.js"></script>
 <script>
 // Draft helper: an edge between the two teams from my tier list, win rates, counters, synergy and team comp,
 // and the picks and bans that move it most. The draft lives in the link (?m=map&e=enemies&a=allies&eb=&ab=),
 // so a draft can be shared.
-const MAPS = ["Alterac Pass", "Battlefield of Eternity", "Braxis Holdout", "Cursed Hollow", "Dragon Shire", "Garden of Terror", "Hanamura Temple", "Infernal Shrines", "Sky Temple", "Tomb of the Spider Queen", "Towers of Doom", "Volskaya Foundry"];
 const img = id => `/img/heroes/${id}.webp`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
@@ -370,11 +369,8 @@ document.addEventListener("click", e => {
 });
 document.getElementById("clear").addEventListener("click", () => { for (const k in SIZE) draft[k] = []; draw(); });
 
-const sel = document.getElementById("map");
-sel.innerHTML = ["Overall", ...MAPS].map(m => `<option value="${m}">${m === "Overall" ? "Any map" : m}</option>`).join("");
 if (!MAPS.includes(draft.map)) draft.map = "Overall";
-sel.value = draft.map;
-sel.addEventListener("change", () => { draft.map = sel.value; draw(); });
+mapPicker(document.getElementById("map"), { value: draft.map, overall: "Any map", onChange: m => { draft.map = m; draw(); } });
 document.getElementById("roles").innerHTML = ["All", ...ROLES].map(r => `<button class="tab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${r === "All" ? "" : roleIcon(r)}${r === "All" ? "All" : ROLE_SHORT(r)}</button>`).join("");
 document.getElementById("roles").addEventListener("click", e => {
   const b = e.target.closest("[data-role]");

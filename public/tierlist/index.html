@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=swap">
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/map-picker.css">
 <style>
 .hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
 .controls { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
@@ -28,8 +29,6 @@
 .tab:hover { color: var(--text); }
 .tab[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
 .tab[aria-pressed="true"] .ri { color: #1f0b05 !important; }
-select.tab { appearance: none; color: var(--text); background: var(--surface-2); text-align: center; text-align-last: center; padding-inline: 12px; }
-select.tab option { background: var(--surface); color: var(--text); text-align: left; }
 
 .tiers { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .row { display: grid; grid-template-columns: 56px 1fr; min-height: 76px; }
@@ -118,7 +117,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
     </div>
     <div class="controls" role="group" aria-label="Filter">
       <button class="tab" data-role="All" aria-pressed="true">All</button><span id="roletabs" style="display:contents"></span>
-      <select class="tab" id="map" aria-label="Map"></select>
+      <span id="map"></span>
     </div>
   </header>
   <p class="hint">Click a hero to see counters, synergy and win rate.</p>
@@ -135,6 +134,7 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script src="/map-picker.js"></script>
 
 <div class="scrim" id="scrim" hidden></div>
 <div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
@@ -247,7 +247,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) 
 function showHash() {
   const id = location.hash.slice(1);
   if (!byId[id]) return;
-  if (!tierOf(id)) { map = "Overall"; document.getElementById("map").value = map; }
+  if (!tierOf(id)) { map = "Overall"; picker.set(map); }
   if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
   selected = id;
   render();
@@ -264,10 +264,7 @@ document.querySelectorAll("button.tab[data-role]").forEach(b => b.addEventListen
   document.querySelectorAll("button.tab[data-role]").forEach(x => x.setAttribute("aria-pressed", x === b));
   render();
 }));
-const MAPS = ["Alterac Pass", "Battlefield of Eternity", "Braxis Holdout", "Cursed Hollow", "Dragon Shire", "Garden of Terror", "Hanamura Temple", "Infernal Shrines", "Sky Temple", "Tomb of the Spider Queen", "Towers of Doom", "Volskaya Foundry"];
-const sel = document.getElementById("map");
-sel.innerHTML = ["Overall", ...MAPS].map(m => `<option>${m}</option>`).join("");
-sel.addEventListener("change", () => { map = sel.value; render(); });
+const picker = mapPicker(document.getElementById("map"), { onChange: m => { map = m; render(); } });
 
 Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
