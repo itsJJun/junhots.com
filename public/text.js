@@ -13,7 +13,7 @@ window.SITE_TEXT = {
   card_tierlist_title: "Tier list",
   card_tierlist_text: "My ranked tier list with counters, synergy and win rates for every hero.",
   card_maker_title: "Make your own",
-  card_maker_text: "Drag heroes into your own tiers and share it as a link or a picture.",
+  card_maker_text: "Your own tier list or talent build, ready to share.",
   card_overlay_title: "Stream overlay",
   card_overlay_text: "Live talents, rank, win streak and a draft banner for your stream.",
   card_builds_title: "Builds",
