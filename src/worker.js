@@ -106,24 +106,46 @@ function withChanges(next, old, now = Date.now()) {
 }
 
 // One finished game from the overlay. Only what the site shows: hero, map, win or loss, when.
+const HERO_ID = /^[a-z0-9]{1,30}$/;
+const count = (v, max) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n > 0 ? Math.min(n, max) : 0; };
+const heroIds = (v, max) => Array.isArray(v) ? [...new Set(v.map(String).filter(h => HERO_ID.test(h)))].slice(0, max) : [];
+
+// One game from the overlay. Hero, map and result always; teams, bans, length, levels and my score line
+// (k/d/a, hero damage, siege, healing, damage taken, xp, talent code, awards) when the replay had them.
 function cleanGame(g) {
   if (!g || typeof g !== "object") throw new Error("bad game");
   const hero = String(g.hero || ""), result = String(g.result || "");
-  if (!/^[a-z0-9]{1,30}$/.test(hero)) throw new Error("bad hero");
+  if (!HERO_ID.test(hero)) throw new Error("bad hero");
   if (result !== "win" && result !== "loss") throw new Error("bad result");
   const at = Number(g.at) || Date.now();
-  return {
+  const game = {
     id: String(g.id || at).slice(0, 40),
     hero, result,
     map: String(g.map || "").slice(0, 40),
     at: Math.min(at, Date.now()),
   };
+  for (const [k, max] of [["ally", 5], ["enemy", 5], ["aban", 3], ["eban", 3]]) {
+    const list = heroIds(g[k], max);
+    if (list.length) game[k] = list;
+  }
+  if (count(g.len, 7200)) game.len = count(g.len, 7200);
+  if (Array.isArray(g.lvl) && g.lvl.length === 2 && g.lvl.every(l => count(l, 30))) game.lvl = g.lvl.map(l => count(l, 30));
+  if (g.me && typeof g.me === "object") {
+    const me = {};
+    for (const k of ["k", "d", "a"]) me[k] = count(g.me[k], 999);
+    for (const k of ["hd", "siege", "heal", "taken", "xp"]) me[k] = count(g.me[k], 10000000);
+    if (/^[0-9]{1,7}$/.test(String(g.me.t || ""))) me.t = String(g.me.t);
+    const aw = Array.isArray(g.me.aw) ? g.me.aw.map(String).filter(a => /^[A-Za-z0-9]{1,40}$/.test(a)).slice(0, 3) : [];
+    if (aw.length) me.aw = aw;
+    game.me = me;
+  }
+  return game;
 }
 
 // Every page and every hero's builds page, for search engines.
 async function sitemap(url, env) {
   const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
-  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/tierlist-maker/", "/overlay/", ...heroes.map(h => `/builds/${h[0]}`)];
+  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/tierlist-maker/", "/overlay/", ...heroes.map(h => `/builds/${h[0]}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}\n</urlset>\n`;
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }

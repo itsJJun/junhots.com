@@ -177,6 +177,7 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script src="/map-picker.js"></script>
+<script src="/edge.js"></script>
 <script>
 // Draft helper: an edge between the two teams from my tier list, win rates, counters, synergy and team comp,
 // and the picks and bans that move it most. The draft lives in the link (?m=map&e=enemies&a=allies&eb=&ab=),
@@ -201,78 +202,19 @@ function save() {
   history.replaceState(null, "", location.pathname + (p.size ? "?" + p.toString().replace(/%2C/g, ",") : ""));
 }
 
-// ---------- The model ----------
-// Every hero gets a value, and every team a score; the edge is how far apart the two scores are.
-//   hero value  = tier (per map: top tier +2 ... bottom tier -2, unranked 0)
-//               + win rate, pulled toward 50% when it's from few games (a 52% from 300 games counts less than from 30,000)
-//   team score  = its heroes' values
-//               + 1 for each enemy one of its heroes counters, + 0.6 for each "good with" pair
-//               - team comp: no healer, no tank, no ranged damage, doubled tanks/healers (only once the team is mostly picked)
-//   edge        = 100 / (1 + e^(-(your score - their score) / 4))
+// ---------- The model (public/edge.js) ----------
 // A pick's advantage is how much the edge moves if you take that hero; a ban's is how much it would move toward
-// the enemy if they took it. An empty slot counts as a typical good pick (the average of the 20 best heroes on
-// this map), so a team that has picked more heroes doesn't look stronger just for that.
-const W = { counter: 1, synergy: 0.6, wr: 0.35, shrink: 2000, noHealer: 2, noTank: 1.5, noRanged: 1, double: 0.75, spread: 4 };
-function tierId(id) {
-  const m = draft.map !== "Overall" ? (TL.maps || {})[draft.map] : null;
-  if (m && id in m) return m[id] || "";
-  return TL.overall[id] || "";
-}
-function tierVal(t) {
-  const ids = TL.tiers.map(x => x.id), i = ids.indexOf(t);
-  if (i < 0) return 0;
-  return ids.length === 1 ? 2 : 2 - 4 * i / (ids.length - 1);
-}
-const wrOf = id => TL.winrates?.rates?.[id]?.wr;
-function wrVal(id) {
-  const r = TL.winrates?.rates?.[id];
-  if (!r) return 0;
-  const n = r.games || 0, adj = (r.wr * n + 50 * W.shrink) / (n + W.shrink);
-  return (adj - 50) * W.wr * (n ? 1 : 0.5);
-}
-const beats = (a, b) => (TL.counters?.[a] || []).includes(b);
-const goodWith = (a, b) => (TL.synergy?.[a] || []).includes(b) || (TL.synergy?.[b] || []).includes(a);
+// the enemy if they took it.
+let M = null;
+const tierId = id => M.tierId(id, draft.map), wrOf = id => M.wrOf(id), beats = (a, b) => M.beats(a, b), goodWith = (a, b) => M.goodWith(a, b), comp = t => M.comp(t);
+const edge = (ally, enemy) => M.edge(ally, enemy, draft.map);
 const names = ids => ids.map(id => byId[id].name).join(", ");
-
-function comp(team) {
-  const n = team.length, roles = team.map(id => byId[id].grole), count = r => roles.filter(x => x === r).length;
-  const ramp = Math.max(0, (n - 2) / 3);   // 0 with 2 heroes or fewer, full at 5
-  let v = 0;
-  if (!count("Healer")) v -= W.noHealer * ramp;
-  if (!count("Tank")) v -= W.noTank * ramp;
-  if (n >= 4 && !count("Ranged Assassin")) v -= W.noRanged * ramp;
-  v -= W.double * (Math.max(0, count("Healer") - 1) + Math.max(0, count("Tank") - 1));
-  return v;
-}
-let BASE = null;   // what an empty slot is worth, per map
-function base() {
-  if (BASE?.map === draft.map) return BASE;
-  const vals = HEROES.map(h => [tierVal(tierId(h.id)), wrVal(h.id)]).sort((x, y) => (y[0] + y[1]) - (x[0] + x[1])).slice(0, 20);
-  return BASE = { map: draft.map, tiers: vals.reduce((a, v) => a + v[0], 0) / vals.length, wr: vals.reduce((a, v) => a + v[1], 0) / vals.length };
-}
-function teamScore(team, opp) {
-  const b = base(), open = 5 - team.length;
-  const parts = { tiers: open * b.tiers, wr: open * b.wr, counters: 0, synergy: 0, comp: comp(team) };
-  for (const h of team) {
-    parts.tiers += tierVal(tierId(h));
-    parts.wr += wrVal(h);
-    parts.counters += W.counter * opp.filter(e => beats(h, e)).length;
-  }
-  for (let i = 0; i < team.length; i++) for (let k = i + 1; k < team.length; k++) if (goodWith(team[i], team[k])) parts.synergy += W.synergy;
-  parts.total = parts.tiers + parts.wr + parts.counters + parts.synergy + parts.comp;
-  return parts;
-}
-function edge(ally, enemy) {
-  const a = teamScore(ally, enemy), e = teamScore(enemy, ally), d = a.total - e.total;
-  const pct = 100 / (1 + Math.exp(-d / W.spread));
-  return { pct, a, e };
-}
 const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1);
 
 function drawEdge() {
   const box = document.getElementById("edge");
   if (!draft.ally.length && !draft.enemy.length) { box.innerHTML = `<div class="row"><span>Add heroes to see which team has the edge.</span></div>`; return; }
-  const { pct, a, e } = edge(draft.ally, draft.enemy), p = Math.round(Math.max(10, Math.min(90, pct)));   // never claim more than 90%
+  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct);
   const part = (label, k) => { const v = a[k] - e[k]; return Math.abs(v) < 0.05 ? "" : `<span>${label} <i style="color:var(--${v > 0 ? "good" : "bad"})">${sgn(v)}</i></span>`; };
   box.innerHTML = `<div class="row"><span class="you">Your team <b>${p}%</b></span><span class="them"><b>${100 - p}%</b> Enemy</span></div>
     <div class="bar"><span style="--w:${p}%"></span></div>
@@ -298,7 +240,7 @@ function drawPicks() {
   const list = HEROES.filter(h => !taken.has(h.id) && (role === "All" || h.grole === role)).map(h => {
     // pick: how much your edge goes up with this hero; ban: how much it would go down if the enemy took it
     const after = ban ? 100 - edge(draft.ally, [...draft.enemy, h.id]).pct : edge([...draft.ally, h.id], draft.enemy).pct;
-    return { id: h.id, adv: after, after: Math.round(Math.max(10, Math.min(90, after))), t: tierId(h.id), wr: wrOf(h.id), why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true) };
+    return { id: h.id, adv: after, after: M.shown(after), t: tierId(h.id), wr: wrOf(h.id), why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true) };
   }).sort((x, y) => y.adv - x.adv);
   const top = list.slice(0, ban ? 6 : 8);
   document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
@@ -384,6 +326,7 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).th
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, grole: g })).sort((a, b) => a.name.localeCompare(b.name));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;
+  M = draftModel(TL, HEROES);
   const seen = new Set();   // drop unknown heroes and any hero listed twice
   for (const k in SIZE) draft[k] = draft[k].filter(id => byId[id] && !seen.has(id) && seen.add(id));
   draw();
