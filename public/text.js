@@ -35,6 +35,8 @@ window.SITE_TEXT = {
 
   // Home page: my last games, sent by the overlay when a match ends
   games_title: "My recent games",
+  history_title: "Match history",
+  history_text: "Every ranked game the overlay recorded, newest first. Open a game for both teams, bans, my talents and the draft edge.",
 
   overlay_title: "Stream overlay",
   overlay_text: "The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.",

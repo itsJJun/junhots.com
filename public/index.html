@@ -21,6 +21,7 @@
 <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/games.css">
 <script>
 // Old links like junhots.com/#tierlist go to the new pages.
 ({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash] && location.replace(({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash]);
@@ -142,11 +143,19 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 .g-rec .w { color: var(--good); } .g-rec .l { color: var(--bad); }
 .g-rec .streak { padding: 1px 8px; border-radius: 999px; font-size: 12px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
 .g-row { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px; }
-.g { position: relative; display: block; border-radius: 9px; }
+.g { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; border-radius: 9px; }
 .g img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px 9px 3px 3px; background: var(--surface-2); transition: transform .15s; }
 .g::after { content: ""; display: block; height: 3px; margin-top: 3px; border-radius: 3px; background: var(--c); }
 .g.loss img { filter: saturate(.55) brightness(.8); }
-.g:hover img, .g:focus-visible img { transform: translateY(-2px); filter: none; }
+.g:hover img, .g:focus-visible img, .g[aria-expanded="true"] img { transform: translateY(-2px); filter: none; }
+.g-row:has([aria-expanded="true"]) .g:not([aria-expanded="true"]) img { opacity: .4; }
+.g[aria-expanded="true"]::after { height: 4px; margin-top: 2px; }
+.g-all { color: var(--accent); font-weight: 500; }
+.g-all:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* The open game: slides down under the row */
+.g-open { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; margin-top: -14px; transition: grid-template-rows .32s cubic-bezier(.22, 1, .36, 1), margin-top .32s cubic-bezier(.22, 1, .36, 1); }
+.g-open > div { min-height: 0; overflow: hidden; }
+.g-open.on { grid-template-rows: 1fr; margin-top: 0; }
 .g .tip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); width: max-content; max-width: 220px; padding: 7px 10px; border-radius: 8px; border: 1px solid #3d3531; background: var(--surface); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55); font-size: 12px; line-height: 1.4; color: var(--muted); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s, transform .15s, visibility 0s .15s; }
 .g .tip b { display: block; color: var(--text); font-weight: 600; font-size: 13px; }
 .g .tip i { font-style: normal; font-weight: 600; color: var(--c); }
@@ -154,7 +163,7 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 .g-row .g:first-child .tip { left: 0; transform: translateY(4px); } .g-row .g:first-child:hover .tip { transform: none; }
 .g-row .g:last-child .tip { left: auto; right: 0; transform: translateY(4px); } .g-row .g:last-child:hover .tip { transform: none; }
 @media (max-width: 720px) { .games { grid-template-columns: 1fr; } .g-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-@media (prefers-reduced-motion: reduce) { .g img, .g .tip { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .g img, .g .tip, .g-open { transition: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -204,6 +213,8 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script src="/edge.js"></script>
+<script src="/games.js"></script>
 <script>
 // YouTube, X and Discord buttons get the hover animation (site.css .hb)
 for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
@@ -316,27 +327,38 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
 </script>
 <script>
 // My recent games, from /api/games (the overlay sends each one when a match ends). Win rate and streak from the last 10.
+// Click a game to open its card (public/games.js) under the row; all of them are on the Match history page.
 (() => {
   const T = window.SITE_TEXT || {};
-  const ago = d => {
-    const s = (d - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    for (const [u, n] of [["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]])
-      if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
-    return "just now";
-  };
-  Promise.all([fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(([d, heroes]) => {
+  const tl = loadTierlist().catch(() => null);
+  Promise.all([fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(async ([d, heroes]) => {
     const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
     const last = (d.games || []).filter(g => name[g.hero]).slice(0, 10);
     if (!last.length) return;
+    const kit = gameKit(heroes, await tl);
     const w = last.filter(g => g.result === "win").length, l = last.length - w;
     let n = 0;
     while (n < last.length && last[n].result === last[0].result) n++;
     const streak = n >= 2 ? `<span class="streak" style="--c:var(--${last[0].result === "win" ? "good" : "bad"})">${n} ${last[0].result === "win" ? "win" : "loss"} streak</span>` : "";
     const box = document.getElementById("games");
-    box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}</div></div>
-      <div class="g-row">${last.map(g => `<a class="g ${g.result}" href="/builds/${g.hero}" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
-        <span class="tip"><b>${name[g.hero]}</b>${g.map ? g.map + "<br>" : ""}<i>${g.result === "win" ? "Win" : "Loss"}</i> · ${ago(g.at)}</span></a>`).join("")}</div>`;
+    box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}<a class="g-all" href="/games/">All games</a></div></div>
+      <div class="g-row">${last.map((g, i) => `<button class="g ${g.result}" type="button" data-i="${i}" aria-expanded="false" aria-controls="g-open" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
+        <span class="tip"><b>${name[g.hero]}</b>${g.map ? g.map + "<br>" : ""}<i>${g.result === "win" ? "Win" : "Loss"}</i> · ${kit.ago(g.at)}</span></button>`).join("")}</div>
+      <div class="g-open" id="g-open"><div></div></div>`;
     box.hidden = false;
+    const open = box.querySelector(".g-open"), inner = open.firstElementChild;
+    box.querySelector(".g-row").addEventListener("click", e => {
+      const b = e.target.closest(".g");
+      if (!b) return;
+      const was = b.getAttribute("aria-expanded") === "true";
+      box.querySelectorAll(".g").forEach(x => x.setAttribute("aria-expanded", "false"));
+      if (was) { open.classList.remove("on"); return; }
+      b.setAttribute("aria-expanded", "true");
+      inner.innerHTML = kit.card(last[+b.dataset.i]);
+      kit.fill(inner);
+      open.classList.add("on");
+    });
+    addEventListener("keydown", e => { if (e.key === "Escape" && open.classList.contains("on")) box.querySelector('.g[aria-expanded="true"]')?.click(); });
   }).catch(() => {});
 })();
 </script>
