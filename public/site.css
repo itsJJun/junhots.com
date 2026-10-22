@@ -55,7 +55,7 @@ h2 small { font-family: var(--sans); }
 .hb-b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; color: #1f0b05; font-weight: 600; opacity: 0; transform: translateX(40px); transition: transform .35s, opacity .25s; }
 .hb-b svg { width: 15px; height: 15px; }
 .btn.hb:hover { background: var(--surface); border-color: var(--brand); }
-.btn.hb:hover .hb-dot, .btn.hb:focus-visible .hb-dot { transform: scale(40); }
+.btn.hb:hover .hb-dot, .btn.hb:focus-visible .hb-dot { transform: scale(60); }
 .btn.hb:hover .hb-a, .btn.hb:focus-visible .hb-a { transform: translateX(40px); opacity: 0; }
 .btn.hb:hover .hb-b, .btn.hb:focus-visible .hb-b { transform: none; opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .hb-dot, .hb-a, .hb-b { transition: none; } }

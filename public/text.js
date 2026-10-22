@@ -9,10 +9,10 @@ window.SITE_TEXT = {
   intro: "Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.",
   twitch_button: "Watch on Twitch",
 
-  // Home page: latest video link and the live stream card
-  media_video: "New video",
+  // Home page: what the Twitch and YouTube buttons say when there's something new
+  media_live_button: "Live now",
   media_live: "Live now on Twitch",
-  media_watch: "Watch",
+  media_video: "Latest video",
 
   // Home page cards
   card_tierlist_title: "Tier list",
