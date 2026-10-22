@@ -111,6 +111,14 @@ h2.sec > span { white-space: nowrap; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
 .chip img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
 .chip button { all: unset; cursor: pointer; color: var(--muted); padding-left: 2px; }
+/* "Take it vs": the heroes this build is made for, as small faces (name on hover) */
+.takevs .faces { display: flex; gap: 4px; flex-wrap: wrap; }
+.takevs .faces img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; border: 1px solid var(--line); }
+.takevs .faces img:hover { border-color: var(--good); }
+.takevs.with .lab::before { background: var(--accent); }
+.takevs.with .faces img:hover { border-color: var(--accent); }
+.bcard .takevs + .takevs { margin-top: -6px; }
+.good.with .lab::before { background: var(--accent); }
 .note { font-size: 13.5px; line-height: 1.55; color: var(--text); margin: 0; white-space: pre-line; }
 /* Level notes: "Lvl 13: ..." lines of a build's note, shown per level and as a small coral dot on that level's icon */
 .lnotes { display: grid; gap: 6px; }
@@ -300,9 +308,9 @@ const MAKE = new URLSearchParams(location.search).has("make");
 let HEROES = [], byId = {}, BUILDS = {}, role = "All", hero = null, mine = null;
 
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
-function heroChip(id, removable) {
+function heroChip(id, removable, kind = "good") {
   const h = byId[id]; if (!h) return "";
-  return `<span class="chip"><img src="${portrait(id)}" alt="">${esc(h.name)}${removable ? `<button data-ungood="${id}" aria-label="Remove ${esc(h.name)}">×</button>` : ""}</span>`;
+  return `<span class="chip"><img src="${portrait(id)}" alt="">${esc(h.name)}${removable ? `<button data-un${kind}="${id}" aria-label="Remove ${esc(h.name)}">×</button>` : ""}</span>`;
 }
 
 // ---------- hero list ----------
@@ -331,7 +339,7 @@ function renderList() {
 // ---------- hero page ----------
 async function openHero(id, state) {
   if (!hero || hero.id !== id) hero = await fetch(`/data/heroes/${id}.json`).then(r => r.json());
-  mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], ...state };
+  mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], with: [], ...state };
   mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
   document.title = `${hero.name} build and talents · JunHotS`;
   const jun = BUILDS[id] || [];
@@ -398,7 +406,7 @@ function buildCard(b, key) {
         <div class="strip">${strip(b.picks, true, b.alt, splitNote(b.note).lv)}</div>
         <code class="code">${esc(code(b.picks))}</code>
         ${sitRow(b.alt)}
-        ${b.good?.length ? `<div class="good"><span class="lab">Good vs</span>${b.good.map(g => heroChip(g)).join("")}</div>` : ""}
+        ${faces("Take it vs", b.good)}${faces("Take it with", b.with, "with")}
         ${noteHtml(b.note)}
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
@@ -415,9 +423,11 @@ function strip(picks, jump, alt = [], lv = {}) {
     // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
     const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" data-tip="t-${r}-${nums[0]}"></span>`
       : as.length ? `<span class="more" aria-label="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "") + (t && lv[r] ? `<span class="ndot" aria-label="Note"></span>` : "");
-    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}${lv[r] ? ` data-note="${esc(lv[r])}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? "#" + picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
+    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}${lv[r] ? ` data-note="${esc(lv[r])}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
+// "Take it vs" (enemies) / "Take it with" (allies): the heroes this build is made for, as small faces, name on hover
+const faces = (lab, ids = [], cls = "") => (ids = ids.filter(g => byId[g])).length ? `<div class="good takevs ${cls}"><span class="lab">${lab}</span><span class="faces">${ids.map(g => `<img src="${portrait(g)}" alt="${esc(byId[g].name)}" data-tip="h-${g}" loading="lazy">`).join("")}</span></div>` : "";
 // "Situational" row under a build: which talents to swap in, tap one to see it
 function sitRow(alt = []) {
   const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
@@ -474,8 +484,10 @@ function drawMine() {
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn2 primary" id="mycode"${n ? "" : " disabled"}>Copy build code</button><button class="btn2" id="share">Copy share link</button><button class="btn2" id="savemine"${n ? "" : " disabled"}>Save</button><button class="btn2" id="clear">Clear</button></div>
     <div class="rowx"${n ? "" : " hidden"}>
       <input type="text" id="bname" placeholder="Build name, like Sleep build" value="${esc(mine.name)}" maxlength="40" aria-label="Build name">
-      <span class="good"><span class="lab">Good vs</span>${mine.good.map(g => heroChip(g, true)).join("")}</span>
-      <input type="text" list="herolist" id="addgood" placeholder="+ Add hero" aria-label="Add a hero this build is good against">
+      <span class="good"><span class="lab">Take it vs</span>${mine.good.map(g => heroChip(g, true)).join("")}</span>
+      <input type="text" list="herolist" id="addgood" placeholder="+ Add enemy" aria-label="Add an enemy hero this build is good against">
+      <span class="good with"><span class="lab">Take it with</span>${mine.with.map(g => heroChip(g, true, "with")).join("")}</span>
+      <input type="text" list="herolist" id="addwith" placeholder="+ Add ally" aria-label="Add an ally hero this build works well with">
       <datalist id="herolist">${HEROES.map(h => `<option value="${esc(h.name)}">`).join("")}</datalist>
     </div>
     ${ADMIN && n ? `<div class="rowx admin">
@@ -487,6 +499,11 @@ function drawMine() {
       ${mine.editing != null ? `<button class="btn2" id="canceledit">Cancel edit</button>` : ""}
     </div>` : ""}`;
   document.getElementById("bname").oninput = e => { mine.name = e.target.value; };
+  document.getElementById("addwith").onchange = e => {
+    const h = HEROES.find(x => x.name.toLowerCase() === e.target.value.trim().toLowerCase());
+    if (h && !mine.with.includes(h.id)) { mine.with.push(h.id); drawMine(); document.getElementById("addwith").focus(); }
+    else e.target.value = "";
+  };
   document.getElementById("addgood").onchange = e => {
     const h = HEROES.find(x => x.name.toLowerCase() === e.target.value.trim().toLowerCase());
     if (h && !mine.good.includes(h.id)) { mine.good.push(h.id); drawMine(); document.getElementById("addgood").focus(); }
@@ -496,6 +513,7 @@ function drawMine() {
     const p = new URLSearchParams({ b: mine.picks.join("") });
     if (mine.name.trim()) p.set("n", mine.name.trim());
     if (mine.good.length) p.set("g", mine.good.join(","));
+    if (mine.with.length) p.set("w", mine.with.join(","));
     if (mine.alt.some(Boolean)) p.set("s", mine.alt.join("-"));
     const url = `${location.origin}/builds/${hero.id}?${p}`;
     history.replaceState(null, "", `#${hero.id}?${p}`);
@@ -504,7 +522,7 @@ function drawMine() {
   document.getElementById("mycode").onclick = () => copyCode(mine.picks);
   document.getElementById("savemine").onclick = () => {
     if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
-    const list = [...(MYB[hero.id] || [])], b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good] };
+    const list = [...(MYB[hero.id] || [])], b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good], with: [...mine.with] };
     const at = list.findIndex(x => x.name.toLowerCase() === b.name.toLowerCase());
     if (at >= 0) list[at] = b; else list.push(b);
     MYB = { ...MYB, [hero.id]: list };
@@ -529,9 +547,9 @@ function drawMine() {
       nb.focus(); nb.setSelectionRange(pos, pos); nb.oninput();
     });
     document.getElementById("savejun").onclick = saveJun;
-    document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], note: "" }; drawMine(); });
+    document.getElementById("canceledit")?.addEventListener("click", () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], with: [], note: "" }; drawMine(); });
   }
-  document.getElementById("clear").onclick = () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], note: "" }; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
+  document.getElementById("clear").onclick = () => { mine = { picks: [0, 0, 0, 0, 0, 0, 0], alt: noAlt(), name: "", good: [], with: [], note: "" }; history.replaceState(null, "", `#${hero.id}`); drawMine(); };
 }
 
 app.addEventListener("click", e => {
@@ -540,7 +558,7 @@ app.addEventListener("click", e => {
   const al = e.target.closest("[data-alt]");
   if (al) { const [r, i] = al.dataset.alt.split("-").map(Number); const cur = alts(mine.alt[r]); mine.alt[r] = (cur.includes(i) ? cur.filter(a => a !== i) : [...cur, i].sort()).join(""); drawMine(); return; }
   const ej = e.target.closest("[data-edit-jun]");
-  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+  if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
   const dj = e.target.closest("[data-del-jun]");
   if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
   const dy = e.target.closest("[data-del-you]");
@@ -554,12 +572,14 @@ app.addEventListener("click", e => {
     // Clicking one of its talent icons does the same, then scrolls to that talent.
     const key = bc.dataset.b, b = buildOf(key), cur = mine.picks.join("");
     if (mine.from !== key && cur !== "0000000" && cur !== b.picks.join("") && !confirm(`Replace your build with "${b.name}"?`)) return;
-    if (mine.from !== key) { mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: key.startsWith("jun") ? b.name + " (my version)" : b.name, good: [...(b.good || [])], note: "", from: key }; drawMine(); }
+    if (mine.from !== key) { mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: key.startsWith("jun") ? b.name + " (my version)" : b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: "", from: key }; drawMine(); }
     if (!j) { document.getElementById("tiers").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
   }
   if (j) { const [r, i] = j.dataset.jump.split("-"); const c = app.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`); c.scrollIntoView({ block: "center", behavior: "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); return; }
   const ug = e.target.closest("[data-ungood]");
   if (ug) { mine.good = mine.good.filter(g => g !== ug.dataset.ungood); drawMine(); }
+  const uw = e.target.closest("[data-unwith]");
+  if (uw) { mine.with = mine.with.filter(g => g !== uw.dataset.unwith); drawMine(); }
 });
 
 // ---------- hover info (mouse only; phones keep tap to open / tap to jump) ----------
@@ -589,7 +609,7 @@ app.addEventListener("click", hideTip);
 // ---------- Jun's editor (only shows after "Jun login"; the server checks the password) ----------
 function saveJun() {
   if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
-  const b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good], note: (mine.note || "").trim() };
+  const b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good], with: [...mine.with], note: (mine.note || "").trim() };
   const list = [...(BUILDS[hero.id] || [])];
   if (mine.editing != null) list[mine.editing] = b; else list.push(b);
   putBuilds({ ...BUILDS, [hero.id]: list }, mine.editing != null ? "Updated. It's live." : "Saved. It's live for everyone.");
@@ -631,7 +651,7 @@ function route() {
   const [id, qs] = location.hash.slice(1).split("?");
   if (!id || !byId[id]) { hero = null; renderList(); return; }
   const p = new URLSearchParams(qs || ""), b = (p.get("b") || "").padEnd(7, "0").slice(0, 7);
-  openHero(id, { picks: [...b].map(Number), alt: (p.get("s") || "").split("-"), name: p.get("n") || "", good: (p.get("g") || "").split(",").filter(g => byId[g]) }).then(() => scrollTo(0, 0));
+  openHero(id, { picks: [...b].map(Number), alt: (p.get("s") || "").split("-"), name: p.get("n") || "", good: (p.get("g") || "").split(",").filter(g => byId[g]), with: (p.get("w") || "").split(",").filter(g => byId[g]) }).then(() => scrollTo(0, 0));
 }
 addEventListener("hashchange", route);
 Promise.all([fetch("/data/heroes.json").then(r => r.json()), fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()).catch(() => fetch("/data/builds.json", { cache: "no-cache" }).then(r => r.json())).catch(() => ({}))]).then(([heroes, builds]) => {
