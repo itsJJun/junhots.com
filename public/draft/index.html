@@ -50,6 +50,14 @@ select.tab option { background: var(--surface); color: var(--text); text-align: 
 .slot.full::after { content: "×"; position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: rgba(10, 8, 7, 0.8); color: var(--text); font: 600 13px/1 var(--sans); opacity: 0; transition: opacity .15s; }
 .slot.full:hover::after, .slot.full:focus-visible::after { opacity: 1; }
 @media (hover: none) { .slot.full::after { opacity: 1; } }
+/* Bans: 3 small slots per team under its picks; a banned hero is greyed out with a slash */
+.bans { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.bans > span { width: 40px; font-size: 12px; color: var(--muted); }
+.bans .slot { width: 44px; aspect-ratio: 1; font-size: 16px; border-radius: 8px; }
+.bans .slot img { border-radius: 7px; filter: grayscale(1) brightness(.6); }
+.bans .slot .nm { display: none; }
+.bans .slot.full::before { content: ""; position: absolute; z-index: 1; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--bad); transform: rotate(45deg); box-shadow: 0 0 0 1px rgba(10, 8, 7, 0.6); }
+.bans .slot.full::after { z-index: 2; top: -6px; right: -6px; width: 16px; height: 16px; font-size: 11px; }
 .slot .nm { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 4px 4px; border-radius: 0 0 9px 9px; background: linear-gradient(to top, rgba(10, 8, 7, 0.9), transparent); font: 600 10.5px/1.1 var(--sans); color: #fff; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .picks { display: grid; gap: 8px; counter-reset: n; }
@@ -111,7 +119,7 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
   <header class="page-head">
     <div>
       <h1 data-edit="draft_title">Draft helper</h1>
-      <p class="sub" data-edit="draft_text">Add the heroes already picked and get the best picks for your team, from my tier list, counters and win rates.</p>
+      <p class="sub" data-edit="draft_text">Add the bans and picks so far and get the best picks for your team, from my tier list, counters and win rates.</p>
     </div>
     <div class="controls">
       <select class="tab" id="map" aria-label="Map"></select>
@@ -121,9 +129,9 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
 
   <div class="board">
     <section class="panel" aria-label="The draft">
-      <h2>The draft <small>Tap a slot to add a hero</small></h2>
-      <div class="team" style="--c:var(--bad)"><h3>Enemy team</h3><div class="slots" id="enemy"></div></div>
-      <div class="team" style="--c:var(--good)"><h3>Your team</h3><div class="slots" id="ally"></div></div>
+      <h2>The draft <small>Tap a slot to add a hero or ban</small></h2>
+      <div class="team" style="--c:var(--bad)"><h3>Enemy team</h3><div class="slots" id="enemy"></div><div class="bans"><span>Bans</span><span style="display:contents" id="eban"></span></div></div>
+      <div class="team" style="--c:var(--good)"><h3>Your team</h3><div class="slots" id="ally"></div><div class="bans"><span>Bans</span><span style="display:contents" id="aban"></span></div></div>
     </section>
     <section class="panel" aria-label="Best picks">
       <h2>Best picks <small id="for"></small></h2>
@@ -159,13 +167,17 @@ const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 let HEROES = [], byId = {}, TL = null, role = "All";
 const q = new URLSearchParams(location.search);
 const list = k => (q.get(k) || "").split(",").filter(Boolean);
-const draft = { map: q.get("m") || "Overall", enemy: list("e").slice(0, 5), ally: list("a").slice(0, 4) };
+// enemy/ally = picks, eban/aban = each team's 3 bans
+const SIZE = { enemy: 5, ally: 4, eban: 3, aban: 3 };
+const PARAM = { enemy: "e", ally: "a", eban: "eb", aban: "ab" };
+const draft = { map: q.get("m") || "Overall" };
+for (const k in SIZE) draft[k] = list(PARAM[k]).slice(0, SIZE[k]);
+const allTaken = () => new Set(Object.keys(SIZE).flatMap(k => draft[k]));
 
 function save() {
   const p = new URLSearchParams();
   if (draft.map !== "Overall") p.set("m", draft.map);
-  if (draft.enemy.length) p.set("e", draft.enemy.join(","));
-  if (draft.ally.length) p.set("a", draft.ally.join(","));
+  for (const k in SIZE) if (draft[k].length) p.set(PARAM[k], draft[k].join(","));
   history.replaceState(null, "", location.pathname + (p.size ? "?" + p.toString().replace(/%2C/g, ",") : ""));
 }
 
@@ -204,18 +216,20 @@ function score(id) {
   return { id, s, t, wr, why };
 }
 
+const LABEL = { enemy: "Add to the enemy team", ally: "Add to your team", eban: "Enemy ban", aban: "Your team's ban" };
 function drawSlots() {
   const slot = (side, i) => {
     const id = draft[side][i];
-    return id ? `<button class="slot full" data-side="${side}" data-i="${i}" aria-label="Remove ${esc(byId[id].name)}"><img src="${img(id)}" alt=""><span class="nm">${esc(byId[id].name)}</span></button>`
-      : `<button class="slot" data-side="${side}" data-i="${i}" aria-label="Add a hero to ${side === "enemy" ? "the enemy team" : "your team"}">+</button>`;
+    return id ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(byId[id].name)}" aria-label="Remove ${esc(byId[id].name)}"><img src="${img(id)}" alt=""><span class="nm">${esc(byId[id].name)}</span></button>`
+      : `<button class="slot" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
   };
+  for (const k of ["eban", "aban"]) document.getElementById(k).innerHTML = [0, 1, 2].map(i => slot(k, i)).join("");
   document.getElementById("enemy").innerHTML = [0, 1, 2, 3, 4].map(i => slot("enemy", i)).join("");
   document.getElementById("ally").innerHTML = [0, 1, 2, 3].map(i => slot("ally", i)).join("") + `<div class="slot you">You</div>`;
 }
 
 function drawPicks() {
-  const taken = new Set([...draft.enemy, ...draft.ally]);
+  const taken = allTaken();
   const all = HEROES.filter(h => !taken.has(h.id) && (role === "All" || h.grole === role)).map(h => score(h.id)).sort((a, b) => b.s - a.s);
   const top = all.slice(0, 8), max = Math.max(...top.map(x => x.s), 1), min = Math.min(...all.map(x => x.s), 0);
   document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
@@ -235,13 +249,13 @@ function draw() { drawSlots(); drawPicks(); save(); }
 const dlg = document.getElementById("chooser"), qbox = document.getElementById("q");
 let target = null;
 function drawGrid() {
-  const taken = new Set([...draft.enemy, ...draft.ally]), k = norm(qbox.value);
+  const taken = allTaken(), k = norm(qbox.value);
   const list = HEROES.filter(h => !k || norm(h.name).includes(k));
   document.getElementById("grid").innerHTML = list.map(h => `<button class="hc" data-pick="${h.id}"${taken.has(h.id) ? " disabled" : ""}><img src="${img(h.id)}" alt="" loading="lazy"><span>${esc(h.name)}</span></button>`).join("") || '<div class="empty">No hero by that name.</div>';
 }
 function choose(side) {
   target = side;
-  document.getElementById("dt").textContent = side === "enemy" ? "Add to the enemy team" : "Add to your team";
+  document.getElementById("dt").textContent = LABEL[side];
   qbox.value = "";
   drawGrid();
   dlg.showModal();
@@ -264,7 +278,7 @@ document.addEventListener("click", e => {
   if (s.classList.contains("full")) { draft[side].splice(+s.dataset.i, 1); draw(); }
   else choose(side);
 });
-document.getElementById("clear").addEventListener("click", () => { draft.enemy = []; draft.ally = []; draw(); });
+document.getElementById("clear").addEventListener("click", () => { for (const k in SIZE) draft[k] = []; draw(); });
 
 const sel = document.getElementById("map");
 sel.innerHTML = ["Overall", ...MAPS].map(m => `<option value="${m}">${m === "Overall" ? "Any map" : m}</option>`).join("");
@@ -284,8 +298,8 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).th
   HEROES = heroes.map(([id, name, r, g]) => ({ id, name, grole: g })).sort((a, b) => a.name.localeCompare(b.name));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;
-  draft.enemy = draft.enemy.filter(id => byId[id]);
-  draft.ally = draft.ally.filter(id => byId[id] && !draft.enemy.includes(id));
+  const seen = new Set();   // drop unknown heroes and any hero listed twice
+  for (const k in SIZE) draft[k] = draft[k].filter(id => byId[id] && !seen.has(id) && seen.add(id));
   draw();
 }).catch(() => { document.getElementById("picks").innerHTML = '<div class="empty">The tier list couldn\'t load. Refresh the page to try again.</div>'; });
 </script>
