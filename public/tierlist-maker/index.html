@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Make your HotS tier list · JunHotS</title>
 <meta name="description" content="Make your own Heroes of the Storm tier list with counters and synergy. Share it as a link or a picture.">
@@ -155,6 +156,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap
     <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/tierlist-maker/" aria-current="page">Make your own</a><a href="/overlay/">Overlay</a></div>
     <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
   </nav>
+  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
   <h1 id="top">Make your tier list</h1>
   <p class="lead">Drag heroes into tiers, or tap a hero and then tap a row. Mark who each hero beats and who it works well with. Share it as a link or a picture, or save it for the junhots overlay.</p>
   <div class="banner" id="sharedBanner" hidden><span id="sharedText">You're looking at a shared tier list. Change anything to make it your own.</span><button id="startFresh">Start my own</button></div>

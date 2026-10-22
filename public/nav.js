@@ -211,3 +211,18 @@
     else if (e.key === "Escape" && box) close();
   });
 })();
+
+// The coral line under the current tab (made by a tiny script at the top of each page) stays under its tab
+// when the fonts finish loading, the window changes size, or "Make your own" becomes the current tab.
+(() => {
+  const ind = document.querySelector(".tabs .tab-ind");
+  if (!ind) return;
+  const place = () => {
+    const a = document.querySelector('.tabs a[aria-current="page"]');
+    ind.hidden = !a;
+    if (a) ind.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
+  };
+  place();
+  document.fonts?.ready.then(place);
+  addEventListener("resize", place);
+})();
