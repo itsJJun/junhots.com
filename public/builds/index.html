@@ -111,13 +111,13 @@ h2.sec > span { white-space: nowrap; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
 .chip img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
 .chip button { all: unset; cursor: pointer; color: var(--muted); padding-left: 2px; }
-.note { font-size: 13px; line-height: 1.55; color: #cdc6c1; margin: 0; white-space: pre-line; }
+.note { font-size: 13.5px; line-height: 1.55; color: var(--text); margin: 0; white-space: pre-line; }
 /* Level notes: "Lvl 13: ..." lines of a build's note, shown per level and as a small coral dot on that level's icon */
 .lnotes { display: grid; gap: 6px; }
 .lnotes .lab { font-size: 12px; color: var(--muted); }
 .lnotes .lab::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); margin-right: 7px; vertical-align: 0; }
-.lnrow { display: grid; grid-template-columns: 48px 1fr; align-items: baseline; font-size: 13px; line-height: 1.5; color: #cdc6c1; white-space: pre-line; }
-.lnrow .sl { font: 500 11px var(--mono); color: var(--muted); }
+.lngrid { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; align-items: baseline; font-size: 13px; line-height: 1.5; color: #b9b1ab; white-space: pre-line; }
+.lngrid .sl { font: 600 11px var(--mono); color: var(--brand); white-space: nowrap; }
 .slot .ic .ndot { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--surface); }
 .tip .tnote { margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid var(--brand); font-size: 12.5px; line-height: 1.5; color: #cdc6c1; white-space: pre-line; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
 .tip .tnote b { color: var(--brand); font-weight: 600; }
@@ -424,26 +424,33 @@ function sitRow(alt = []) {
   return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}" data-tip="t-${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
 }
 // A build's note is one text. Lines that start with a level ("Lvl 13: ...", "lv13 - ...", "13: ...") are notes for that level;
-// every other line is the general comment, line breaks kept. Old notes have no level lines, so they show exactly as before.
-const LVRE = /^\s*(?:(?:lvl|lv|level|l)\s*\.?\s*)?(1|4|7|10|13|16|20)\s*(?:[:.)\-–—]\s*|\s+(?=\D))(.*)$/i;
+// "Lvl 13/16 ..." (also "13 & 16", "13, 16") is one note for both. Every other line is the general comment, line breaks kept.
+// Old notes have no level lines, so they show exactly as before.
+const LVN = "(?:20|16|13|10|7|4|1)(?!\\d)";
+const LVRE = new RegExp(`^\\s*(?:(?:lvl|lv|level|l)\\s*\\.?\\s*)?(${LVN}(?:\\s*(?:\\/|,|&|\\+|and)\\s*${LVN})*)\\s*(?:[:.)\\-–—]\\s*|\\s+(?=\\D))(.*)$`, "i");
 // Plain "13: ..." counts too, but only with a colon, so a sentence like "4 stacks is enough" stays general.
 function lineLevel(line) {
   const m = line.match(LVRE);
-  return m && m[2].trim() && (/^\s*l/i.test(line) || /^\s*\d+\s*:/.test(line)) ? m : null;
+  if (!m || !m[2].trim() || !(/^\s*l/i.test(line) || /^\s*[\d\s/,&+]+:/.test(line))) return null;
+  return { levels: [...new Set(m[1].match(/\d+/g))].sort((a, b) => LEVELS.indexOf(a) - LEVELS.indexOf(b)), text: m[2].trim() };
 }
+// gen = general comment, rows = [{ levels: ["13", "16"], text }] in level order, lv = note text per level row (for the dots and hover)
 function splitNote(note) {
-  const gen = [], lv = {};
+  const gen = [], rows = [], lv = {};
   String(note || "").split(/\r?\n/).forEach(line => {
     const m = lineLevel(line);
-    if (m) { const r = LEVELS.indexOf(m[1]); lv[r] = (lv[r] ? lv[r] + "\n" : "") + m[2].trim(); }
-    else gen.push(line);
+    if (!m) { gen.push(line); return; }
+    const key = m.levels.join("/"), row = rows.find(x => x.levels.join("/") === key);
+    if (row) row.text += "\n" + m.text; else rows.push(m);
+    m.levels.forEach(L => { const r = LEVELS.indexOf(L); lv[r] = (lv[r] ? lv[r] + "\n" : "") + m.text; });
   });
-  return { gen: gen.join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n"), lv };
+  rows.sort((a, b) => LEVELS.indexOf(a.levels[0]) - LEVELS.indexOf(b.levels[0]));
+  return { gen: gen.join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n"), rows, lv };
 }
 function noteHtml(note) {
-  const { gen, lv } = splitNote(note), rows = LEVELS.map((L, r) => [L, lv[r]]).filter(x => x[1]);
+  const { gen, rows } = splitNote(note);
   return (gen ? `<p class="note">${esc(gen)}</p>` : "")
-    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span>${rows.map(([L, t]) => `<div class="lnrow"><small class="sl">Lvl ${L}</small><span>${esc(t)}</span></div>`).join("")}</div>` : "");
+    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span><div class="lngrid">${rows.map(x => `<small class="sl">Lvl ${x.levels.join("/")}</small><span>${esc(x.text)}</span>`).join("")}</div></div>` : "");
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
 const noAlt = () => ["", "", "", "", "", "", ""];
@@ -512,7 +519,7 @@ function drawMine() {
     nb.oninput = () => { mine.note = nb.value; grow(); marks(); }; grow();
     // Level buttons: jump to that level's line, or add "Lvl 13: " on a new line, in level order
     app.querySelectorAll("[data-lvnote]").forEach(b => b.onclick = () => {
-      const L = b.dataset.lvnote, lines = nb.value.split("\n"), lvOf = l => { const m = l.match(LVRE); return m && (/^\s*l/i.test(l) || /^\s*\d+\s*:/.test(l)) ? +m[1] : null; };
+      const L = b.dataset.lvnote, lines = nb.value.split("\n"), lvOf = l => { const m = lineLevel(l + " x"); return m ? +m.levels[0] : null; };
       let at = lines.findIndex(l => lvOf(l) === +L), pos;
       if (at < 0) {
         const pre = `Lvl ${L}: `; at = lines.findIndex(l => lvOf(l) > +L); if (at < 0) at = lines.length;
