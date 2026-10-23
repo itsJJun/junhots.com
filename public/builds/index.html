@@ -388,11 +388,11 @@ fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()).then(d => { GA
 function drawMatchups() {
   const box = document.getElementById("mu"), tx = document.getElementById("tierx");
   if (!box || !TL || !hero) return;
-  const id = hero.id, c = TL.counters || {}, sy = TL.synergy || {};
+  const id = tierKey(hero.id), c = TL.counters || {}, sy = TL.synergy || {};   // Gall's page shows Cho'gall's tier
   const t = TL.tiers?.find(x => x.id === TL.overall?.[id]), wr = TL.winrates?.rates?.[id]?.wr;
   tx.innerHTML = (t ? `<span class="tierx"><b>${esc(t.name)}</b> tier</span>` : "")
     + (wr != null ? `<span class="tierx wrx">Win rate <b style="color:${wr >= 51 ? "var(--good)" : wr < 49 ? "var(--bad)" : "var(--text)"}">${wr.toFixed(1)}%</b></span>` : "")
-    + ((mine => mine.length ? `<span class="tierx wrx" title="My games on ${esc(hero.name)}, sent by the stream overlay">My games <b style="color:var(--good)">${mine.filter(g => g.result === "win").length}</b>–<b style="color:var(--bad)">${mine.filter(g => g.result !== "win").length}</b></span>` : "")((GAMES || []).filter(g => g.hero === id)));
+    + ((mine => mine.length ? `<span class="tierx wrx" title="My games on ${esc(hero.name)}, sent by the stream overlay">My games <b style="color:var(--good)">${mine.filter(g => g.result === "win").length}</b>–<b style="color:var(--bad)">${mine.filter(g => g.result !== "win").length}</b></span>` : "")((GAMES || []).filter(g => g.hero === hero.id)));
   const groups = [
     ["Strong against", "var(--good)", c[id] || []],
     ["Weak against", "var(--bad)", Object.keys(c).filter(a => c[a].includes(id))],

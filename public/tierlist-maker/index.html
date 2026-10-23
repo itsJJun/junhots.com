@@ -229,6 +229,9 @@ function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } ca
 function changed() { if (isShared) { isShared = false; $("sharedBanner").hidden = true; } save(); render(); }
 
 // ---------- data rules (same file format as the overlay's tierlist.json) ----------
+// Cho and Gall are one hero in the draft, so they're one Cho'gall here (Cho's id); older lists' Gall moves onto it.
+const SHARED = { gall: "chogall" }, one = id => SHARED[id] || id;
+const pic = id => `/img/heroes/${id === "chogall" ? "chogall-both" : id}.webp`;
 function clean(d) {
   const out = blank(); if (!d || typeof d !== "object") return out;
   const tiers = [], seen = new Set();
@@ -239,10 +242,11 @@ function clean(d) {
   }
   if (tiers.length) out.tiers = tiers;
   const ids = new Set(out.tiers.map(t => t.id));
-  for (const [h, t] of Object.entries(d.overall || {})) if (H[h] && ids.has(String(t))) out.overall[h] = String(t);
-  for (const key of ["counters", "synergy"]) for (const [h, list] of Object.entries(d[key] || {})) {
+  for (const [h, t] of Object.entries(d.overall || {})) if (H[one(h)] && ids.has(String(t)) && !(SHARED[h] && out.overall[one(h)])) out.overall[one(h)] = String(t);
+  for (const key of ["counters", "synergy"]) for (const [raw, list] of Object.entries(d[key] || {})) {
+    const h = one(raw);
     if (!H[h] || !Array.isArray(list)) continue;
-    const l = [...new Set(list.map(String))].filter(x => H[x] && x !== h); if (l.length) out[key][h] = l;
+    const l = [...new Set([...(out[key][h] || []), ...list.map(x => one(String(x)))])].filter(x => H[x] && x !== h); if (l.length) out[key][h] = l;
   }
   return out;
 }
@@ -269,7 +273,7 @@ function toggleRelation(other) {
 function visible(h) { return (role === "All" || h.role === role) && (!query || h.name.toLowerCase().includes(query)); }
 function heroTile(h) {
   const b = el("button", "hero"); b.dataset.hero = h.id; b.draggable = view === "tiers"; b.title = h.name;
-  const i = el("img"); i.src = `/img/heroes/${h.id}.webp`; i.alt = ""; i.loading = "lazy"; b.append(i, el("span", "nm", h.name));
+  const i = el("img"); i.src = pic(h.id); i.alt = ""; i.loading = "lazy"; b.append(i, el("span", "nm", h.name));
   if (view === "tiers") { if (picked === h.id) b.classList.add("sel"); }
   else {
     const nb = beats(h.id).length, nl = beatenBy(h.id).length;
@@ -327,7 +331,7 @@ function render() {
 function chipList(ids) {
   if (!ids.length) return el("span", "none", "None yet");
   const w = el("div", "chips");
-  ids.forEach(id => { const c = el("button", "chip"); const i = el("img"); i.src = `/img/heroes/${id}.webp`; i.alt = ""; c.append(i, H[id].name); c.onclick = () => { focusHero = id; render(); }; w.append(c); });
+  ids.forEach(id => { const c = el("button", "chip"); const i = el("img"); i.src = pic(id); i.alt = ""; c.append(i, H[id].name); c.onclick = () => { focusHero = id; render(); }; w.append(c); });
   return w;
 }
 function renderSide() {
@@ -455,7 +459,7 @@ $("savePic").onclick = async () => {
   x.fillStyle = "#0e0c0b"; x.fillRect(0, 0, W, Hh);
   x.fillStyle = "#fbf6f2"; x.font = "700 34px Rajdhani, Segoe UI, sans-serif"; x.fillText(role === "All" ? "My tier list" : `My ${role} tier list`, pad, pad + 30);
   x.fillStyle = "#f26a4b"; x.font = "700 18px Rajdhani, Segoe UI, sans-serif"; x.textAlign = "right"; x.fillText("junhots.com", W - pad, pad + 30); x.textAlign = "left";
-  const imgs = new Map(await Promise.all(HEROES.map(async h => [h.id, await loadImg(`/img/heroes/${h.id}.webp`)])));
+  const imgs = new Map(await Promise.all(HEROES.map(async h => [h.id, await loadImg(pic(h.id))])));
   let y = pad + 56;
   for (const g of groups) {
     const h = rowH(g);
@@ -471,7 +475,7 @@ $("savePic").onclick = async () => {
 
 // ---------- start ----------
 (async () => {
-  HEROES = await (await fetch("/data/heroes.json")).json().then(l => l.map(([id, name, r]) => ({ id, name, role: r })));
+  HEROES = await (await fetch("/data/heroes.json")).json().then(l => l.filter(([id]) => !SHARED[id]).map(([id, name, r]) => ({ id, name: id === "chogall" ? "Cho'gall" : name, role: r })));
   HEROES.forEach(h => H[h.id] = h);
   let shared = null;
   if (location.hash.length > 2) { try { shared = await decode(location.hash); } catch (e) {} }

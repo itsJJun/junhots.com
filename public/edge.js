@@ -10,11 +10,15 @@
 // An empty slot counts as a typical good pick (the average of the 20 best heroes on this map), so a team that has
 // picked more heroes doesn't look stronger just for that.
 //
+// Gall is looked up as Cho'gall (site.js tierKey), and Cho + Gall on one team count once for counters and "good with".
+//
 // draftModel(tierlist, heroes) with heroes = [{ id, grole }]. map is a tier list map name or "Overall".
 window.draftModel = (TL, HEROES) => {
   const W = { counter: 1, synergy: 0.6, wr: 0.35, shrink: 2000, noHealer: 2, noTank: 1.5, noRanged: 1, double: 0.75, spread: 4 };
   const roleOf = Object.fromEntries(HEROES.map(h => [h.id, h.grole]));
+  const key = window.tierKey || (id => id);
   function tierId(id, map) {
+    id = key(id);
     const m = map && map !== "Overall" ? (TL.maps || {})[map] : null;
     if (m && id in m) return m[id] || "";
     return TL.overall[id] || "";
@@ -24,15 +28,16 @@ window.draftModel = (TL, HEROES) => {
     if (i < 0) return 0;
     return ids.length === 1 ? 2 : 2 - 4 * i / (ids.length - 1);
   }
-  const wrOf = id => TL.winrates?.rates?.[id]?.wr;
+  const wrOf = id => TL.winrates?.rates?.[key(id)]?.wr;
   function wrVal(id) {
-    const r = TL.winrates?.rates?.[id];
+    const r = TL.winrates?.rates?.[key(id)];
     if (!r) return 0;
     const n = r.games || 0, adj = (r.wr * n + 50 * W.shrink) / (n + W.shrink);
     return (adj - 50) * W.wr * (n ? 1 : 0.5);
   }
-  const beats = (a, b) => (TL.counters?.[a] || []).includes(b);
-  const goodWith = (a, b) => (TL.synergy?.[a] || []).includes(b) || (TL.synergy?.[b] || []).includes(a);
+  const beats = (a, b) => (TL.counters?.[key(a)] || []).includes(key(b));
+  const goodWith = (a, b) => { a = key(a); b = key(b); return a !== b && ((TL.synergy?.[a] || []).includes(b) || (TL.synergy?.[b] || []).includes(a)); };
+  const once = ids => [...new Set(ids.map(key))];
 
   function comp(team) {
     const n = team.length, roles = team.map(id => roleOf[id]), count = r => roles.filter(x => x === r).length;
@@ -56,9 +61,10 @@ window.draftModel = (TL, HEROES) => {
     for (const h of team) {
       parts.tiers += tierVal(tierId(h, map));
       parts.wr += wrVal(h);
-      parts.counters += W.counter * opp.filter(e => beats(h, e)).length;
     }
-    for (let i = 0; i < team.length; i++) for (let k = i + 1; k < team.length; k++) if (goodWith(team[i], team[k])) parts.synergy += W.synergy;
+    const mine = once(team), theirs = once(opp);
+    for (const h of mine) parts.counters += W.counter * theirs.filter(e => beats(h, e)).length;
+    for (let i = 0; i < mine.length; i++) for (let k = i + 1; k < mine.length; k++) if (goodWith(mine[i], mine[k])) parts.synergy += W.synergy;
     parts.total = parts.tiers + parts.wr + parts.counters + parts.synergy + parts.comp;
     return parts;
   }
