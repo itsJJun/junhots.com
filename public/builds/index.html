@@ -177,7 +177,10 @@ h2.sec > span { white-space: nowrap; }
 .mug a:hover { transform: translateY(-2px); }
 .mug a:hover img { border-color: var(--c); }
 /* A style tag in a matchup row ("Strong against Dive"): a pill with the word, hover lists the heroes with that tag */
-.mug .tagp { display: inline-flex; align-items: center; height: 34px; box-sizing: border-box; padding: 0 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 45%, var(--line)); background: color-mix(in srgb, var(--c) 8%, transparent); font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: default; }
+.mug .tagp { --t: var(--c); display: inline-flex; align-items: center; gap: 7px; height: 34px; box-sizing: border-box; padding: 0 13px 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: default;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--t) 22%, var(--surface-2)), var(--surface-2) 85%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t) 35%, transparent); transition: transform .12s; }
+.mug .tagp:hover { transform: translateY(-2px); }
+.mug .tagp .ti { width: 17px; height: 17px; flex: none; }
 .mug .tagp[hidden] { display: none; }
 .tip .hname.tagl { max-width: 320px; font-weight: 400; color: var(--muted); line-height: 1.5; }
 .tip .hname.tagl b { color: var(--text); font-weight: 600; }
@@ -406,7 +409,7 @@ function drawMatchups() {
   // Up to 6 per row; "+N" opens the rest, so a long list never takes over the page.
   box.innerHTML = groups.map(([lab, col, ids]) => `<div class="mug" style="--c:${col}"><span class="lab">${lab}</span><span class="ps">${ids.map((h, i) => {
     const hide = i >= 6 && ids.length > 7 ? " hidden" : "";
-    return isTag(h) ? `<span class="tagp" data-tip="g-${esc(h.slice(4))}"${hide}>${esc(tagLabel(TL, h))}</span>`
+    return isTag(h) ? `<span class="tagp" style="--t:${tagColor(TL, h)}" data-tip="g-${esc(h.slice(4))}"${hide}>${tagIcon(TL, h)}${esc(tagLabel(TL, h))}</span>`
       : `<a href="#${h}" data-tip="h-${h}" aria-label="${esc(byId[h].name)}"${hide}><img src="${portrait(h)}" alt="" loading="lazy"></a>`;
   }).join("")}${ids.length > 7 ? `<button class="more" data-muall>+${ids.length - 6}</button>` : ""}</span></div>`).join("");
   box.querySelectorAll("[data-muall]").forEach(b => b.onclick = () => { b.parentNode.querySelectorAll("[hidden]").forEach(a => a.hidden = false); b.remove(); });

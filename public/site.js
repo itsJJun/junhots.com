@@ -45,6 +45,7 @@ window.loadTierlist = () => Promise.all([fetch("/api/tierlist", { cache: "no-sto
   .then(([tl, td]) => {
     foldTierlist(tl);
     tl.tagNames = Object.fromEntries((td.tags || []).map(t => [t.id, t.name]));
+    tl.tagInfo = Object.fromEntries((td.tags || []).map(t => [t.id, t]));
     tl.tags = { ...td.heroes, ...(tl.tags || {}) };
     return tl;
   });
@@ -55,6 +56,9 @@ window.loadTierlist = () => Promise.all([fetch("/api/tierlist", { cache: "no-sto
 //   synergy.zarya = ["tag:dive"]       Zarya is good with dive heroes
 window.isTag = id => String(id).startsWith("tag:");
 window.tagLabel = (tl, id) => tl.tagNames?.[String(id).replace(/^tag:/, "")] || String(id).replace(/^tag:/, "");
+// A tag's line icon in its color (paths and colors live in /data/hero-tags.json, shared with the overlay)
+window.tagColor = (tl, id) => tl.tagInfo?.[String(id).replace(/^tag:/, "")]?.color || "#a89f99";
+window.tagIcon = (tl, id, cls = "ti") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:${tagColor(tl, id)};stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">${tl.tagInfo?.[String(id).replace(/^tag:/, "")]?.icon || ""}</svg>`;
 window.tagsOf = (tl, id) => tl.tags?.[tierKey(id)] || [];
 window.heroesWithTag = (tl, id, heroIds) => heroIds.filter(h => tagsOf(tl, h).includes(String(id).replace(/^tag:/, "")));
 

@@ -1,6 +1,17 @@
 {
- "_about": "Starter style tags. The tier list editor saves your own tags in tierlist.json; these only fill in heroes that have none yet.",
- "tags": [{"id": "melee", "name": "Melee"}, {"id": "ranged", "name": "Ranged"}, {"id": "aa", "name": "Auto-attack"}, {"id": "mage", "name": "Mage"}, {"id": "dive", "name": "Dive"}, {"id": "poke", "name": "Poke"}, {"id": "burst", "name": "Burst"}, {"id": "lockdown", "name": "Lockdown"}, {"id": "sustain", "name": "Sustain"}, {"id": "mobile", "name": "Mobile"}],
+ "_about": "Starter style tags. The tier list editor saves your own tags in tierlist.json; these only fill in heroes that have none yet. Each tag's icon is SVG paths for a 24x24 line drawing (stroke, no fill), shown in its color.",
+ "tags": [
+  {"id": "melee", "name": "Melee", "color": "#ef8a6a", "icon": "<path d=\"M19.5 4.5h-4l-9 9 4 4 9-9z\"/><path d=\"M5 14l5 5M3.5 20.5 7 17\"/>"},
+  {"id": "ranged", "name": "Ranged", "color": "#8fb8e0", "icon": "<circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><path d=\"M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4\"/>"},
+  {"id": "aa", "name": "Auto-attack", "color": "#e9cf7a", "icon": "<path d=\"M4.5 7l5 5-5 5M11.5 7l5 5-5 5\"/><path d=\"M19.5 7v10\"/>"},
+  {"id": "mage", "name": "Mage", "color": "#b48ad8", "icon": "<path d=\"M11 3.5c.7 4.6 2.1 6 6.5 6.8-4.4.7-5.8 2.2-6.5 6.7-.7-4.5-2.1-6-6.5-6.7 4.4-.8 5.8-2.2 6.5-6.8z\"/><path d=\"M18.5 15.5v5M16 18h5\"/>"},
+  {"id": "dive", "name": "Dive", "color": "#ff6f86", "icon": "<path d=\"M4 5c7.5 0 11.5 4 11.5 11.5\"/><path d=\"M11 13l4.5 4.5L20 13\"/>"},
+  {"id": "poke", "name": "Poke", "color": "#5fd0c4", "icon": "<path d=\"M3.5 19.5l2-2M8 15l2-2M12.5 10.5l2-2\"/><circle cx=\"17.5\" cy=\"6.5\" r=\"3\"/>"},
+  {"id": "burst", "name": "Burst", "color": "#ffa94d", "icon": "<path d=\"M12 2.8l1.9 5.1 5-2.3-2.3 5 5.1 1.9-5.1 1.9 2.3 5-5-2.3L12 22.2l-1.9-5.1-5 2.3 2.3-5L2.3 12.5l5.1-1.9-2.3-5 5 2.3z\"/>"},
+  {"id": "lockdown", "name": "Lockdown", "color": "#a9b2c6", "icon": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"2.2\"/><path d=\"M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5M12 14.3v2.6\"/>"},
+  {"id": "sustain", "name": "Sustain", "color": "#6fd08c", "icon": "<path d=\"M12 20s-7.5-4.6-7.5-10.3A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z\"/><path d=\"M12 10.5v5M9.5 13h5\"/>"},
+  {"id": "mobile", "name": "Mobile", "color": "#7fc4ff", "icon": "<path d=\"M2.5 8h6M3.5 12h5M2.5 16h6\"/><path d=\"M12.5 5.5L19 12l-6.5 6.5\"/>"}
+ ],
  "heroes": {
   "abathur": ["melee", "poke"],
   "alarak": ["melee", "dive", "burst"],
