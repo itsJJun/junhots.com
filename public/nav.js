@@ -94,6 +94,7 @@
 .qk-in input { flex: 1; height: 52px; border: 0; outline: 0; background: transparent; color: var(--text, #f4efec); font: 16px var(--sans, "Geist", system-ui, sans-serif); min-width: 0; }
 .qk-list { overflow-y: auto; padding: 6px; }
 .qk-sec { padding: 8px 10px 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #a89f99); }
+.qk-sec .qk-ti { width: 13px; height: 13px; vertical-align: -2px; }
 .qk-row { display: flex; align-items: center; gap: 12px; padding: 7px 10px; border-radius: 8px; color: inherit; text-decoration: none; cursor: pointer; }
 .qk-row img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: var(--surface-2, #221e1c); }
 .qk-row .qk-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 6px; background: var(--surface-2, #221e1c); border: 1px solid var(--line, #332d2a); color: var(--brand, #f26a4b); }
@@ -172,7 +173,7 @@
     const list = box.querySelector(".qk-list");
     const heroRow = (h, i) => `<div class="qk-row" role="option" data-i="${i}" data-href="/builds/#${h.id}"><img src="/img/heroes/${h.id}.webp" alt=""><span><b>${esc(h.name)}</b><br><small>${window.roleIcon ? roleIcon(h.grole) : ""}${esc(h.grole)}</small></span><span class="qk-go"><a href="/builds/#${h.id}" tabindex="-1">Builds</a><a href="/tierlist/#${h.id}" tabindex="-1">Tier list</a></span></div>`;
     list.innerHTML = (named.length ? `<div class="qk-sec">Heroes</div>` + named.map(heroRow).join("") : "")
-      + (ts.length ? `<div class="qk-sec">${esc(TL.tagNames[tag])} heroes</div>` + ts.map((h, j) => heroRow(h, named.length + j)).join("") : "")
+      + (ts.length ? `<div class="qk-sec">${tagIcon(TL, tag, "qk-ti")} ${esc(TL.tagNames[tag])} heroes</div>` + ts.map((h, j) => heroRow(h, named.length + j)).join("") : "")
       + (ps.length ? `<div class="qk-sec">Pages</div>` + ps.map((p, j) => `<div class="qk-row" role="option" data-i="${hs.length + j}" data-href="${p[1]}"><span class="qk-ic">${pageIc}</span><span><b>${esc(p[0])}</b><br><small>${esc(p[2])}</small></span></div>`).join("") : "")
       || `<div class="qk-none">No hero or page called “${esc(q)}”</div>`;
     mark();
