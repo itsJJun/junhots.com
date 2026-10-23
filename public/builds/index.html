@@ -176,6 +176,11 @@ h2.sec > span { white-space: nowrap; }
 .mug a img { display: block; width: 34px; height: 34px; border-radius: 7px; object-fit: cover; border: 1px solid var(--line); }
 .mug a:hover { transform: translateY(-2px); }
 .mug a:hover img { border-color: var(--c); }
+/* A style tag in a matchup row ("Strong against Dive"): a pill with the word, hover lists the heroes with that tag */
+.mug .tagp { display: inline-flex; align-items: center; height: 34px; box-sizing: border-box; padding: 0 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 45%, var(--line)); background: color-mix(in srgb, var(--c) 8%, transparent); font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: default; }
+.mug .tagp[hidden] { display: none; }
+.tip .hname.tagl { max-width: 320px; font-weight: 400; color: var(--muted); line-height: 1.5; }
+.tip .hname.tagl b { color: var(--text); font-weight: 600; }
 .mug .more { all: unset; cursor: pointer; height: 34px; min-width: 34px; box-sizing: border-box; padding: 0 6px; border-radius: 7px; border: 1px dashed var(--line); font: 600 11px/32px var(--mono); color: var(--muted); text-align: center; }
 .mug .more:hover { color: var(--text); border-color: var(--c); }
 /* Wide screens: matchups fill the empty space between the hero name and the hero art */
@@ -397,11 +402,14 @@ function drawMatchups() {
     ["Strong against", "var(--good)", c[id] || []],
     ["Weak against", "var(--bad)", Object.keys(c).filter(a => c[a].includes(id))],
     ["Good with", "var(--accent)", [...new Set([...(sy[id] || []), ...Object.keys(sy).filter(a => sy[a].includes(id))])]],
-  ].map(([lab, col, ids]) => [lab, col, ids.filter(h => byId[h])]).filter(g => g[2].length);
-  // Up to 6 faces per row; "+N" opens the rest, so a long list never takes over the page.
-  box.innerHTML = groups.map(([lab, col, ids]) => `<div class="mug" style="--c:${col}"><span class="lab">${lab}</span><span class="ps">${ids.map((h, i) =>
-    `<a href="#${h}" data-tip="h-${h}" aria-label="${esc(byId[h].name)}"${i >= 6 && ids.length > 7 ? " hidden" : ""}><img src="${portrait(h)}" alt="" loading="lazy"></a>`).join("")}${ids.length > 7 ? `<button class="more" data-muall>+${ids.length - 6}</button>` : ""}</span></div>`).join("");
-  box.querySelectorAll("[data-muall]").forEach(b => b.onclick = () => { b.parentNode.querySelectorAll("a[hidden]").forEach(a => a.hidden = false); b.remove(); });
+  ].map(([lab, col, ids]) => [lab, col, [...ids.filter(h => byId[h]), ...ids.filter(isTag)]]).filter(g => g[2].length);   // heroes first, then tags
+  // Up to 6 per row; "+N" opens the rest, so a long list never takes over the page.
+  box.innerHTML = groups.map(([lab, col, ids]) => `<div class="mug" style="--c:${col}"><span class="lab">${lab}</span><span class="ps">${ids.map((h, i) => {
+    const hide = i >= 6 && ids.length > 7 ? " hidden" : "";
+    return isTag(h) ? `<span class="tagp" data-tip="g-${esc(h.slice(4))}"${hide}>${esc(tagLabel(TL, h))}</span>`
+      : `<a href="#${h}" data-tip="h-${h}" aria-label="${esc(byId[h].name)}"${hide}><img src="${portrait(h)}" alt="" loading="lazy"></a>`;
+  }).join("")}${ids.length > 7 ? `<button class="more" data-muall>+${ids.length - 6}</button>` : ""}</span></div>`).join("");
+  box.querySelectorAll("[data-muall]").forEach(b => b.onclick = () => { b.parentNode.querySelectorAll("[hidden]").forEach(a => a.hidden = false); b.remove(); });
 }
 // A saved build: Jun's ("jun-0") or one the visitor saved in this browser ("you-0"). Click anywhere on it to show it on the talents.
 function buildCard(b, key) {
@@ -599,6 +607,11 @@ app.addEventListener("mouseover", e => {
   const el = e.target.closest("[data-tip]");
   if (!el || el === tip.on) return;
   if (el.getAttribute("aria-expanded") === "true") { hideTip(); return; } // already open in the panel below
+  if (el.dataset.tip.startsWith("g-")) {   // a style tag: which heroes have it
+    const t = el.dataset.tip.slice(2), list = heroesWithTag(TL, t, Object.keys(byId).filter(h => !TIER_SHARED[h])).map(h => tierKey(h) === "chogall" ? "Cho'gall" : byId[h].name);
+    tip.innerHTML = `<div class="hname tagl"><b>${esc(tagLabel(TL, t))}:</b> ${esc(list.join(", ") || "no heroes yet")}</div>`;
+    tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = r.bottom + 6 + "px"; return;
+  }
   if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
   const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
   if (!t) return;

@@ -16,7 +16,7 @@
 const KEY = "builds";
 const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
-const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates"];
+const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates", "tags"];
 const GAMES_KEY = "games";
 const MAX_GAMES = 500;
 const DAY = 864e5;
