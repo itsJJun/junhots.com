@@ -7,7 +7,9 @@
 //   PUT  /api/tierlist -> Jun only (password): the overlay sends tierlist.json here when Jun saves
 //                         (the server adds "updated" and "changes": which heroes moved tier in the last 2 weeks)
 //   GET  /api/games    -> everyone: my recent games (hero, map, win/loss), newest first
-//   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends
+//                         (?limit=10 for only the newest, ?hero=jaina for one hero's games)
+//   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends,
+//                         or {games: [...]} (up to 200) from the GUI's "Import old replays" button
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
@@ -18,7 +20,9 @@ const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
 const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates"];
 const GAMES_KEY = "games";
-const MAX_GAMES = 500;
+const MAX_GAMES = 5000;
+const MAX_BATCH = 200;
+const SAME_GAME = 8 * 60e3;   // same hero within 8 minutes = the same game (sent live, then again by an import)
 const DAY = 864e5;
 const SITE = "https://junhots.com";
 
@@ -253,16 +257,33 @@ export default {
     if (url.pathname === "/api/games") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
       const games = () => env.BUILDS.get(GAMES_KEY).then(t => JSON.parse(t || "[]")).catch(() => []);
-      if (request.method === "GET") return json({ games: await games() });
+      if (request.method === "GET") {
+        const hero = url.searchParams.get("hero"), limit = Math.max(0, Number(url.searchParams.get("limit")) || 0);
+        let list = await games();
+        if (hero) list = list.filter(g => g.hero === hero);
+        return json({ games: limit ? list.slice(0, limit) : list });
+      }
       if (request.method === "POST") {
         if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
-        let game;
-        try { game = cleanGame(JSON.parse(await request.text())); } catch (e) { return json({ error: e.message }, 400); }
-        const list = (await games()).filter(g => g.id !== game.id);   // sending the same game twice keeps one
-        list.push(game);
+        let incoming;
+        try {
+          const body = JSON.parse(await request.text());
+          const raw = Array.isArray(body?.games) ? body.games : [body];
+          if (raw.length > MAX_BATCH) throw new Error(`at most ${MAX_BATCH} games at once`);
+          incoming = raw.map(cleanGame);
+        } catch (e) { return json({ error: e.message }, 400); }
+        const list = await games();
+        let added = 0;
+        for (const game of incoming) {
+          // Sending the same game twice keeps one: same id, or same hero ending within 8 minutes.
+          // The copy with my score line (from the replay) wins over one without.
+          const i = list.findIndex(g => g.id === game.id || (g.hero === game.hero && Math.abs(g.at - game.at) < SAME_GAME));
+          if (i < 0) { list.push(game); added++; }
+          else if (list[i].id === game.id || (game.me && !list[i].me)) list[i] = game;
+        }
         list.sort((a, b) => b.at - a.at);
         await env.BUILDS.put(GAMES_KEY, JSON.stringify(list.slice(0, MAX_GAMES)));
-        return json({ ok: true, games: Math.min(list.length, MAX_GAMES) });
+        return json({ ok: true, added, games: Math.min(list.length, MAX_GAMES) });
       }
       return json({ error: "method not allowed" }, 405);
     }

@@ -160,7 +160,7 @@ function drawHeroes() {
 
 function row(g, i) {
   const b = kit.best(g), e = kit.edge(g), h = kit.byId[g.hero];
-  const when = new Date(g.at).toLocaleDateString("en", { month: "short", day: "numeric" });
+  const d = new Date(g.at), when = d.toLocaleDateString("en", { month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
   return `<button class="row ${g.result}" data-i="${i}" aria-expanded="false" style="--c:var(--${g.result === "win" ? "good" : "bad"})">
     <span class="bar"></span><img src="/img/heroes/${g.hero}.webp" alt="" loading="lazy">
     <span class="who"><b>${kit.esc(h.name)} <span style="color:var(--c);font-size:13px;font-weight:500">${g.result === "win" ? "Win" : "Loss"}</span></b><span>${kit.esc(g.map || "Map unknown")}</span></span>
@@ -201,6 +201,14 @@ document.getElementById("heroes").addEventListener("click", e => {
   F.h = F.h === b.dataset.h ? "" : b.dataset.h;
   shown = PAGE; draw();
 });
+// Many heroes after an import: the mouse wheel scrolls the hero row sideways
+document.getElementById("heroes").addEventListener("wheel", e => {
+  const el = e.currentTarget;
+  const atEnd = e.deltaY > 0 ? el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 : el.scrollLeft <= 0;
+  if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || atEnd) return;   // at either end the page scrolls as usual
+  el.scrollLeft += e.deltaY;
+  e.preventDefault();
+}, { passive: false });
 document.getElementById("res").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;

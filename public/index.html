@@ -331,7 +331,7 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
 (() => {
   const T = window.SITE_TEXT || {};
   const tl = loadTierlist().catch(() => null);
-  Promise.all([fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(async ([d, heroes]) => {
+  Promise.all([fetch("/api/games?limit=10").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(async ([d, heroes]) => {
     const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
     const last = (d.games || []).filter(g => name[g.hero]).slice(0, 10);
     if (!last.length) return;

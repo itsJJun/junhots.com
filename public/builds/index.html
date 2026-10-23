@@ -343,6 +343,7 @@ function renderList() {
 // ---------- hero page ----------
 async function openHero(id, state) {
   if (!hero || hero.id !== id) hero = await fetch(`/data/heroes/${id}.json`).then(r => r.json());
+  loadGames(id);
   mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], with: [], ...state };
   mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
   document.title = `${hero.name} build and talents · JunHotS`;
@@ -382,9 +383,14 @@ async function openHero(id, state) {
 // Tier, win rate, counters and synergy from Jun's tier list (same data as the Tier list page). Loads after the page, never holds it up.
 let TL = null;
 const tlReady = (window.loadTierlist ? loadTierlist() : Promise.reject()).then(d => { TL = d; if (hero) drawMatchups(); }).catch(() => {});
-// My own record on this hero, from the games the overlay sends (/api/games). Shown next to the tier once I've played it.
-let GAMES = null;
-fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()).then(d => { GAMES = d.games || []; if (hero) drawMatchups(); }).catch(() => {});
+// My own record on this hero, from the games the overlay sends (/api/games?hero=…, only this hero's games).
+// Shown next to the tier once I've played it.
+let GAMES = null, gamesFor = "";
+function loadGames(id) {
+  if (gamesFor === id) return;
+  gamesFor = id; GAMES = null;
+  fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) drawMatchups(); } }).catch(() => {});
+}
 function drawMatchups() {
   const box = document.getElementById("mu"), tx = document.getElementById("tierx");
   if (!box || !TL || !hero) return;
