@@ -20,6 +20,7 @@ window.foldTierlist = tl => {
   fold(tl.overall);
   Object.values(tl.maps || {}).forEach(fold);
   fold(tl.winrates?.rates);
+  fold(tl.tags);
   if (tl.changes) for (const a in TIER_SHARED) delete tl.changes[a];
   for (const k of ["counters", "synergy"]) {
     if (!tl[k]) continue;
@@ -34,11 +35,28 @@ window.foldTierlist = tl => {
 };
 
 // Jun's tier list: the copy the overlay uploads when Jun saves, or the file in the repo if that isn't there.
-window.loadTierlist = () => fetch("/api/tierlist", { cache: "no-store" })
+// Style tags come along: tl.tags = { hero: ["melee", "dive"] } (Jun's own, starter tags for any hero without),
+// tl.tagNames = { dive: "Dive" }, in the editor's order.
+window.loadTierlist = () => Promise.all([fetch("/api/tierlist", { cache: "no-store" })
   .then(r => r.ok ? r.json() : Promise.reject())
   .then(d => d && Array.isArray(d.tiers) ? d : Promise.reject())
-  .catch(() => fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()))
-  .then(foldTierlist);
+  .catch(() => fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json())),
+  fetch("/data/hero-tags.json").then(r => r.json()).catch(() => ({ tags: [], heroes: {} }))])
+  .then(([tl, td]) => {
+    foldTierlist(tl);
+    tl.tagNames = Object.fromEntries((td.tags || []).map(t => [t.id, t.name]));
+    tl.tags = { ...td.heroes, ...(tl.tags || {}) };
+    return tl;
+  });
+
+// Counters and synergy lists can name a style tag instead of a hero, as "tag:dive":
+//   counters.uther = ["tag:dive"]      Uther is good against dive heroes
+//   counters["tag:dive"] = ["lunara"]  Lunara is bad against dive heroes
+//   synergy.zarya = ["tag:dive"]       Zarya is good with dive heroes
+window.isTag = id => String(id).startsWith("tag:");
+window.tagLabel = (tl, id) => tl.tagNames?.[String(id).replace(/^tag:/, "")] || String(id).replace(/^tag:/, "");
+window.tagsOf = (tl, id) => tl.tags?.[tierKey(id)] || [];
+window.heroesWithTag = (tl, id, heroIds) => heroIds.filter(h => tagsOf(tl, h).includes(String(id).replace(/^tag:/, "")));
 
 // Role icons (the game's six roles), drawn as small SVGs so they stay sharp at any size.
 const ROLE_COLORS = { "Tank": "#f5c03b", "Bruiser": "#ff8a3d", "Ranged Assassin": "#b98aff", "Melee Assassin": "#ff5f5f", "Healer": "#4cd471", "Support": "#55aaff" };

@@ -154,18 +154,25 @@
     }, 2600);
   });
 
+  // Style tags from the tier list ("dive" lists the dive heroes). Loaded the first time the box opens.
+  let TL = null;
+  const loadTags = () => TL || !window.loadTierlist ? Promise.resolve() : loadTierlist().then(t => { TL = t; }).catch(() => {});
   function find(q) {
     const k = norm(q);
     const hs = !k ? [] : (heroes || []).map(h => [h, h.key.startsWith(k) || h.id.startsWith(k) ? 0 : h.words.some(w => w.startsWith(k)) ? 1 : h.key.includes(k) ? 2 : 9]).filter(x => x[1] < 9).sort((a, b) => a[1] - b[1]).map(x => x[0]).slice(0, 8);
+    const tag = k.length >= 3 && TL ? Object.keys(TL.tagNames || {}).find(t => norm(TL.tagNames[t]).startsWith(k)) : null;
+    const ts = tag ? (heroes || []).filter(h => !hs.includes(h) && h.id !== "gall" && tagsOf(TL, h.id).includes(tag)) : [];
     const ps = PAGES.filter(p => !k || norm(p[0]).includes(k) || norm(p[2]).includes(k));
-    return { hs, ps };
+    return { hs, tag, ts, ps };
   }
   function draw() {
-    const q = box.querySelector("input").value, { hs, ps } = find(q);
+    const q = box.querySelector("input").value, { hs: named, tag, ts, ps } = find(q), hs = [...named, ...ts];
     rows = [...hs.map(h => ["/builds/#" + h.id, h]), ...ps.map(p => [p[1], p])];
     at = Math.min(at, Math.max(0, rows.length - 1));
     const list = box.querySelector(".qk-list");
-    list.innerHTML = (hs.length ? `<div class="qk-sec">Heroes</div>` + hs.map((h, i) => `<div class="qk-row" role="option" data-i="${i}" data-href="/builds/#${h.id}"><img src="/img/heroes/${h.id}.webp" alt=""><span><b>${esc(h.name)}</b><br><small>${window.roleIcon ? roleIcon(h.grole) : ""}${esc(h.grole)}</small></span><span class="qk-go"><a href="/builds/#${h.id}" tabindex="-1">Builds</a><a href="/tierlist/#${h.id}" tabindex="-1">Tier list</a></span></div>`).join("") : "")
+    const heroRow = (h, i) => `<div class="qk-row" role="option" data-i="${i}" data-href="/builds/#${h.id}"><img src="/img/heroes/${h.id}.webp" alt=""><span><b>${esc(h.name)}</b><br><small>${window.roleIcon ? roleIcon(h.grole) : ""}${esc(h.grole)}</small></span><span class="qk-go"><a href="/builds/#${h.id}" tabindex="-1">Builds</a><a href="/tierlist/#${h.id}" tabindex="-1">Tier list</a></span></div>`;
+    list.innerHTML = (named.length ? `<div class="qk-sec">Heroes</div>` + named.map(heroRow).join("") : "")
+      + (ts.length ? `<div class="qk-sec">${esc(TL.tagNames[tag])} heroes</div>` + ts.map((h, j) => heroRow(h, named.length + j)).join("") : "")
       + (ps.length ? `<div class="qk-sec">Pages</div>` + ps.map((p, j) => `<div class="qk-row" role="option" data-i="${hs.length + j}" data-href="${p[1]}"><span class="qk-ic">${pageIc}</span><span><b>${esc(p[0])}</b><br><small>${esc(p[2])}</small></span></div>`).join("") : "")
       || `<div class="qk-none">No hero or page called “${esc(q)}”</div>`;
     mark();
@@ -182,7 +189,7 @@
   }
   function open() {
     if (box) return;
-    load().then(() => box && draw());
+    Promise.all([load(), loadTags()]).then(() => box && draw());
     box = document.createElement("div");
     box.className = "qk-box";
     box.innerHTML = `<div class="qk-panel" role="dialog" aria-label="Search"><label class="qk-in">${glass}<input type="text" placeholder="Search a hero or page…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true"></label><div class="qk-list" role="listbox"></div><div class="qk-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> builds</span><span><kbd>Shift</kbd>+<kbd>Enter</kbd> tier list</span><span><kbd>Esc</kbd> close</span></div></div>`;

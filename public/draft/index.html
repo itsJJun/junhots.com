@@ -50,6 +50,14 @@
 .edge .parts { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 12px; color: var(--muted); }
 .edge .parts i { font-style: normal; font-family: var(--mono); }
 .edge + .team { margin-top: 18px; }
+/* Why: the 3 matchups that move the edge most. Shows while the mouse is on the edge (tap on phones). */
+.edge { position: relative; }
+.edge .whys { display: none; position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); gap: 4px; padding: 10px 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.edge .whys span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; background: var(--c); }
+.edge .whys small { color: var(--muted); opacity: .7; }
+.edge:hover .whys, .edge.open .whys { display: grid; }
+.edge .hint { font-size: 11px; color: var(--muted); opacity: .7; margin-left: auto; }
+.edge:hover .hint, .edge.open .hint { visibility: hidden; }
 .pick .adv { grid-column: 4; grid-row: 1 / span 2; align-self: center; display: grid; justify-items: end; font: 600 15px/1 var(--mono); color: var(--good); }
 .pick .adv small { margin-top: 3px; font: 400 10.5px var(--sans); color: var(--muted); }
 .pick .adv.ban { color: var(--brand); }
@@ -214,20 +222,34 @@ const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1);
 function drawEdge() {
   const box = document.getElementById("edge");
   if (!draft.ally.length && !draft.enemy.length) { box.innerHTML = `<div class="row"><span>Add heroes to see which team has the edge.</span></div>`; return; }
-  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct);
+  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct), whys = M.explain(draft.ally, draft.enemy).slice(0, 3);
   const part = (label, k) => { const v = a[k] - e[k]; return Math.abs(v) < 0.05 ? "" : `<span>${label} <i style="color:var(--${v > 0 ? "good" : "bad"})">${sgn(v)}</i></span>`; };
   box.innerHTML = `<div class="row"><span class="you">Your team <b>${p}%</b></span><span class="them"><b>${100 - p}%</b> Enemy</span></div>
     <div class="bar"><span style="--w:${p}%"></span></div>
-    <div class="parts">${[part("Tiers", "tiers"), part("Win rates", "wr"), part("Counters", "counters"), part("Synergy", "synergy"), part("Team comp", "comp")].join("")}</div>`;
+    <div class="parts">${[part("Tiers", "tiers"), part("Win rates", "wr"), part("Counters", "counters"), part("Synergy", "synergy"), part("Team comp", "comp")].join("")}${whys.length ? `<span class="hint">${matchMedia("(hover: hover)").matches ? "Hover" : "Tap"} for why</span>` : ""}</div>
+    ${whys.length ? `<div class="whys">${whys.map(w => `<span style="--c:var(--${w.v > 0 ? "good" : "bad"})">${esc(w.text)} <small>${sgn(w.v)}</small></span>`).join("")}</div>` : ""}`;
 }
+document.getElementById("edge").addEventListener("click", e => e.currentTarget.classList.toggle("open"));
 
 // Why a hero is suggested: the matchups it brings, and the team comp hole it fills
 function reasons(h, team, opp, own) {
   const why = [];
   const strong = opp.filter(e => beats(h, e)), weak = opp.filter(e => beats(e, h)), pals = team.filter(a => goodWith(h, a));
-  if (strong.length) why.push([own ? "var(--good)" : "var(--bad)", "Strong vs " + names(strong)]);
-  if (weak.length) why.push([own ? "var(--bad)" : "var(--good)", "Weak vs " + names(weak)]);
-  if (pals.length) why.push(["var(--accent)", "Good with " + names(pals)]);
+  // Matchups from style tags. The tag is the other hero's ("Strong vs Dive (Genji, Tracer)")
+  // or this hero's own ("Strong vs Genji (weak to Poke)").
+  const has = (list, x) => (list || []).includes(x);
+  const byTag = (ids, f, theirs, why) => {
+    const g = {}, own = [];
+    ids.forEach(x => { const t = f(x); if (!t) return; if (theirs(x, t)) (g[t] ||= []).push(x); else own.push(`${byId[x].name} (${why} ${tagLabel(TL, t)})`); });
+    return [...Object.entries(g).map(([t, xs]) => `${tagLabel(TL, t)} (${names(xs)})`), ...own];
+  };
+  const c = TL.counters || {}, sy = TL.synergy || {}, k = window.tierKey || (x => x);
+  const strongT = byTag(opp.filter(e => !strong.includes(e)), e => M.beatsByTag(h, e), (e, t) => has(c[k(h)], t), "weak to");
+  const weakT = byTag(opp.filter(e => !weak.includes(e)), e => M.beatsByTag(e, h), (e, t) => has(c[k(e)], t) ? false : true, "good vs");
+  const palsT = byTag(team.filter(a => !pals.includes(a)), a => M.withByTag(h, a), (a, t) => has(sy[k(h)], t), "likes");
+  if (strong.length || strongT.length) why.push([own ? "var(--good)" : "var(--bad)", "Strong vs " + [strong.length ? names(strong) : "", ...strongT].filter(Boolean).join(", ")]);
+  if (weak.length || weakT.length) why.push([own ? "var(--bad)" : "var(--good)", "Weak vs " + [weak.length ? names(weak) : "", ...weakT].filter(Boolean).join(", ")]);
+  if (pals.length || palsT.length) why.push(["var(--accent)", "Good with " + [pals.length ? names(pals) : "", ...palsT].filter(Boolean).join(", ")]);
   const fix = comp([...team, h]) - comp(team), g = byId[h].grole;
   if (fix > 0.4) why.push(["var(--muted)", `${own ? "Your" : "Their"} team needs a ${g === "Healer" ? "healer" : g === "Tank" ? "tank" : "ranged hero"}`]);
   return why;

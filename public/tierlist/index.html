@@ -54,8 +54,10 @@
 .detail[data-side="above"] .arrow { bottom: -7px; border-left: 0; border-top: 0; }
 .scrim { position: fixed; inset: 0; z-index: 19; background: rgba(5, 6, 8, 0.6); }
 .detail .who { display: grid; grid-template-columns: 64px auto; gap: 2px 14px; align-content: start; }
-.detail .who img { grid-row: span 3; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
+.detail .who img { grid-row: span 4; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
 .detail .name { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.detail .tagline { font-size: 12px; color: var(--muted); }
+.chip.tagc { padding: 0 10px; cursor: default; color: var(--muted); font-weight: 600; }
 .pill { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
 .pill::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
 .stat { font-size: 13px; color: var(--muted); }
@@ -175,8 +177,8 @@ function tierOf(id) {
   return TL.overall[id] || null;
 }
 function chips(ids) {
-  const list = ids.filter(id => byId[id]);
-  return list.length ? `<div class="chips">${list.map(id => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}</div>` : '<span class="none">None</span>';
+  const list = ids.filter(id => byId[id]), tags = ids.filter(isTag);   // heroes, then style tags ("Dive")
+  return list.length || tags.length ? `<div class="chips">${list.map(id => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}${tags.map(t => `<span class="chip tagc" title="${esc(tagLabel(TL, t))}: ${esc(heroesWithTag(TL, t, HEROES.map(h => h.id)).map(h => byId[h].name).join(", "))}">${esc(tagLabel(TL, t))}</span>`).join("")}</div>` : '<span class="none">None</span>';
 }
 let anchor = null;   // the hero card the popup points at
 const phone = () => matchMedia("(max-width: 640px)").matches;
@@ -187,6 +189,7 @@ function renderDetail() {
   box.innerHTML = `<span class="arrow"></span><button class="x" aria-label="Close">×</button>
     <div class="who"><img src="${img(selected)}" alt=""><div class="name">${esc(h.name)}</div>
       <span class="pill" style="--c:${t ? PALETTE[t.color] : "var(--line)"}">${t ? esc(t.name) + " tier" : "Not ranked"} · ${roleIcon(h.grole)} ${esc(h.grole)}</span>
+      <div class="tagline">${tagsOf(TL, selected).map(x => esc(tagLabel(TL, x))).join(" · ")}</div>
       <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}${(m => m ? `<div class="mvd ${m.up ? "up" : "down"}">${arrow(m.up)} ${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New on the list"} · ${fmtDay(m.at)}</div>` : "")(moveOf(selected))}</div></div>
     <div class="rel">
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
