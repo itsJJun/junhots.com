@@ -23,6 +23,30 @@ const GAMES_KEY = "games";
 const MAX_GAMES = 5000;
 const MAX_BATCH = 200;
 const SAME_GAME = 8 * 60e3;   // same hero within 8 minutes = the same game (sent live, then again by an import)
+// Also the same game: same hero, map, result, length (±2s) and K/D/A within 3 hours, whatever time each copy says.
+function sameGame(a, b) {
+  if (a.id === b.id) return true;
+  if (a.hero !== b.hero) return false;
+  const gap = Math.abs(a.at - b.at);
+  if (gap < SAME_GAME) return true;
+  return gap < 3 * 3600e3 && a.result === b.result && a.map === b.map && a.len && b.len && Math.abs(a.len - b.len) <= 2
+    && (!a.me || !b.me || (a.me.k === b.me.k && a.me.d === b.me.d && a.me.a === b.me.a));
+}
+// Which copy of one game to keep: the one with my score line (from the replay), then the earlier time
+// (the first import dated games one game length too late).
+const better = (a, b) => (!!a.me !== !!b.me ? (a.me ? a : b) : a.at <= b.at ? a : b);
+// One copy of each game, newest first. The list is sorted, so only games close in time are compared.
+function dedupeGames(list) {
+  list.sort((a, b) => b.at - a.at);
+  const out = [];
+  for (const g of list) {
+    let j = out.length - 1;
+    while (j >= 0 && out[j].at - g.at < 3 * 3600e3 && !sameGame(out[j], g)) j--;
+    if (j >= 0 && out[j].at - g.at < 3 * 3600e3) out[j] = better(out[j], g);
+    else out.push(g);
+  }
+  return out.sort((a, b) => b.at - a.at);
+}
 const DAY = 864e5;
 const SITE = "https://junhots.com";
 
@@ -272,16 +296,11 @@ export default {
           if (raw.length > MAX_BATCH) throw new Error(`at most ${MAX_BATCH} games at once`);
           incoming = raw.map(cleanGame);
         } catch (e) { return json({ error: e.message }, 400); }
-        const list = await games();
-        let added = 0;
-        for (const game of incoming) {
-          // Sending the same game twice keeps one: same id, or same hero ending within 8 minutes.
-          // The copy with my score line (from the replay) wins over one without.
-          const i = list.findIndex(g => g.id === game.id || (g.hero === game.hero && Math.abs(g.at - game.at) < SAME_GAME));
-          if (i < 0) { list.push(game); added++; }
-          else if (list[i].id === game.id || (game.me && !list[i].me)) list[i] = game;
-        }
-        list.sort((a, b) => b.at - a.at);
+        const before = await games();
+        // Sending the same game twice keeps one (sameGame); a resent copy with the same id replaces the old one.
+        const ids = new Set(incoming.map(g => g.id));
+        const list = dedupeGames([...before.filter(g => !ids.has(g.id)), ...incoming]);
+        const added = Math.max(0, list.length - before.length);
         await env.BUILDS.put(GAMES_KEY, JSON.stringify(list.slice(0, MAX_GAMES)));
         return json({ ok: true, added, games: Math.min(list.length, MAX_GAMES) });
       }
