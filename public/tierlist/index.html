@@ -142,7 +142,7 @@
 // Tier list: the overlay's own tierlist.json, uploaded when Jun saves it (site.js loadTierlist).
 const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
 let HEROES = [], byId = {}, TL = null, role = "All", map = "Overall", selected = null;
-const img = id => `/img/heroes/${id}.webp`;
+const img = tierImg;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const wrOf = id => TL.winrates?.rates?.[id]?.wr;
 const wrClass = v => v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid";
@@ -245,7 +245,7 @@ document.addEventListener("click", e => {
 document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
 // /tierlist/#jaina opens Jaina's info (links from the search box)
 function showHash() {
-  const id = location.hash.slice(1);
+  const id = tierKey(location.hash.slice(1));
   if (!byId[id]) return;
   if (!tierOf(id)) { map = "Overall"; picker.set(map); }
   if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
@@ -267,7 +267,7 @@ document.querySelectorAll("button.tab[data-role]").forEach(b => b.addEventListen
 const picker = mapPicker(document.getElementById("map"), { onChange: m => { map = m; render(); } });
 
 Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
-  HEROES = heroes.map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
+  HEROES = tierRows(heroes).map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
   HEROES.forEach(h => byId[h.id] = h);
   TL = tl;
   drawMoved();

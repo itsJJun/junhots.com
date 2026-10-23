@@ -4,11 +4,41 @@ for (const el of document.querySelectorAll("[data-edit]")) {
   if (typeof v === "string") el.textContent = v;
 }
 
+// Cho and Gall are one hero in the draft, so tier lists rank them as one: Cho'gall, under Cho's id ("chogall").
+// Their builds, talents and games stay separate.
+window.TIER_SHARED = { gall: "chogall" };
+window.tierKey = id => TIER_SHARED[id] || id;
+// /data/heroes.json rows as a tier list shows them: no Gall row, and Cho's row named Cho'gall
+window.tierRows = rows => rows.filter(r => !TIER_SHARED[r[0]]).map(r => r[0] === "chogall" ? ["chogall", "Cho'gall", ...r.slice(2)] : r);
+// Tier list pictures: Cho'gall gets the two-headed one
+window.tierImg = id => `/img/heroes/${id === "chogall" ? "chogall-both" : id}.webp`;
+// Moves Gall's tiers, counters, synergy and win rate onto Cho'gall (lists saved before they were one hero).
+// Where both were set, Cho's stays; lists are merged.
+window.foldTierlist = tl => {
+  if (!tl || typeof tl !== "object") return tl;
+  const fold = m => { if (!m) return; for (const [a, b] of Object.entries(TIER_SHARED)) if (a in m) { if (!(b in m)) m[b] = m[a]; delete m[a]; } };
+  fold(tl.overall);
+  Object.values(tl.maps || {}).forEach(fold);
+  fold(tl.winrates?.rates);
+  if (tl.changes) for (const a in TIER_SHARED) delete tl.changes[a];
+  for (const k of ["counters", "synergy"]) {
+    if (!tl[k]) continue;
+    const out = {};
+    for (const [h, list] of Object.entries(tl[k])) {
+      const a = tierKey(h);
+      for (const t of list || []) { const b = tierKey(t); if (b !== a && !(out[a] ||= []).includes(b)) out[a].push(b); }
+    }
+    tl[k] = Object.fromEntries(Object.entries(out).filter(([, l]) => l.length));
+  }
+  return tl;
+};
+
 // Jun's tier list: the copy the overlay uploads when Jun saves, or the file in the repo if that isn't there.
 window.loadTierlist = () => fetch("/api/tierlist", { cache: "no-store" })
   .then(r => r.ok ? r.json() : Promise.reject())
   .then(d => d && Array.isArray(d.tiers) ? d : Promise.reject())
-  .catch(() => fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()));
+  .catch(() => fetch("/data/tierlist.json", { cache: "no-cache" }).then(r => r.json()))
+  .then(foldTierlist);
 
 // Role icons (the game's six roles), drawn as small SVGs so they stay sharp at any size.
 const ROLE_COLORS = { "Tank": "#f5c03b", "Bruiser": "#ff8a3d", "Ranged Assassin": "#b98aff", "Melee Assassin": "#ff5f5f", "Healer": "#4cd471", "Support": "#55aaff" };
