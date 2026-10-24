@@ -32,7 +32,16 @@
 .sum .w { color: var(--good); } .sum .l { color: var(--bad); }
 /* Filters: heroes I played (most first), map, result */
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
-.heroes { display: flex; gap: 6px; flex: 1 1 320px; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: 5px; margin: -5px; }
+/* Heroes get their own line and wrap; two rows show until "All N heroes" opens the rest */
+.heroes { display: flex; flex-wrap: wrap; gap: 8px 6px; flex: 1 1 100%; min-width: 0; padding: 5px; margin: -5px; }
+.hsearch { flex: 0 1 240px; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); max-width: 280px; }
+.hsearch:focus-within { border-color: var(--muted); }
+.hsearch svg { flex: none; width: 15px; height: 15px; color: var(--muted); }
+.hsearch input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: 400 14px/1 var(--sans); }
+.hsearch input::placeholder { color: var(--muted); }
+.hnone { align-self: center; color: var(--muted); font-size: 13px; padding-left: 4px; }
+.hmore { flex: none; height: 38px; padding: 0 12px; border-radius: 9px; border: 1px dashed var(--line); background: transparent; color: var(--muted); font: 500 13px/1 var(--sans); cursor: pointer; }
+.hmore:hover { color: var(--text); border-color: var(--muted); }
 .hf { position: relative; flex: none; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 9px; background: var(--surface-2); cursor: pointer; transition: opacity .15s, transform .15s; }
 .hf img { display: block; width: 100%; height: 100%; border-radius: 9px; object-fit: cover; }
 .hf span { position: absolute; right: -3px; bottom: -3px; min-width: 16px; padding: 0 3px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); font: 600 10px/14px var(--mono); color: var(--muted); }
@@ -101,6 +110,7 @@
   <section class="sum" id="sum" aria-label="Summary"></section>
   <div class="filters">
     <div class="heroes" id="heroes" role="group" aria-label="Hero"></div>
+    <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
     <span id="map"></span>
     <div class="seg" id="res" role="group" aria-label="Result"><button data-r="" aria-pressed="true">All</button><button data-r="win" aria-pressed="false">Wins</button><button data-r="loss" aria-pressed="false">Losses</button></div>
   </div>
@@ -155,8 +165,48 @@ function drawHeroes() {
   const count = {};
   for (const g of GAMES) count[g.hero] = (count[g.hero] || 0) + 1;
   const ids = Object.keys(count).sort((a, b) => count[b] - count[a] || kit.byId[a].name.localeCompare(kit.byId[b].name));
-  document.getElementById("heroes").innerHTML = ids.map(id => `<button class="hf" data-h="${id}" aria-pressed="${F.h === id}" title="${kit.esc(kit.byId[id].name)}: ${count[id]} game${count[id] > 1 ? "s" : ""}"><img src="/img/heroes/${id}.webp" alt="${kit.esc(kit.byId[id].name)}"><span>${count[id]}</span></button>`).join("");
+  const box = document.getElementById("heroes");
+  box.innerHTML = ids.map(id => `<button class="hf" data-h="${id}" aria-pressed="${F.h === id}" title="${kit.esc(kit.byId[id].name)}: ${count[id]} game${count[id] > 1 ? "s" : ""}"><img src="/img/heroes/${id}.webp" alt="${kit.esc(kit.byId[id].name)}"><span>${count[id]}</span></button>`).join("")
+    + `<button class="hmore" type="button" hidden>All ${ids.length} heroes</button>`;
+  fitHeroes();
 }
+// Hero search: "lucio" finds Lúcio. Enter picks the first match, Escape clears.
+const fold = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const hq = document.getElementById("hq");
+hq.addEventListener("input", () => { if (kit) fitHeroes(); });
+hq.addEventListener("keydown", e => {
+  if (e.key === "Escape") { hq.value = ""; fitHeroes(); }
+  if (e.key !== "Enter") return;
+  const first = [...document.querySelectorAll("#heroes .hf")].find(b => !b.hidden);
+  if (first && F.h !== first.dataset.h) first.click();
+});
+// Two rows of heroes, the last spot of the second row is the "All N heroes" button. Open, every hero shows.
+let heroesOpen = false;
+function fitHeroes() {
+  const box = document.getElementById("heroes"), more = box.querySelector(".hmore"), list = [...box.querySelectorAll(".hf")];
+  if (!more) return;
+  const q = fold(document.getElementById("hq").value);
+  box.querySelector(".hnone")?.remove();
+  if (q) {   // searching: every matching hero, nothing else
+    more.hidden = true;
+    list.forEach(b => b.hidden = !fold(kit.byId[b.dataset.h].name).includes(q));
+    if (list.every(b => b.hidden)) box.insertAdjacentHTML("beforeend", '<span class="hnone">No games on a hero by that name</span>');
+    return;
+  }
+  list.forEach(b => b.hidden = false);
+  more.hidden = true;
+  const top = list[0]?.offsetTop ?? 0, rowH = 46;
+  const over = list.filter(b => b.offsetTop - top >= 2 * rowH);
+  if (heroesOpen || !over.length) { if (heroesOpen && over.length) { more.hidden = false; more.textContent = "Fewer heroes"; } return; }
+  over.forEach(b => b.hidden = true);
+  more.hidden = false;
+  more.textContent = `All ${list.length} heroes`;
+  // make room for the button on the second row
+  let shown = list.filter(b => !b.hidden);
+  while (shown.length && more.offsetTop - top >= 2 * rowH) { shown.pop().hidden = true; }
+  if (F.h && box.querySelector(`.hf[data-h="${F.h}"]`)?.hidden) { heroesOpen = true; fitHeroes(); }   // the picked hero always shows
+}
+addEventListener("resize", () => { if (kit) fitHeroes(); });
 
 function row(g, i) {
   const b = kit.best(g), e = kit.edge(g), h = kit.byId[g.hero];
@@ -196,19 +246,12 @@ document.getElementById("list").addEventListener("click", e => {
   open.classList.toggle("on", !was);
 });
 document.getElementById("heroes").addEventListener("click", e => {
+  if (e.target.closest(".hmore")) { heroesOpen = !heroesOpen; fitHeroes(); return; }
   const b = e.target.closest(".hf");
   if (!b) return;
   F.h = F.h === b.dataset.h ? "" : b.dataset.h;
   shown = PAGE; draw();
 });
-// Many heroes after an import: the mouse wheel scrolls the hero row sideways
-document.getElementById("heroes").addEventListener("wheel", e => {
-  const el = e.currentTarget;
-  const atEnd = e.deltaY > 0 ? el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 : el.scrollLeft <= 0;
-  if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || atEnd) return;   // at either end the page scrolls as usual
-  el.scrollLeft += e.deltaY;
-  e.preventDefault();
-}, { passive: false });
 document.getElementById("res").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
