@@ -83,6 +83,29 @@ a.card:hover { border-color: #4a413c; transform: translateY(-2px); }
 .card b .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
 a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 .card p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+/* Tier list card: Jun's live tier list, same tiles as /tierlist/ (fills in from loadTierlist; the old picture stays if it can't load) */
+.c-tier .pic { position: relative; min-height: 320px; background: var(--surface); }
+.c-tier .mini { position: absolute; inset: 0; }
+.c-tier .pic::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: linear-gradient(transparent, var(--surface)); pointer-events: none; }
+.mini .row { display: grid; grid-template-columns: 52px 1fr; min-height: 76px; }
+.mini .row + .row { border-top: 1px solid var(--line); }
+.mini .tier { display: grid; place-items: center; font: 700 22px/1 var(--sans); letter-spacing: -0.02em; color: var(--c); background: linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, var(--surface-2)), color-mix(in srgb, var(--c) 6%, var(--surface))); box-shadow: inset 3px 0 0 var(--c); border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line)); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent); }
+.mini .heroes { display: flex; flex-wrap: wrap; gap: 10px 8px; align-content: center; padding: 10px 12px; min-width: 0; }
+.mini .h { width: 56px; text-align: center; }
+.mini .h img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--surface-2); }
+.mini .h > span:not(.port) { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini .wr { font: 500 11px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.mini .good { color: var(--good); } .mini .bad { color: var(--bad); } .mini .mid { color: var(--muted); }
+.mini .port .mv { position: absolute; left: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
+.mini .port .mv svg { width: 9px; height: 9px; color: #12100f; }
+.c-tier .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.c-tier .meta:empty { display: none; }
+.c-tier .meta strong { color: var(--text); font-weight: 500; }
+.c-tier .meta .mvs { display: inline-flex; gap: 6px; }
+.c-tier .meta .mvs span { position: relative; }
+.c-tier .meta .mvs img { display: block; width: 24px; height: 24px; border-radius: 5px; object-fit: cover; }
+.c-tier .meta .mvs svg { position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; padding: 2px; border-radius: 50%; background: var(--c); color: #12100f; box-shadow: 0 0 0 2px var(--surface); }
+@media (max-width: 520px) { .mini .row { grid-template-columns: 44px 1fr; } .mini .h, .mini .h img { width: 48px; } .mini .h img { height: 48px; } }
 /* Builds card: three hero art slices */
 .c-builds .pic, .c-maker .pic { flex: none; height: 150px; }
 .c-builds .pic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--line); }
@@ -198,7 +221,7 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
   <section class="games" id="games" aria-label="My recent games" hidden></section>
 
   <section class="cards" aria-label="On this site">
-    <a class="card c-tier" href="/tierlist/"><div class="pic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p></div></a>
+    <a class="card c-tier" href="/tierlist/"><div class="pic" id="tlpic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p><div class="meta" id="tlmeta"></div></div></a>
     <a class="card c-builds" href="/builds/"><div class="pic" id="buildpics"><img src="/img/art/jaina.webp" alt=""><img src="/img/art/muradin.webp" alt=""><img src="/img/art/malfurion.webp" alt=""></div><div class="txt"><b><span data-edit="card_builds_title">Builds</span><span class="arr">→</span></b><p data-edit="card_builds_text">Talents for every hero, my builds to copy into the game, and your own.</p></div></a>
     <div class="card c-maker"><div class="pic"><a href="/tierlist-maker/" aria-label="Make a tier list"><img src="/img/previews/maker.webp" alt=""></a><a href="/builds/?make" aria-label="Make a build"><img src="/img/previews/build-maker.webp" alt=""></a></div><div class="txt"><b><span data-edit="card_maker_title">Make your own</span></b><p data-edit="card_maker_text">Your own tier list or talent build, ready to share.</p><div class="mk"><a href="/tierlist-maker/">Tier list <span class="arr">→</span></a><a href="/builds/?make">Build <span class="arr">→</span></a></div></div></div>
     <a class="card c-overlay" href="/overlay/"><div class="pic"><img src="/img/previews/overlay-talents.webp" alt="Stream overlay in a game"></div><div class="txt"><b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b><p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p></div></a>
@@ -235,6 +258,22 @@ Promise.all([
   const top3 = best.filter(id => wr(id) != null).slice(0, 3);
   if (top3.length === 3) document.getElementById("buildpics").innerHTML = top3.map(id =>
     `<img src="/img/art/${id}.webp" alt="${name[id]}" onerror="this.onerror=null;this.src='/img/heroes/${id}.webp'">`).join("");
+  // Tier list card: the real tier list in the same tiles as /tierlist/ (best win rate first; the card cuts it off at the bottom)
+  const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
+  const rows = tierRows(heroes), grole = Object.fromEntries(rows.map(r => [r[0], r[3]])), tname = Object.fromEntries(rows.map(r => [r[0], r[1]]));
+  const tierIdx = id => tl.tiers.findIndex(t => t.id === id);
+  const moveOf = id => { const c = tl.changes?.[id]; if (!c || Date.now() - c.at > 7 * 864e5) return null; const a = tierIdx(c.from), b = tierIdx(c.to); return { ...c, up: b >= 0 && (a < 0 || b < a) }; };
+  const arrow = up => `<svg viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
+  const wrClass = v => v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid";
+  if (tl.tiers?.length) document.getElementById("tlpic").innerHTML = `<div class="mini" aria-label="Jun's tier list">${tl.tiers.map(t => {
+    const list = rows.map(r => r[0]).filter(id => tl.overall?.[id] === t.id).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+    if (!list.length) return "";
+    return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${t.name}</div><div class="heroes">${list.map(id => { const m = moveOf(id);
+      return `<div class="h"><span class="port"><img src="${tierImg(id)}" alt="" loading="lazy">${roleIcon(grole[id], "rb")}${m ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})">${arrow(m.up)}</i>` : ""}</span><span>${tname[id]}</span><div class="wr ${wrClass(wr(id))}">${wr(id) == null ? "" : wr(id).toFixed(1) + "%"}</div></div>`; }).join("")}</div></div>`;
+  }).join("")}</div>`;
+  const moved = Object.keys(tl.changes || {}).filter(id => tname[id] && moveOf(id)).sort((a, b) => tl.changes[b].at - tl.changes[a].at);
+  document.getElementById("tlmeta").innerHTML = (tl.updated ? `<span>Updated <strong>${new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" })}</strong></span>` : "") +
+    (moved.length ? `<span>${moved.length} moved this week</span><span class="mvs">${moved.slice(0, 6).map(id => { const m = moveOf(id); return `<span title="${tname[id]}"><img src="${tierImg(id)}" alt="${tname[id]}">${arrow(m.up).replace("<svg", `<svg style="--c:var(--${m.up ? "good" : "bad"})"`)}</span>`; }).join("")}</span>` : "");
   const pool = [...best];
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   const show = pool.slice(0, 5), mid = (show.length - 1) / 2;
