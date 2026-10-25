@@ -174,7 +174,7 @@ function cleanGame(g) {
 // Every page and every hero's builds page, for search engines.
 async function sitemap(url, env) {
   const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
-  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/tierlist-maker/", "/overlay/", ...heroes.map(h => `/builds/${h[0]}`)];
+  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/tierlist-maker/", "/overlay/", "/updates/", ...heroes.map(h => `/builds/${h[0]}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}\n</urlset>\n`;
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }

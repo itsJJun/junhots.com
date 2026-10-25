@@ -75,3 +75,20 @@ const ROLE_PATHS = {
 window.roleIcon = (role, cls = "ri") => ROLE_PATHS[role] ? `<svg class="${cls}" viewBox="0 0 24 24" style="color:${ROLE_COLORS[role]}" role="img" aria-label="${role}"><title>${role}</title>${ROLE_PATHS[role]}</svg>` : "";
 window.ROLES = Object.keys(ROLE_PATHS);
 window.ROLE_SHORT = r => r.replace(" Assassin", "");
+
+// "New: ..." line: shows the newest update (or newest overlay update) from /data/updates.json
+{
+  const els = document.querySelectorAll("[data-latest]");
+  if (els.length) fetch("/data/updates.json").then(r => r.json()).then(all => {
+    all.sort((a, b) => b.date.localeCompare(a.date));
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    for (const el of els) {
+      const f = el.dataset.latest;
+      const u = all.find(u => f === "all" || u.area === f || u.area === "both");
+      if (!u) continue;
+      const day = new Date(u.date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      el.innerHTML = `<b>New</b><span>${esc(u.title)} <i>· ${day}</i></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      el.hidden = false;
+    }
+  }).catch(() => {});
+}
