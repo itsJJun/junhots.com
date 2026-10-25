@@ -93,6 +93,9 @@ h2.sec > span { white-space: nowrap; }
 .ic { position: relative; display: block; }
 .empty { display: block; }
 .tal .slot .lvl { margin-top: 2px; }
+/* "LV" small and dim, level number bright: a lowercase "Lvl" read like "Lv 11" in the small mono font */
+.slot .lvl small, .sl small { font-size: 9px; letter-spacing: .06em; opacity: .75; }
+.slot .lvl b { font-weight: 600; color: #d8d0cb; }
 .tn { font: 600 11px/1 var(--mono); color: var(--brand); }
 .slot .tn { margin-top: -1px; }
 .code { font: 500 12px var(--mono); color: var(--muted); }
@@ -539,7 +542,7 @@ function strip(picks, jump, alt = [], lv = {}) {
     // One swap: its icon on the corner. Two or more: an amber "+N" badge, so the slot stays small.
     const inner = img + (as.length === 1 ? `<span class="alts"><img class="alt" src="${icon(as[0].icon)}" alt="Situational: ${esc(as[0].name)}" data-tip="t-${r}-${nums[0]}"></span>`
       : as.length ? `<span class="more" aria-label="Situational: ${as.map(a => esc(a.name)).join(", ")}">+${as.length}</span>` : "") + (t && lv[r] ? `<span class="ndot" aria-label="Note"></span>` : "");
-    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}${lv[r] ? ` data-note="${esc(lv[r])}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl">Lvl ${L}</span><span class="tn">${t ? picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
+    return `<span class="slot"${t ? ` data-tip="t-${r}-${picks[r]}"${nums.length ? ` data-sit="${nums.join("")}"` : ""}${lv[r] ? ` data-note="${esc(lv[r])}"` : ""}` : ""}>${t && jump ? `<button data-jump="${r}-${picks[r]}" aria-label="${esc(t.name)}"><span class="ic">${inner}</span></button>` : `<span class="ic">${inner}</span>`}<span class="lvl"><small>LV</small> <b>${L}</b></span><span class="tn">${t ? picks[r] + (nums.length ? `<i>${nums.length > 2 ? " +" + nums.length : "/" + nums.join("/")}</i>` : "") : "&nbsp;"}</span></span>`;
   }).join("");
 }
 // "Take it vs" (enemies) / "Take it with" (allies): the heroes this build is made for, as small faces, name on hover
@@ -547,7 +550,7 @@ const faces = (lab, ids = [], cls = "") => (ids = ids.filter(g => byId[g])).leng
 // "Situational" row under a build: which talents to swap in, tap one to see it
 function sitRow(alt = []) {
   const rows = LEVELS.map((L, r) => [L, r, alts(alt[r]).filter(a => hero.talents[L]?.[a - 1])]).filter(x => x[2].length);
-  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl">Lvl ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}" data-tip="t-${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
+  return rows.length ? `<div class="sitbox"><span class="sit"><span class="lab">Situational</span></span>${rows.map(([L, r, as]) => `<div class="sitrow"><small class="sl"><small>LV</small> ${L}</small><span class="sit">${as.map(a => `<button class="chip" data-jump="${r}-${a}" data-tip="t-${r}-${a}"><img src="${icon(hero.talents[L][a - 1].icon)}" alt="">${esc(hero.talents[L][a - 1].name)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
 }
 // A build's note is one text. Lines that start with a level ("Lvl 13: ...", "lv13 - ...", "13: ...") are notes for that level;
 // "Lvl 13/16 ..." (also "13 & 16", "13, 16") is one note for both. Every other line is the general comment, line breaks kept.
@@ -576,7 +579,7 @@ function splitNote(note) {
 function noteHtml(note, b) {
   const { gen, rows } = splitNote(note);
   return (gen ? `<p class="note">${noteText(gen, b)}</p>` : "")
-    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span><div class="lngrid">${rows.map(x => `<small class="sl">Lvl ${x.levels.join("/")}</small><span>${noteText(x.text, b)}</span>`).join("")}</div></div>` : "");
+    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span><div class="lngrid">${rows.map(x => `<small class="sl"><small>LV</small> ${x.levels.join("/")}</small><span>${noteText(x.text, b)}</span>`).join("")}</div></div>` : "");
 }
 // Talent and hero names in a note get a small icon: hover shows the talent (or hero name) like everywhere else,
 // tap jumps to the talent / opens that hero. Found by themselves: a talent's full name in any case, or a short form of
