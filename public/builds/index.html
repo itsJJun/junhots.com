@@ -147,6 +147,9 @@ a.hlink { text-decoration: none; }
 .tfound .tlink { font-size: 12px; font-weight: 500; }
 .tfounds { display: grid; gap: 4px; }
 .tfound .fl { width: 56px; }
+.tlink .xh { width: 14px; height: 14px; margin: 0 0 0 4px; border-radius: 50%; vertical-align: -2px; box-shadow: none; opacity: .85; }
+.tip .tfrom { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px; padding: 4px 9px 4px 4px; border-radius: 6px; background: #1d1a18; border: 1px solid #3d3531; font-size: 12px; color: var(--muted); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
+.tip .tfrom img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
 .tlink.pk img { box-shadow: 0 0 0 1.5px var(--brand); }
 .tlink.st img { box-shadow: 0 0 0 1.5px var(--sit); }
 .tlink .k { margin-left: 4px; padding: 0 4px; border-radius: 4px; border: 1px solid #3d3531; font: 600 10px/15px var(--mono); color: var(--muted); vertical-align: 1px; }
@@ -372,6 +375,7 @@ function renderList() {
 async function openHero(id, state) {
   if (!hero || hero.id !== id) hero = await fetch(`/data/heroes/${id}.json`).then(r => r.json());
   loadGames(id);
+  await loadOthers([...(BUILDS[id] || []), ...(MYB[id] || []), state].flatMap(linkedHeroes));   // so other heroes' talents in notes get icons
   mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], with: [], ...state };
   mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
   document.title = `${hero.name} build and talents · JunHotS`;
@@ -514,9 +518,18 @@ function noteHtml(note, b) {
 // one talent or hero, like [Bolt]; the brackets don't show. One-word short forms only work that way, so normal words stay text.
 const STOP = /^(the|a|an|of|for|and|with|on|in|to|from|is)$/i;
 const NICK = { anubarak: ["Anub", "Anubarak"], dva: ["Dva", "DVa"], etc: ["ETC"], guldan: ["Guldan"], kaelthas: ["Kael", "Kaelthas"], kelthuzad: ["KT", "Kelthuzad", "Kel"], liming: ["Li Ming", "Liming"], lili: ["LiLi"], ltmorales: ["Morales", "Lt Morales"], lucio: ["Lucio"], malganis: ["Malganis"], sgthammer: ["Hammer", "Sgt Hammer"], butcher: ["Butcher"], lostvikings: ["Lost Vikings", "Vikings", "TLV"], xalatath: ["Xalatath"], zuljin: ["Zuljin", "Zul"] };
-let TM = null;
-function talentMatcher() {
-  if (TM?.id === hero.id) return TM;
+// Other heroes' talents ("Hungry for More" on an Alexstrasza build) count only for heroes the build links:
+// its Take it vs / Take it with heroes and heroes named in the note. Full names only, and this hero's own names win.
+const OTHER = {};   // hero id -> that hero's data, loaded on demand
+const loadOthers = ids => Promise.all(ids.filter(id => !OTHER[id] && byId[id]).map(id => fetch(`/data/heroes/${id}.json`).then(r => r.json()).then(d => { OTHER[id] = d; }).catch(() => {})));
+function linkedHeroes(b) {
+  const ids = [...(b?.good || []), ...(b?.with || []), ...matches(b?.note || "").map(([, x]) => x.ref.hero).filter(Boolean)];
+  return [...new Set(ids)].filter(id => id !== hero.id && byId[id]).sort();
+}
+const TMS = {};
+function talentMatcher(others = []) {
+  const id = [hero.id, ...others.filter(o => OTHER[o])].join(",");
+  if (TMS[id]) return TMS[id];
   const key = s => s.toLowerCase().replace(/\s+/g, " "), by = {}, forced = {}, pre = {};
   const add = (map, s, ref) => { map[key(s)] ||= { s, ref }; };
   LEVELS.forEach((L, r) => (hero.talents[L] || []).forEach((t, i) => {
@@ -534,13 +547,19 @@ function talentMatcher() {
   });
   hero.abilities.forEach((a, i) => add(by, a.name.trim(), { ab: i, a }));   // a heroic with the same name stays the talent
   HEROES.forEach(h => [h.name, ...(/^the\s/i.test(h.name) ? [h.name.slice(4)] : []), ...(NICK[h.id] || [])].forEach(n => add(by, n, { hero: h.id })));
+  others.filter(o => OTHER[o]).forEach(o => LEVELS.forEach((L, r) => (OTHER[o].talents[L] || []).forEach((t, i) => {
+    const ref = { oh: o, r, i: i + 1, t }, name = t.name.trim();
+    add(by, name, ref);
+    if (/^the\s/i.test(name)) add(by, name.slice(4), ref);
+  })));
+  others.filter(o => OTHER[o]).forEach(o => OTHER[o].abilities.forEach((a, i) => add(by, a.name.trim(), { oh: o, ab: i, a })));   // "Lightning Nova" beats the hero Nova
   Object.assign(forced, by);
   const pats = Object.keys(by).sort((a, b) => b.length - a.length).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+"));
-  return TM = { id: hero.id, by, forced, key, re: new RegExp(`\\[([^\\[\\]\\n]{1,40})\\]|(?<![\\p{L}\\p{N}'’.])(?:${pats.join("|")})(?![\\p{L}\\p{N}'’])`, "giu") };
+  return TMS[id] = { by, forced, key, re: new RegExp(`\\[([^\\[\\]\\n]{1,40})\\]|(?<![\\p{L}\\p{N}'’.])(?:${pats.join("|")})(?=['’]s(?![\\p{L}\\p{N}])|(?!['’]?[\\p{L}\\p{N}]))`, "giu") };
 }
 // Every name a note matched: [match, entry, the text to show]
-function matches(text) {
-  const { by, forced, key, re } = talentMatcher(), out = [];
+function matches(text, others) {
+  const { by, forced, key, re } = talentMatcher(others), out = [];
   for (const m of String(text).matchAll(re)) {
     if (m[1] != null) { const x = forced[key(m[1].trim())]; if (x) out.push([m, x, m[1].trim()]); continue; }
     const x = by[key(m[0])];
@@ -553,20 +572,21 @@ function matches(text) {
 function nameTag(x, shown, b) {
   const { hero: h, ab, a, r, i, t } = x.ref;
   if (h) return `<a class="tlink hlink" href="#${h}" data-tip="h-${h}"><img src="${portrait(h)}" alt="">${esc(shown)}</a>`;
+  if (x.ref.oh) return `<a class="tlink hlink xlink" href="#${x.ref.oh}" data-tip="o-${x.ref.oh}-${a ? "a-" + ab : r + "-" + i}"><img src="${icon((a || t).icon)}" alt="">${esc(shown)}${a?.key.length === 1 ? `<small class="k">${a.key}</small>` : ""}<img class="xh" src="${portrait(x.ref.oh)}" alt="${esc(byId[x.ref.oh].name)}"></a>`;
   if (a) return `<span class="tlink" data-tip="a-${ab}" data-abjump="${ab}"><img src="${icon(a.icon)}" alt="">${esc(shown)}${a.key.length === 1 ? `<small class="k">${a.key}</small>` : ""}</span>`;
   const st = b?.picks?.[r] === i ? " pk" : alts(b?.alt?.[r]).includes(i) ? " st" : "";
   return `<span class="tlink${st}" data-tip="t-${r}-${i}" data-jump="${r}-${i}"><img src="${icon(t.icon)}" alt="">${esc(shown)}</span>`;
 }
 // The talents, abilities and heroes a whole note mentions, each once (for the list under Jun's note box)
-function noteNames(note) {
+function noteNames(note, b) {
   const seen = new Set(), out = [];
-  matches(note).forEach(([, x]) => { const k = x.ref.hero || x.ref.t || x.ref.a; if (!seen.has(k)) { seen.add(k); out.push(x); } });
+  matches(note, linkedHeroes(b)).forEach(([, x]) => { const k = x.ref.hero || x.ref.t || x.ref.a; if (!seen.has(k)) { seen.add(k); out.push(x); } });
   return out;
 }
 // Note text as HTML with the icons
 function noteText(text, b) {
   let html = "", at = 0;
-  for (const [m, x, shown] of matches(text)) { html += esc(text.slice(at, m.index)) + nameTag(x, shown, b); at = m.index + m[0].length; }
+  for (const [m, x, shown] of matches(text, linkedHeroes(b))) { html += esc(text.slice(at, m.index)) + nameTag(x, shown, b); at = m.index + m[0].length; }
   return html + esc(text.slice(at));
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
@@ -644,7 +664,8 @@ function drawMine() {
     const marks = () => app.querySelectorAll("[data-lvnote]").forEach(b => b.classList.toggle("has", !!splitNote(mine.note).lv[LEVELS.indexOf(b.dataset.lvnote)]));
     // Shows which talent and hero names the note will turn into icons, so a typo or a too-short name is easy to spot
     const found = () => {
-      const xs = noteNames(mine.note || ""), row = (lab, list) => list.length ? `<div class="tfound"><span class="fl">${lab}</span>${list.map(x => nameTag(x, x.ref.hero ? byId[x.ref.hero].name : (x.ref.t || x.ref.a).name, mine)).join("")}</div>` : "";
+      const ids = linkedHeroes(mine); if (ids.some(o => !OTHER[o] && byId[o])) loadOthers(ids).then(() => document.getElementById("tfound") && found());
+      const xs = noteNames(mine.note || "", mine), row = (lab, list) => list.length ? `<div class="tfound"><span class="fl">${lab}</span>${list.map(x => nameTag(x, x.ref.hero ? byId[x.ref.hero].name : (x.ref.t || x.ref.a).name, mine)).join("")}</div>` : "";
       document.getElementById("tfound").innerHTML = xs.length ? row("Talents", xs.filter(x => x.ref.t)) + row("Abilities", xs.filter(x => x.ref.a)) + row("Heroes", xs.filter(x => x.ref.hero))
         : `<div class="tfound">Talent and hero names get an icon. For a one-word short name use brackets, like [Bolt].</div>`;
     };
@@ -724,6 +745,16 @@ app.addEventListener("mouseover", e => {
     tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = r.bottom + 6 + "px"; return;
   }
   if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}${heroStats(h.id)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
+  if (el.dataset.tip.startsWith("o-")) {   // another hero's talent named in a note
+    const [, o, r, i] = el.dataset.tip.split("-"), ab = r === "a", t = ab ? OTHER[o]?.abilities[i] : OTHER[o]?.talents[LEVELS[r]]?.[i - 1];
+    if (!t) return;
+    tip.innerHTML = `<div class="tfrom"><img src="${portrait(o)}" alt="">${esc(byId[o].name)} ${ab ? "ability" : `talent · Level ${LEVELS[r]}`}</div>` + card(t, "", "div", ab ? 0 : +i);
+    tip.on = el; tip.hidden = false;
+    const rc = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(12, Math.min(rc.left + rc.width / 2 - w / 2, innerWidth - w - 12)) + "px";
+    tip.style.top = (rc.bottom + 8 + h < innerHeight - 8 ? rc.bottom + 8 : Math.max(8, rc.top - h - 8)) + "px";
+    return;
+  }
   const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
