@@ -79,6 +79,11 @@ h2.sec > span { white-space: nowrap; }
 .bcard .showing { display: none; font: 600 11px/1 var(--sans); color: #1f0b05; background: var(--brand); border-radius: 999px; padding: 4px 8px; }
 .bcard.on .showing { display: inline-block; }
 .bcard[data-b] { cursor: pointer; }
+/* Recommended: Jun's pick for the hero. Shown first, with a coral star badge */
+.bcard.rec { border-color: rgba(242, 106, 75, 0.55); background: linear-gradient(180deg, rgba(242, 106, 75, 0.07), transparent 60%), var(--surface); }
+.bcard .recb { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--sans); letter-spacing: .02em; color: var(--brand); border: 1px solid rgba(242, 106, 75, 0.5); background: rgba(242, 106, 75, 0.1); border-radius: 999px; padding: 4px 8px 4px 6px; }
+.bcard .recb svg { width: 12px; height: 12px; fill: currentColor; }
+.bcard .btn2.recon { color: var(--brand); border-color: rgba(242, 106, 75, 0.5); }
 .bcard[data-b]:hover:not(.on) { border-color: #4a413c; }
 .bcard .clickhint { font-size: 12px; color: var(--muted); opacity: .7; }
 .bcard.on .clickhint { display: none; }
@@ -357,7 +362,7 @@ async function openHero(id, state) {
   document.title = `${hero.name} build and talents · JunHotS`;
   const jun = BUILDS[id] || [];
   const you = MYB[id] || [];
-  const junHtml = jun.length ? `<div class="builds">${jun.map((b, i) => buildCard(b, "jun-" + i)).join("")}</div>` : `<div class="none">No build from Jun for ${esc(hero.name)} yet. Make your own below.</div>`;
+  const junHtml = jun.length ? `<div class="builds">${jun.map((b, i) => [b, i]).sort((x, y) => !!y[0].rec - !!x[0].rec).map(([b, i]) => buildCard(b, "jun-" + i)).join("")}</div>` : `<div class="none">No build from Jun for ${esc(hero.name)} yet. Make your own below.</div>`;
   const youHtml = `<h2 class="sec"><span>Your saved builds</span> <small>Kept in this browser on this device. Use Copy share link to keep one anywhere.</small></h2>
     ${you.length ? `<div class="builds">${you.map((b, i) => buildCard(b, "you-" + i)).join("")}</div>` : `<div class="none">Nothing saved for ${esc(hero.name)} yet. Make a build below, name it and press Save.</div>`}`;
   app.innerHTML = `
@@ -424,10 +429,10 @@ function drawMatchups() {
 function buildCard(b, key) {
   const [kind, i] = key.split("-");
   const btns = kind === "you" ? `<button class="btn2" data-del-you="${i}">Delete</button>`
-    : ADMIN ? `<button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : "";
+    : ADMIN ? `<button class="btn2${b.rec ? " recon" : ""}" data-rec-jun="${i}" title="${b.rec ? "Stop recommending this build" : "Mark as recommended: shown first with a badge"}">${b.rec ? "★ Recommended" : "☆ Recommend"}</button><button class="btn2" data-edit-jun="${i}">Edit</button><button class="btn2" data-del-jun="${i}">Delete</button>` : "";
   return `
-      <div class="bcard" data-b="${key}">
-        <div class="bh"><b>${esc(b.name)}</b>${kind === "you" ? `<span class="by">by you</span>` : ""}<span class="showing">On the talents below</span><button class="btn2 primary" data-code="${key}">Copy build code</button>${btns}</div>
+      <div class="bcard${kind === "jun" && b.rec ? " rec" : ""}" data-b="${key}">
+        <div class="bh"><b>${esc(b.name)}</b>${kind === "jun" && b.rec ? `<span class="recb" title="Jun's recommended build for this hero"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>Recommended</span>` : ""}${kind === "you" ? `<span class="by">by you</span>` : ""}<span class="showing">On the talents below</span><button class="btn2 primary" data-code="${key}">Copy build code</button>${btns}</div>
         <div class="strip">${strip(b.picks, true, b.alt, splitNote(b.note).lv)}</div>
         <code class="code">${esc(code(b.picks))}</code>
         ${sitRow(b.alt)}
@@ -584,6 +589,8 @@ app.addEventListener("click", e => {
   if (al) { const [r, i] = al.dataset.alt.split("-").map(Number); const cur = alts(mine.alt[r]); mine.alt[r] = (cur.includes(i) ? cur.filter(a => a !== i) : [...cur, i].sort()).join(""); drawMine(); return; }
   const ej = e.target.closest("[data-edit-jun]");
   if (ej) { const i = +ej.dataset.editJun, b = BUILDS[hero.id][i]; mine = { picks: [...b.picks], alt: [...(b.alt || noAlt())], name: b.name, good: [...(b.good || [])], with: [...(b.with || [])], note: b.note || "", editing: i, from: "jun-" + i }; drawMine(); return; }
+  const rj = e.target.closest("[data-rec-jun]");
+  if (rj) { const i = +rj.dataset.recJun, list = BUILDS[hero.id].map((b, k) => k === i ? { ...b, rec: !b.rec } : b); putBuilds({ ...BUILDS, [hero.id]: list }, list[i].rec ? "Marked as recommended." : "No longer recommended."); return; }
   const dj = e.target.closest("[data-del-jun]");
   if (dj) { const i = +dj.dataset.delJun; if (confirm(`Delete "${BUILDS[hero.id][i].name}"? Visitors stop seeing it right away.`)) { const list = [...BUILDS[hero.id]]; list.splice(i, 1); putBuilds({ ...BUILDS, [hero.id]: list }, "Deleted."); } return; }
   const dy = e.target.closest("[data-del-you]");
@@ -640,6 +647,7 @@ app.addEventListener("click", hideTip);
 function saveJun() {
   if (!mine.name.trim()) { toast("Give the build a name first."); document.getElementById("bname").focus(); return; }
   const b = { name: mine.name.trim(), picks: [...mine.picks], alt: [...mine.alt], good: [...mine.good], with: [...mine.with], note: (mine.note || "").trim() };
+  if (mine.editing != null && BUILDS[hero.id]?.[mine.editing]?.rec) b.rec = true;   // editing keeps the Recommended mark
   const list = [...(BUILDS[hero.id] || [])];
   if (mine.editing != null) list[mine.editing] = b; else list.push(b);
   putBuilds({ ...BUILDS, [hero.id]: list }, mine.editing != null ? "Updated. It's live." : "Saved. It's live for everyone.");
