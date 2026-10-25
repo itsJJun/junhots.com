@@ -21,6 +21,7 @@
 <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/patch-changes.css">
 <style>
 :root { --sit: #f0b429; }
 .seg { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
@@ -192,6 +193,29 @@ a.hlink { text-decoration: none; }
 .tx b.h { color: #e6dfda; font-weight: 600; }
 /* Ability row under the hero name: small chips, tap one to read it */
 /* Matchups from Jun's tier list: three short rows of small portraits under the abilities */
+/* What the last patch changed on this hero (public/patch-changes.js), and every patch before it */
+.px { position: relative; z-index: 1; margin-top: 22px; padding: 16px 18px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.px-h { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-bottom: 6px; }
+.px-h h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.px-h small { color: var(--muted); font-size: 13px; }
+.px-h a { margin-left: auto; color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
+.px-h a:hover { color: var(--accent); }
+.px-body { columns: 2 320px; column-gap: 28px; }
+.px-body .pc-e { break-inside: avoid; }
+.px details { margin-top: 6px; border-top: 1px solid var(--line); }
+.px summary { padding: 10px 0; color: var(--muted); font-size: 13.5px; cursor: pointer; list-style: none; }
+.px summary::-webkit-details-marker { display: none; }
+.px summary::before { content: "▸"; display: inline-block; width: 14px; transition: transform .15s; }
+.px details[open] summary::before { transform: rotate(90deg); }
+.px summary:hover { color: var(--text); }
+.px-old { padding: 4px 0 10px; }
+.px-old + .px-old { border-top: 1px dashed var(--line); }
+.px-old .px-h h2 { font-size: 14px; }
+.pwarn:empty { display: none; }
+.pwarn { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding: 7px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, #e0b04f 35%, transparent); background: color-mix(in srgb, #e0b04f 8%, transparent); font-size: 13px; color: var(--text); }
+.pwarn > b { color: #e0b04f; font-weight: 600; }
+.pwarn .pw { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; }
+.pwarn .pw img { width: 18px; height: 18px; border-radius: 4px; }
 .mu { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
 .mu:empty { display: none; }
 .mug { display: grid; gap: 7px; }
@@ -323,6 +347,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-to
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script src="/patch-changes.js"></script>
 <script>
 // Hero data: /data/heroes/<id>.json (talents and abilities from the game files, made by tools/update_builds_data.py).
 // Jun's builds: /api/builds (saved in Cloudflare by Jun's editor, see src/worker.js), falling back to /data/builds.json. "picks" = which talent was taken on each row, counting from 1 (0 = none).
@@ -378,6 +403,7 @@ function renderList() {
 async function openHero(id, state) {
   if (!hero || hero.id !== id) hero = await fetch(`/data/heroes/${id}.json`).then(r => r.json());
   loadGames(id);
+  loadPatch(id);
   await loadOthers([...(BUILDS[id] || []), ...(MYB[id] || []), state].flatMap(linkedHeroes));   // so other heroes' talents in notes get icons
   mine = { picks: [0, 0, 0, 0, 0, 0, 0], name: "", good: [], with: [], ...state };
   mine.alt = noAlt().map((_, r) => alts(mine.alt?.[r]).filter(a => a !== mine.picks[r] && hero.talents[LEVELS[r]]?.[a - 1]).join(""));
@@ -396,6 +422,7 @@ async function openHero(id, state) {
       <div class="abinfo" id="abinfo" hidden></div>
       <div class="mu" id="mu"></div>
     </section>
+    <div id="patchx"></div>
 
     ${MAKE ? (jun.length ? `<details class="junfold"><summary>Jun's builds <small>${jun.length} for ${esc(hero.name)}, tap to look or start from one</small></summary>${junHtml}</details>` : "") : `<h2 class="sec">Jun's builds</h2>${junHtml}`}
     ${!MAKE || you.length ? youHtml : ""}
@@ -414,6 +441,7 @@ async function openHero(id, state) {
   app.querySelectorAll(".tx b.n[data-s]").forEach(b => b.title = `Grows ${Math.round(b.dataset.s * 100)}% per level`);
   drawMine();
   drawMatchups();
+  drawPatch();
 }
 // Tier, win rate, counters and synergy from Jun's tier list (same data as the Tier list page). Loads after the page, never holds it up.
 let TL = null;
@@ -425,6 +453,44 @@ function loadGames(id) {
   if (gamesFor === id) return;
   gamesFor = id; GAMES = null;
   fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) drawMatchups(); } }).catch(() => {});
+}
+// What Blizzard's patches changed on this hero (/api/patch-notes?hero=…, newest first), shown under the header.
+// Builds that take a talent the last patch changed get a small note, so an old build is easy to spot.
+let PATCH = null, patchFor = "";
+function loadPatch(id) {
+  if (patchFor === id) return;
+  patchFor = id; PATCH = null;
+  fetch(`/api/patch-notes?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject())
+    .catch(() => fetch("/data/patch-notes.json").then(r => r.json()).then(d => ({ items: d.items.filter(i => i.changes?.[id]).map(i => ({ ...i, verdict: i.verdicts?.[id], changes: i.changes[id], take: "" })) })))
+    .then(d => { if (patchFor === id) { PATCH = (d.items || []).filter(i => i.changes?.length && i.kind !== "ptr"); if (hero) drawPatch(); } }).catch(() => {});
+}
+const pday = iso => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+function pago(iso) { const d = Math.floor((Date.now() - new Date(iso)) / 864e5); return d < 1 ? "today" : d === 1 ? "yesterday" : d < 45 ? `${d} days ago` : d < 540 ? `${Math.round(d / 30.4)} months ago` : `${Math.round(d / 365)} years ago`; }
+// The talents a patch changed that this build takes, as [talent, change]
+function changedPicks(b, p) {
+  if (!b || !p) return [];
+  return p.changes.map(e => [PatchKit.lookup(hero, e), e]).filter(([t]) => t?.lvl && b.picks[LEVELS.indexOf(t.lvl)] && hero.talents[t.lvl][b.picks[LEVELS.indexOf(t.lvl)] - 1]?.name === t.name);
+}
+function drawPatch() {
+  const box = document.getElementById("patchx");
+  if (!box || !hero) return;
+  if (!PATCH?.length) { box.innerHTML = ""; return; }
+  const [last, ...older] = PATCH;
+  // Talents in Jun's builds get an "In my build" tag
+  const picked = new Set((BUILDS[hero.id] || []).flatMap(b => changedPicks(b, last).map(([t]) => PatchKit.norm(t.name))));
+  const head = (p, tag) => `<div class="px-h">${tag}<h2>${pday(p.date)} patch</h2>${PatchKit.verdict(p.verdict)}<small>${pago(p.date)}</small><a href="${esc(p.url)}" target="_blank" rel="noopener">Full notes ↗</a></div>`;
+  box.innerHTML = `<section class="px" aria-label="Patch changes">
+    ${head(last, `<span class="pc-tag">Last change</span>`)}
+    <div class="px-body">${PatchKit.entries(hero, last.changes, { hero: hero.id, picked })}</div>
+    ${PatchKit.take(last.take)}
+    ${older.length ? `<details><summary>Earlier patches (${older.length})</summary>${older.map(p => `<div class="px-old">${head(p, "")}<div class="px-body">${PatchKit.entries(hero, p.changes, { hero: hero.id })}</div>${PatchKit.take(p.take)}</div>`).join("")}</details>` : ""}
+  </section>`;
+  // A note on each build that takes a talent the last patch changed (only for 4 months after that patch)
+  const fresh = Date.now() - new Date(last.date) < 120 * 864e5;
+  for (const el of app.querySelectorAll("[data-pw]")) {
+    const hit = fresh ? changedPicks(buildOf(el.dataset.pw), last) : [];
+    el.innerHTML = hit.length ? `<b>Changed in the ${pday(last.date)} patch:</b>${hit.map(([t, e]) => { const d = e.lines.map(l => l.d); const v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : ""; return `<span class="pw"><img src="${icon(t.icon)}" alt="">${esc(t.name)}${v === "up" || v === "down" ? `<i class="pc-m ${v}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>` : ""}</span>`; }).join("")}` : "";
+  }
 }
 function drawMatchups() {
   const box = document.getElementById("mu"), tx = document.getElementById("tierx");
@@ -460,6 +526,7 @@ function buildCard(b, key) {
         ${sitRow(b.alt)}
         ${faces("Take it vs", b.good)}${faces("Take it with", b.with, "with")}
         ${noteHtml(b.note, b)}
+        <div class="pwarn" data-pw="${key}"></div>
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
 }
