@@ -38,6 +38,9 @@ window.SITE_TEXT = {
   history_title: "Match history",
   history_text: "Every ranked game the overlay recorded, newest first. Open a game for both teams, bans, my talents and the draft edge.",
 
+  updates_title: "Updates",
+  updates_text: "Everything new on my stream overlay and on junhots.com, newest first.",
+
   overlay_title: "Stream overlay",
   overlay_text: "The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.",
   overlay_badge: "Download coming soon",

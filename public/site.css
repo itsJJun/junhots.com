@@ -113,3 +113,15 @@ footer a:hover { color: var(--text); }
 .rtab { display: inline-flex; align-items: center; gap: 6px; }
 .port { position: relative; display: block; }
 .port .rb { position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; padding: 3px; border-radius: 50%; background: #12100f; box-shadow: 0 0 0 1px var(--line); }
+
+/* "New: ..." line (Home, Overlay page): the newest entry from /data/updates.json, links to /updates/ */
+.hero-txt { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.whatsnew { display: flex; width: fit-content; align-items: center; gap: 8px; max-width: 100%; margin-bottom: 18px; padding: 4px 12px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; color: var(--muted); transition: border-color .2s, color .2s; }
+.page-head .whatsnew { margin: 14px 0 0; }
+.hero-txt .whatsnew { margin-bottom: 0; }
+.whatsnew:hover { border-color: rgba(242, 106, 75, .5); color: var(--text); }
+.whatsnew b { flex: none; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #1f0b05; background: var(--brand); border-radius: 999px; padding: 2px 8px; }
+.whatsnew span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.whatsnew i { font-style: normal; color: var(--muted); }
+.whatsnew svg { width: 14px; height: 14px; flex: none; transition: transform .2s; }
+.whatsnew:hover svg { transform: translateX(2px); }
