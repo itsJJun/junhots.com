@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patch notes · JunHotS</title>
+<meta name="description" content="Every official Heroes of the Storm patch, newest first: what changed, which heroes changed, and links to Blizzard's full patch notes.">
+<meta property="og:title" content="Patch notes · JunHotS">
+<meta property="og:description" content="Every official Heroes of the Storm patch, newest first: what changed, which heroes changed, and links to Blizzard's full patch notes.">
+<meta property="og:url" content="https://junhots.com/patch-notes/">
+<meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JunHotS">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://junhots.com/patch-notes/">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+<style>
+.seg { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); overflow-x: auto; scrollbar-width: none; }
+.seg button { flex: none; font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 100%; }
+/* Kind of post: Live patch, PTR (test server), balance patch, other news */
+.kind { flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 5px; font: 600 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--k); background: color-mix(in srgb, var(--k) 14%, transparent); border: 1px solid color-mix(in srgb, var(--k) 30%, transparent); }
+.k-live { --k: var(--brand); } .k-ptr { --k: #e0b04f; } .k-balance { --k: #7fc4d9; } .k-news { --k: var(--muted); }
+/* Hero faces: each one opens that hero's builds */
+.faces { display: flex; flex-wrap: wrap; gap: 6px; }
+.face { position: relative; display: block; width: 34px; height: 34px; border-radius: 8px; background: var(--surface-2); transition: transform .15s, box-shadow .15s; }
+.face img { display: block; width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
+.face:hover, .face:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--brand); outline: none; }
+.face[data-name]:hover::after, .face[data-name]:focus-visible::after { content: attr(data-name); position: absolute; left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%); padding: 4px 8px; border-radius: 6px; background: #0b0a09; border: 1px solid var(--line); color: var(--text); font: 500 12px/1.2 var(--sans); white-space: nowrap; pointer-events: none; z-index: 2; }
+.more-h { align-self: center; padding: 0 4px; font: 600 12px var(--mono); color: var(--muted); }
+/* The newest patch, big */
+.latest { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 22px 32px; padding: 26px 28px; margin-bottom: 28px; border: 1px solid var(--line); border-radius: 16px; background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--brand) 11%, transparent), transparent 55%), var(--surface); overflow: hidden; }
+.latest .top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.latest h2 { margin: 12px 0 4px; font-size: clamp(24px, 3.4vw, 32px); line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; }
+.latest .what { margin: 0; color: var(--muted); max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); font-size: 12.5px; color: var(--text); }
+.chip svg { width: 13px; height: 13px; color: var(--muted); }
+.chip.fix { border-style: dashed; color: var(--muted); }
+.latest .changed { margin-top: 22px; }
+.latest .changed h3, .latest .newh h3 { margin: 0 0 10px; font: 500 12px/1 var(--sans); color: var(--muted); letter-spacing: .02em; }
+.latest .changed .face { width: 46px; height: 46px; border-radius: 10px; }
+.latest .changed .face img { border-radius: 10px; }
+.latest .side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 18px; }
+.newh { display: grid; justify-items: end; text-align: right; }
+.newh a { position: relative; display: block; width: 96px; height: 96px; border-radius: 14px; box-shadow: 0 0 0 1px var(--line); transition: transform .15s; }
+.newh a:hover { transform: translateY(-2px); }
+.newh img { width: 100%; height: 100%; border-radius: 14px; object-fit: cover; }
+.newh a::after { content: "NEW"; position: absolute; top: -8px; right: -8px; padding: 3px 6px; border-radius: 6px; background: var(--brand); color: #1f0b05; font: 700 10px/1 var(--mono); letter-spacing: .06em; }
+.newh b { margin-top: 8px; font: 600 15px var(--display); }
+.read { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 10px; background: var(--brand); color: #1f0b05; font: 600 14px/1 var(--sans); text-decoration: none; white-space: nowrap; transition: filter .15s; }
+.read:hover { filter: brightness(1.08); }
+.read svg, .row .go svg { width: 14px; height: 14px; }
+/* Every other post, one per row */
+.year { margin: 26px 0 10px; font: 600 13px var(--mono); color: var(--muted); }
+.list { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.row { position: relative; display: grid; grid-template-columns: 88px minmax(0, 1fr) auto 18px; align-items: center; gap: 16px; padding: 14px 18px; border-top: 1px solid var(--line); transition: background .15s; }
+.row:first-child { border-top: 0; }
+.row:hover { background: var(--surface-2); }
+.row .d { display: grid; line-height: 1.2; }
+.row .d b { font: 600 15px var(--mono); }
+.row .d small { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.row .t { display: grid; gap: 4px; min-width: 0; }
+.row .t > span { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row .t a { color: var(--text); font-weight: 600; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The whole row opens the article; hero faces sit above that link so they open builds instead */
+.row .t a::after { content: ""; position: absolute; inset: 0; }
+.row .t p { margin: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .faces { position: relative; z-index: 1; justify-content: flex-end; max-width: 330px; }
+.row .faces .face { width: 30px; height: 30px; border-radius: 7px; }
+.row .faces .face img { border-radius: 7px; }
+.row .go { color: var(--muted); }
+.row:hover .go { color: var(--text); }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+.src { margin-top: 14px; font-size: 13px; color: var(--muted); }
+.src a { color: var(--accent); }
+.upd { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); text-decoration: none; }
+.upd:hover { color: var(--text); }
+@media (max-width: 760px) {
+  .latest { grid-template-columns: 1fr; padding: 20px; }
+  .latest .side { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  .newh { order: -1; justify-items: start; text-align: left; }
+  .newh a { width: 72px; height: 72px; }
+  .row { grid-template-columns: 60px minmax(0, 1fr) 14px; gap: 12px; padding: 12px 14px; }
+  .row .faces { grid-column: 2 / 4; justify-content: flex-start; max-width: none; }
+  .row .go { grid-row: 1; grid-column: 3; }
+  .row .d small { display: none; }
+  .row { grid-template-columns: 52px minmax(0, 1fr) 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .face, .row, .newh a, .read { transition: none; } }
+</style>
+<script src="/nav.js" defer></script>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">Jun<span>HotS</span></a>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/patch-notes/" aria-current="page">Patch notes</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
+  </nav>
+  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
+
+  <header class="page-head">
+    <div>
+      <h1 data-edit="patch_title">Patch notes</h1>
+      <p class="sub" data-edit="patch_text">Every official Heroes of the Storm patch, newest first. Tap a hero to see my builds for it, or open a patch to read Blizzard's full notes.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" id="kind" role="group" aria-label="Show"><button data-k="" aria-pressed="true">All</button><button data-k="live" aria-pressed="false">Live</button><button data-k="ptr" aria-pressed="false">PTR</button><button data-k="balance" aria-pressed="false">Balance</button><button data-k="news" aria-pressed="false">News</button></div>
+    </div>
+  </header>
+
+  <section id="latest"></section>
+  <div id="list"><div class="list"><div class="empty">Loading patch notes…</div></div></div>
+  <p class="src" id="src"></p>
+
+  <footer>
+    <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+    <span class="social"><a href="/updates/">Updates</a><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
+    <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+  </footer>
+</div>
+
+<script src="/text.js"></script>
+<script src="/site.js"></script>
+<script>
+// Patch notes: Blizzard's Heroes of the Storm posts from /api/patch-notes (the server reads Blizzard's news feed
+// every few hours, see src/patch-notes.js). If that can't be reached, the copy in /data/patch-notes.json is shown.
+// The filter lives in the link (?k=ptr) so it can be shared.
+const ext = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 4.5 11.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON = {
+  "New hero": '<path d="M8 2.5 9.6 6l3.9.4-2.9 2.6.8 3.8L8 10.9l-3.4 1.9.8-3.8L2.5 6.4 6.4 6z" fill="currentColor"/>',
+  Collection: '<rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 10l3-3 3 3 2-2 2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  General: '<circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M3.8 12.2l1.4-1.4M10.8 5.2l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  Maps: '<path d="M2.5 4.5 6 3l4 1.5L13.5 3v8.5L10 13l-4-1.5-3.5 1.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 3v8.5M10 4.5V13" stroke="currentColor" stroke-width="1.5"/>',
+  Balance: '<path d="M8 2.5v11M4 13.5h8M3 5h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 5 1.5 9h3zM13 5l-1.5 4h3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+  "Bug fixes": '<rect x="5" y="5" width="6" height="8" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 5V4a2 2 0 0 1 4 0v1M2.5 8.5H5M11 8.5h2.5M3 5.5l2 1M13 5.5l-2 1M3 12.5l2-1M13 12.5l-2-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+};
+const icon = s => ICON[s] ? `<svg viewBox="0 0 16 16" aria-hidden="true">${ICON[s]}</svg>` : "";
+const KIND = { live: "Live", ptr: "PTR", balance: "Balance", news: "News" };
+const NAME = { live: "Live patch notes", ptr: "PTR patch notes", balance: "Balance patch notes" };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const when = iso => new Date(iso);
+const day = iso => when(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const full = iso => when(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+function ago(iso) {
+  const d = Math.floor((Date.now() - when(iso)) / 864e5);
+  return d < 1 ? "today" : d === 1 ? "yesterday" : d < 45 ? `${d} days ago` : d < 540 ? `${Math.round(d / 30.4)} months ago` : `${Math.round(d / 365)} years ago`;
+}
+// "10/5/2026" -> "Oct 5"
+const fixDay = s => { const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? new Date(+m[3], m[1] - 1, +m[2]).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : s; };
+
+let HEROES = {}, ITEMS = [];
+const q = new URLSearchParams(location.search);
+let K = KIND[q.get("k")] ? q.get("k") : "";
+
+const img = id => `/img/heroes/${id}.webp`;
+const face = id => HEROES[id] ? `<a class="face" href="/builds/${id}" data-name="${esc(HEROES[id])}" aria-label="${esc(HEROES[id])} builds"><img src="${img(id)}" alt="" loading="lazy" width="34" height="34"></a>` : "";
+function faces(ids, max) {
+  ids = ids.filter(id => HEROES[id]);
+  const extra = ids.length - max;
+  return ids.slice(0, extra > 0 ? max - 1 : max).map(face).join("") + (extra > 0 ? `<span class="more-h">+${extra + 1}</span>` : "");
+}
+// "Heroes of the Storm Live Patch Notes - September 28, 2026" -> "Live patch notes"; news keeps its own title
+const short = i => NAME[i.kind] || i.title;
+
+function drawLatest() {
+  const box = document.getElementById("latest");
+  const i = !K || K === "live" ? ITEMS.find(x => x.kind === "live" || x.kind === "balance") : null;
+  if (!i) { box.innerHTML = ""; return; }
+  const all = [...(i.newHero ? [i.newHero] : []), ...(i.heroes || [])];
+  const fixes = i.hotfixes || [];
+  box.innerHTML = `<article class="latest">
+    <div>
+      <div class="top"><span class="kind k-${i.kind}">${KIND[i.kind]}</span><span>Latest patch · ${ago(i.date)}</span></div>
+      <h2>${esc(short(i))} · ${full(i.date)}</h2>
+      <p class="what">${esc(i.summary)}</p>
+      <div class="chips">${(i.sections || []).map(s => `<span class="chip">${icon(s)}${esc(s)}</span>`).join("")}${fixes.length ? `<span class="chip fix">${fixes.length === 1 ? "Hotfix" : fixes.length + " hotfixes"}: ${fixes.map(fixDay).join(", ")}</span>` : ""}</div>
+      ${i.heroes?.length ? `<div class="changed"><h3>${i.heroes.length} hero${i.heroes.length === 1 ? "" : "es"} changed</h3><div class="faces">${i.heroes.map(face).join("")}</div></div>` : ""}
+    </div>
+    <div class="side">
+      ${i.newHero && HEROES[i.newHero] ? `<div class="newh"><h3>New hero</h3><a href="/builds/${i.newHero}" aria-label="${esc(HEROES[i.newHero])} builds"><img src="${img(i.newHero)}" alt=""></a><b>${esc(HEROES[i.newHero])}</b></div>` : "<span></span>"}
+      <a class="read" href="${esc(i.url)}" target="_blank" rel="noopener">Read the full notes${ext}</a>
+    </div>
+  </article>`;
+  box.dataset.id = i.id;
+}
+
+function drawList() {
+  const top = document.getElementById("latest").dataset.id;
+  const list = ITEMS.filter(i => (!K || i.kind === K) && !(document.getElementById("latest").innerHTML && i.id === top));
+  const out = document.getElementById("list");
+  if (!list.length) { out.innerHTML = `<div class="list"><div class="empty">Nothing here yet.</div></div>`; return; }
+  const years = [];
+  for (const i of list) {
+    const y = when(i.date).getFullYear();
+    if (!years.length || years.at(-1).y !== y) years.push({ y, items: [] });
+    years.at(-1).items.push(i);
+  }
+  out.innerHTML = years.map(({ y, items }, n) => `${n || top ? `<div class="year">${y}</div>` : ""}<div class="list">${items.map(i => {
+    const hs = [...(i.newHero ? [i.newHero] : []), ...(i.heroes || [])];
+    const fixes = i.hotfixes?.length ? ` · ${i.hotfixes.length === 1 ? "1 hotfix" : i.hotfixes.length + " hotfixes"}` : "";
+    const what = i.kind === "news" ? i.summary : [(i.sections || []).filter(s => s !== "Bug fixes").join(" · "), i.heroes?.length ? `${i.heroes.length} hero${i.heroes.length === 1 ? "" : "es"} changed` : ""].filter(Boolean).join(" · ") || i.summary;
+    return `<article class="row">
+      <div class="d"><b>${day(i.date)}</b><small>${ago(i.date)}</small></div>
+      <div class="t"><span><span class="kind k-${i.kind}">${KIND[i.kind]}</span><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(short(i))}</a></span><p>${esc(what + fixes)}</p></div>
+      ${hs.length ? `<div class="faces">${faces(hs, 9)}</div>` : "<span></span>"}
+      <span class="go">${ext}</span>
+    </article>`;
+  }).join("")}</div>`).join("");
+}
+
+function draw() {
+  for (const b of document.querySelectorAll("#kind button")) b.setAttribute("aria-pressed", b.dataset.k === K);
+  drawLatest();
+  drawList();
+}
+document.getElementById("kind").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  K = b.dataset.k;
+  history.replaceState(null, "", location.pathname + (K ? "?k=" + K : ""));
+  draw();
+});
+
+(async () => {
+  const [heroes, data] = await Promise.all([
+    fetch("/data/heroes.json").then(r => r.json()).catch(() => []),
+    fetch("/api/patch-notes").then(r => r.ok ? r.json() : Promise.reject()).catch(() => fetch("/data/patch-notes.json").then(r => r.json())).catch(() => ({ items: [] })),
+  ]);
+  for (const [id, name] of heroes) HEROES[id] = name === "Cho" ? "Cho" : name;
+  ITEMS = data.items || [];
+  draw();
+  document.getElementById("src").innerHTML = `From Blizzard's <a href="https://news.blizzard.com/en-us/heroes-of-the-storm" target="_blank" rel="noopener">Heroes of the Storm news</a>${data.updated ? `, checked ${ago(new Date(data.updated).toISOString())}` : ""}. Patch notes © Blizzard Entertainment. · <a href="/updates/">Site &amp; overlay updates</a>`;
+})();
+</script>
+</body>
+</html>
