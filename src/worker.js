@@ -77,6 +77,7 @@ function clean(data) {
       good: (Array.isArray(b.good) ? b.good : []).filter(g => /^[a-z0-9]{1,30}$/.test(g)).slice(0, 12),
       with: (Array.isArray(b.with) ? b.with : []).filter(g => /^[a-z0-9]{1,30}$/.test(g)).slice(0, 12),
       note: String(b.note || "").replace(/\r\n?/g, "\n").slice(0, 1500),
+      ...(b.rec ? { rec: true } : {}),   // Jun's Recommended build(s): shown first with a badge
     }));
     if (builds.length) out[hero] = builds;
   }
