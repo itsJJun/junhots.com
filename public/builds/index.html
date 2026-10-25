@@ -137,6 +137,21 @@ h2.sec > span { white-space: nowrap; }
 .slot .ic .ndot { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--surface); }
 .tip .tnote { margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid var(--brand); font-size: 12.5px; line-height: 1.5; color: #cdc6c1; white-space: pre-line; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
 .tip .tnote b { color: var(--brand); font-weight: 600; }
+/* A talent named in a note: small icon + the name, hover shows the talent, tap jumps to it */
+.tlink { white-space: nowrap; color: var(--text); font-weight: 600; cursor: pointer; border-bottom: 1px dotted #5a4f49; }
+.tlink img { width: 18px; height: 18px; border-radius: 4px; vertical-align: -4px; margin-right: 5px; box-shadow: 0 0 0 1px #3d3531; }
+.tlink:hover { color: var(--brand); border-bottom-color: var(--brand); }
+a.hlink { text-decoration: none; }
+.hlink img { border-radius: 50%; object-fit: cover; }
+.tfound { display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: center; font-size: 11px; color: var(--muted); }
+.tfound .tlink { font-size: 12px; font-weight: 500; }
+.tfounds { display: grid; gap: 4px; }
+.tfound .fl { width: 56px; }
+.tlink.pk img { box-shadow: 0 0 0 1.5px var(--brand); }
+.tlink.st img { box-shadow: 0 0 0 1.5px var(--sit); }
+.tlink .k { margin-left: 4px; padding: 0 4px; border-radius: 4px; border: 1px solid #3d3531; font: 600 10px/15px var(--mono); color: var(--muted); vertical-align: 1px; }
+.tip .hname .ht { margin-left: 8px; font-weight: 500; color: var(--muted); }
+.tip .hname .ht b { font-weight: 700; }
 .none { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; }
 
 #tiers { scroll-margin-top: 60px; }
@@ -437,7 +452,7 @@ function buildCard(b, key) {
         <code class="code">${esc(code(b.picks))}</code>
         ${sitRow(b.alt)}
         ${faces("Take it vs", b.good)}${faces("Take it with", b.with, "with")}
-        ${noteHtml(b.note)}
+        ${noteHtml(b.note, b)}
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
 }
@@ -487,10 +502,72 @@ function splitNote(note) {
   rows.sort((a, b) => LEVELS.indexOf(a.levels[0]) - LEVELS.indexOf(b.levels[0]));
   return { gen: gen.join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n"), rows, lv };
 }
-function noteHtml(note) {
+function noteHtml(note, b) {
   const { gen, rows } = splitNote(note);
-  return (gen ? `<p class="note">${esc(gen)}</p>` : "")
-    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span><div class="lngrid">${rows.map(x => `<small class="sl">Lvl ${x.levels.join("/")}</small><span>${esc(x.text)}</span>`).join("")}</div></div>` : "");
+  return (gen ? `<p class="note">${noteText(gen, b)}</p>` : "")
+    + (rows.length ? `<div class="lnotes"><span class="lab">Level notes</span><div class="lngrid">${rows.map(x => `<small class="sl">Lvl ${x.levels.join("/")}</small><span>${noteText(x.text, b)}</span>`).join("")}</div></div>` : "");
+}
+// Talent and hero names in a note get a small icon: hover shows the talent (or hero name) like everywhere else,
+// tap jumps to the talent / opens that hero. Found by themselves: a talent's full name in any case, or a short form of
+// 2+ words that fits only one talent ("Hungry Hungry"), and hero names (a few nicknames too, like KT or Butcher).
+// One-word names need a capital letter ("Block" yes, "to block" no). Anything else in [brackets] gets an icon when it fits
+// one talent or hero, like [Bolt]; the brackets don't show. One-word short forms only work that way, so normal words stay text.
+const STOP = /^(the|a|an|of|for|and|with|on|in|to|from|is)$/i;
+const NICK = { anubarak: ["Anub", "Anubarak"], dva: ["Dva", "DVa"], etc: ["ETC"], guldan: ["Guldan"], kaelthas: ["Kael", "Kaelthas"], kelthuzad: ["KT", "Kelthuzad", "Kel"], liming: ["Li Ming", "Liming"], lili: ["LiLi"], ltmorales: ["Morales", "Lt Morales"], lucio: ["Lucio"], malganis: ["Malganis"], sgthammer: ["Hammer", "Sgt Hammer"], butcher: ["Butcher"], lostvikings: ["Lost Vikings", "Vikings", "TLV"], xalatath: ["Xalatath"], zuljin: ["Zuljin", "Zul"] };
+let TM = null;
+function talentMatcher() {
+  if (TM?.id === hero.id) return TM;
+  const key = s => s.toLowerCase().replace(/\s+/g, " "), by = {}, forced = {}, pre = {};
+  const add = (map, s, ref) => { map[key(s)] ||= { s, ref }; };
+  LEVELS.forEach((L, r) => (hero.talents[L] || []).forEach((t, i) => {
+    const ref = { r, i: i + 1, t }, words = t.name.trim().split(/\s+/);
+    add(by, t.name.trim(), ref);
+    if (STOP.test(words[0]) && words.length > 1) add(by, words.slice(1).join(" "), ref);
+    for (let k = 1; k < words.length; k++) {
+      const p = words.slice(0, k).join(" ").replace(/[,:;.!?]+$/, "");
+      if (!STOP.test(words[k - 1])) (pre[key(p)] ||= []).push({ s: p, ref });
+    }
+  }));
+  Object.entries(pre).forEach(([k, xs]) => {
+    if (by[k] || new Set(xs.map(x => x.ref.t)).size > 1) return;
+    (/\s/.test(k) ? by : forced)[k] ||= xs[0];   // "Hungry Hungry" by itself, "Bolt" only as [Bolt]
+  });
+  hero.abilities.forEach((a, i) => add(by, a.name.trim(), { ab: i, a }));   // a heroic with the same name stays the talent
+  HEROES.forEach(h => [h.name, ...(/^the\s/i.test(h.name) ? [h.name.slice(4)] : []), ...(NICK[h.id] || [])].forEach(n => add(by, n, { hero: h.id })));
+  Object.assign(forced, by);
+  const pats = Object.keys(by).sort((a, b) => b.length - a.length).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+"));
+  return TM = { id: hero.id, by, forced, key, re: new RegExp(`\\[([^\\[\\]\\n]{1,40})\\]|(?<![\\p{L}\\p{N}'’.])(?:${pats.join("|")})(?![\\p{L}\\p{N}'’])`, "giu") };
+}
+// Every name a note matched: [match, entry, the text to show]
+function matches(text) {
+  const { by, forced, key, re } = talentMatcher(), out = [];
+  for (const m of String(text).matchAll(re)) {
+    if (m[1] != null) { const x = forced[key(m[1].trim())]; if (x) out.push([m, x, m[1].trim()]); continue; }
+    const x = by[key(m[0])];
+    if (!x || (x.s === x.s.toUpperCase() && m[0] !== x.s)) continue;   // ETC / KT only in capitals, so "etc." stays a word
+    if (/\s/.test(x.s) || /^\p{Lu}/u.test(m[0])) out.push([m, x, m[0]]);   // one word: only with a capital letter
+  }
+  return out;
+}
+// b = the build the note belongs to: a talent it takes gets a coral edge, a situational one amber, any other stays plain
+function nameTag(x, shown, b) {
+  const { hero: h, ab, a, r, i, t } = x.ref;
+  if (h) return `<a class="tlink hlink" href="#${h}" data-tip="h-${h}"><img src="${portrait(h)}" alt="">${esc(shown)}</a>`;
+  if (a) return `<span class="tlink" data-tip="a-${ab}" data-abjump="${ab}"><img src="${icon(a.icon)}" alt="">${esc(shown)}${a.key.length === 1 ? `<small class="k">${a.key}</small>` : ""}</span>`;
+  const st = b?.picks?.[r] === i ? " pk" : alts(b?.alt?.[r]).includes(i) ? " st" : "";
+  return `<span class="tlink${st}" data-tip="t-${r}-${i}" data-jump="${r}-${i}"><img src="${icon(t.icon)}" alt="">${esc(shown)}</span>`;
+}
+// The talents, abilities and heroes a whole note mentions, each once (for the list under Jun's note box)
+function noteNames(note) {
+  const seen = new Set(), out = [];
+  matches(note).forEach(([, x]) => { const k = x.ref.hero || x.ref.t || x.ref.a; if (!seen.has(k)) { seen.add(k); out.push(x); } });
+  return out;
+}
+// Note text as HTML with the icons
+function noteText(text, b) {
+  let html = "", at = 0;
+  for (const [m, x, shown] of matches(text)) { html += esc(text.slice(at, m.index)) + nameTag(x, shown, b); at = m.index + m[0].length; }
+  return html + esc(text.slice(at));
 }
 // Situational talents per level, stored as a string of talent numbers ("23" = #2 and #3, "" = none)
 const noAlt = () => ["", "", "", "", "", "", ""];
@@ -524,6 +601,7 @@ function drawMine() {
       <div class="notebox">
         <textarea id="bnote" rows="3" maxlength="1500" aria-label="Note" placeholder="Comment (optional). Enter makes a new line.&#10;Start a line with a level for a level note, like:&#10;Lvl 13: Dragon Scales if they have lots of stuns">${esc(mine.note || "")}</textarea>
         <div class="lvlbtns">Add a level note:${LEVELS.map((L, r) => `<button type="button" data-lvnote="${L}"${splitNote(mine.note).lv[r] ? ' class="has"' : ""}>${L}</button>`).join("")}</div>
+        <div class="tfounds" id="tfound"></div>
       </div>
       <button class="btn2 save" id="savejun">${mine.editing != null ? "Update my build" : "Save to Jun's builds"}</button>
       ${mine.editing != null ? `<button class="btn2" id="canceledit">Cancel edit</button>` : ""}
@@ -564,7 +642,13 @@ function drawMine() {
   if (ADMIN && n) {
     const nb = document.getElementById("bnote"), grow = () => { nb.style.height = "auto"; nb.style.height = nb.scrollHeight + 2 + "px"; };
     const marks = () => app.querySelectorAll("[data-lvnote]").forEach(b => b.classList.toggle("has", !!splitNote(mine.note).lv[LEVELS.indexOf(b.dataset.lvnote)]));
-    nb.oninput = () => { mine.note = nb.value; grow(); marks(); }; grow();
+    // Shows which talent and hero names the note will turn into icons, so a typo or a too-short name is easy to spot
+    const found = () => {
+      const xs = noteNames(mine.note || ""), row = (lab, list) => list.length ? `<div class="tfound"><span class="fl">${lab}</span>${list.map(x => nameTag(x, x.ref.hero ? byId[x.ref.hero].name : (x.ref.t || x.ref.a).name, mine)).join("")}</div>` : "";
+      document.getElementById("tfound").innerHTML = xs.length ? row("Talents", xs.filter(x => x.ref.t)) + row("Abilities", xs.filter(x => x.ref.a)) + row("Heroes", xs.filter(x => x.ref.hero))
+        : `<div class="tfound">Talent and hero names get an icon. For a one-word short name use brackets, like [Bolt].</div>`;
+    };
+    nb.oninput = () => { mine.note = nb.value; grow(); marks(); found(); }; grow(); found();
     // Level buttons: jump to that level's line, or add "Lvl 13: " on a new line, in level order
     app.querySelectorAll("[data-lvnote]").forEach(b => b.onclick = () => {
       const L = b.dataset.lvnote, lines = nb.value.split("\n"), lvOf = l => { const m = lineLevel(l + " x"); return m ? +m.levels[0] : null; };
@@ -583,6 +667,9 @@ function drawMine() {
 }
 
 app.addEventListener("click", e => {
+  if (e.target.closest(".hlink")) return;   // a hero named in a note: just open that hero
+  const aj = e.target.closest("[data-abjump]");   // an ability named in a note: open it in the ability bar at the top
+  if (aj) { const ab = app.querySelector(`.ab[data-ab="${aj.dataset.abjump}"]`); if (ab.getAttribute("aria-expanded") !== "true") ab.click(); ab.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
   const t = e.target.closest(".tal[data-row]");
   if (t) { const r = +t.dataset.row, i = +t.dataset.i; mine.picks[r] = mine.picks[r] === i ? 0 : i; mine.alt[r] = mine.picks[r] ? alts(mine.alt[r]).filter(a => a !== i).join("") : ""; drawMine(); return; }
   const al = e.target.closest("[data-alt]");
@@ -614,6 +701,14 @@ app.addEventListener("click", e => {
   if (uw) { mine.with = mine.with.filter(g => g !== uw.dataset.unwith); drawMine(); }
 });
 
+// Tier and win rate from Jun's tier list, for a hero's hover ("S tier · 52.1%")
+const TCOL = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];   // same colors as the Tier list page
+function heroStats(id) {
+  if (!TL) return "";
+  const k = tierKey(id), t = TL.tiers?.find(x => x.id === TL.overall?.[k]), wr = TL.winrates?.rates?.[k]?.wr;
+  const bits = [t ? `<b style="color:${TCOL[t.color % TCOL.length]}">${esc(t.name)}</b> tier` : "", wr != null ? `<b style="color:${wr >= 51 ? "var(--good)" : wr < 49 ? "var(--bad)" : "var(--text)"}">${wr.toFixed(1)}%</b>` : ""].filter(Boolean);
+  return bits.length ? `<span class="ht">${bits.join(" · ")}</span>` : "";
+}
 // ---------- hover info (mouse only; phones keep tap to open / tap to jump) ----------
 const HOVER = matchMedia("(hover: hover) and (pointer: fine)");
 const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; document.body.append(tip);
@@ -628,12 +723,12 @@ app.addEventListener("mouseover", e => {
     tip.innerHTML = `<div class="hname tagl"><b>${esc(tagLabel(TL, t))}:</b> ${esc(list.join(", ") || "no heroes yet")}</div>`;
     tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = r.bottom + 6 + "px"; return;
   }
-  if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
+  if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}${heroStats(h.id)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
   const [k, a, b] = el.dataset.tip.split("-"), t = k === "a" ? hero.abilities[a] : hero.talents[LEVELS[a]]?.[b - 1];
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
   tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "")
-    + (el.dataset.note ? `<div class="tnote"><b>Jun's note:</b> ${esc(el.dataset.note)}</div>` : "");
+    + (el.dataset.note ? `<div class="tnote"><b>Jun's note:</b> ${noteText(el.dataset.note, el.closest(".bcard") && buildOf(el.closest(".bcard").dataset.b))}</div>` : "");
   tip.on = el; tip.hidden = false;
   const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
   tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px";
