@@ -236,11 +236,16 @@ a.hlink { text-decoration: none; }
 .px-old { padding: 4px 0 10px; }
 .px-old + .px-old { border-top: 1px dashed var(--line); }
 .px-old .px-h h2 { font-size: 14px; }
-.pwarn:empty { display: none; }
-.pwarn { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding: 7px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, #e0b04f 35%, transparent); background: color-mix(in srgb, #e0b04f 8%, transparent); font-size: 13px; color: var(--text); }
-.pwarn > b { color: #e0b04f; font-weight: 600; }
-.pwarn .pw { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; }
-.pwarn .pw img { width: 18px; height: 18px; border-radius: 4px; }
+/* A talent in a build that the last patch changed: small ▲ / ▼ / ◆ on its top-left corner, the change in its hover */
+.slot .ic .pcm { position: absolute; top: -5px; left: -5px; width: 15px; height: 15px; border-radius: 50%; background: var(--c) center / 8px no-repeat; box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }
+.slot .ic .pcm.up { --c: var(--good); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 9 8H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.slot .ic .pcm.down { --c: var(--bad); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8.5 9 2H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.slot .ic .pcm.mixed, .slot .ic .pcm.same { --c: #e0b04f; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 8.5 5 5 8.5 1.5 5z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.tip .tpatch { margin-top: 6px; padding: 2px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid #3d3531; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.tip .tpatch .pc-e { grid-template-columns: 1fr; padding: 6px 0 8px; border-top: 0; }
+.tip .tpatch .pc-ic, .tip .tpatch .pc-n { display: none; }
+.tip .tpatch .pc-l { margin: 0; }
+.tip .tpatch > b { display: block; padding-top: 8px; font: 600 12px var(--sans); color: #e0b04f; }
 .mu { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
 .mu:empty { display: none; }
 .mug { display: grid; gap: 7px; }
@@ -525,11 +530,19 @@ function drawPatch() {
   </section>`;
   box.querySelector(".px-tog").onclick = () => { PXOPEN = !PXOPEN; drawPatch(); };
   box.querySelector(".px-icons").onclick = () => { if (!HOVER.matches && !PXOPEN) { PXOPEN = true; drawPatch(); } };   // phones: tap the icons to open
-  // A note on each build that takes a talent the last patch changed (only for 4 months after that patch)
+  // Talents in a build that the last patch changed get a small mark (only for 4 months after that patch)
   const fresh = Date.now() - new Date(last.date) < 120 * 864e5;
-  for (const el of app.querySelectorAll("[data-pw]")) {
-    const hit = fresh ? changedPicks(buildOf(el.dataset.pw), last) : [];
-    el.innerHTML = hit.length ? `<b>Changed in the ${pday(last.date)} patch:</b>${hit.map(([t, e]) => { const d = e.lines.map(l => l.d); const v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : ""; return `<span class="pw"><img src="${icon(t.icon)}" alt="">${esc(t.name)}${v === "up" || v === "down" ? `<i class="pc-m ${v}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>` : ""}</span>`; }).join("")}` : "";
+  for (const card of app.querySelectorAll(".bcard[data-b]")) {
+    card.querySelectorAll(".pcm").forEach(m => m.remove());
+    if (!fresh) continue;
+    const slots = card.querySelectorAll(".strip .slot");
+    for (const [t, e] of changedPicks(buildOf(card.dataset.b), last)) {
+      const slot = slots[LEVELS.indexOf(t.lvl)], ic = slot?.querySelector(".ic");
+      if (!ic) continue;
+      const d = e.lines.map(l => l.d), v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : "same";
+      ic.insertAdjacentHTML("beforeend", `<span class="pcm ${v}" aria-label="Changed in the ${pday(last.date)} patch"></span>`);
+      slot.dataset.pc = last.changes.indexOf(e);
+    }
   }
 }
 function drawMatchups() {
@@ -566,7 +579,6 @@ function buildCard(b, key) {
         ${sitRow(b.alt)}
         ${faces("Take it vs", b.good)}${faces("Take it with", b.with, "with")}
         ${noteHtml(b.note, b)}
-        <div class="pwarn" data-pw="${key}"></div>
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
 }
@@ -878,6 +890,7 @@ app.addEventListener("mouseover", e => {
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
   tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "")
+    + (el.dataset.pc && PATCH?.[0]?.changes[el.dataset.pc] ? `<div class="tpatch"><b>Changed in the ${pday(PATCH[0].date)} patch</b>${PatchKit.entries(hero, [PATCH[0].changes[el.dataset.pc]], { hero: hero.id })}</div>` : "")
     + (el.dataset.note ? `<div class="tnote"><b>Jun's note:</b> ${noteText(el.dataset.note, el.closest(".bcard") && buildOf(el.closest(".bcard").dataset.b))}</div>` : "");
   tip.on = el; tip.hidden = false;
   const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
