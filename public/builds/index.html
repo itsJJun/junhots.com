@@ -194,7 +194,32 @@ a.hlink { text-decoration: none; }
 /* Ability row under the hero name: small chips, tap one to read it */
 /* Matchups from Jun's tier list: three short rows of small portraits under the abilities */
 /* What the last patch changed on this hero (public/patch-changes.js), and every patch before it */
-.px { position: relative; z-index: 1; margin-top: 22px; padding: 16px 18px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+/* Slim bar by default: date, Buff/Nerf, the changed talents as small icons; "Show changes" opens the full list */
+.px-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.px-bar .px-lab { font-size: 13px; color: var(--muted); }
+.px-bar > b { font-weight: 600; font-size: 14px; }
+.px-bar > small { color: var(--muted); font-size: 12.5px; }
+.px-icons { display: flex; gap: 6px; flex-wrap: wrap; margin-left: 4px; }
+.px-icons .pi { position: relative; width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line); }
+.px-icons .pi img { display: block; width: 100%; height: 100%; border-radius: 6px; object-fit: cover; }
+.px-icons .pi[data-v]::after { content: ""; position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--surface); background: var(--c) center / 7px no-repeat; }
+.px-icons .pi[data-v="up"] { --c: var(--good); } .px-icons .pi[data-v="down"] { --c: var(--bad); } .px-icons .pi[data-v="mixed"] { --c: #e0b04f; }
+.px-icons .pi[data-v="up"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 9 8H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi[data-v="down"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8.5 9 2H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi[data-v="mixed"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 8.5 5 5 8.5 1.5 5z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi-more { align-self: center; font: 600 12px var(--mono); color: var(--muted); }
+.px-tog { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: 500 13px var(--sans); cursor: pointer; white-space: nowrap; }
+.px-tog:hover { border-color: var(--muted); }
+.px-tog svg { width: 10px; height: 10px; transition: transform .2s; }
+.px-tog[aria-expanded="true"] svg { transform: rotate(180deg); }
+.px.old .px-bar { opacity: .72; }
+.px.old:hover .px-bar, .px.open .px-bar { opacity: 1; }
+.px-more { margin-top: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
+.px-more .px-full { display: inline-block; margin: 4px 0 8px; color: var(--muted); font-size: 13px; text-decoration: none; }
+.px-more .px-full:hover { color: var(--accent); }
+.tip .ptip { width: 340px; max-width: calc(100vw - 24px); padding: 4px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 16px 40px rgba(0, 0, 0, .55); }
+@media (max-width: 640px) { .px-icons { margin-left: 0; } }
+.px { position: relative; z-index: 1; margin-top: 22px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .px-h { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-bottom: 6px; }
 .px-h h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 .px-h small { color: var(--muted); font-size: 13px; }
@@ -211,11 +236,16 @@ a.hlink { text-decoration: none; }
 .px-old { padding: 4px 0 10px; }
 .px-old + .px-old { border-top: 1px dashed var(--line); }
 .px-old .px-h h2 { font-size: 14px; }
-.pwarn:empty { display: none; }
-.pwarn { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding: 7px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, #e0b04f 35%, transparent); background: color-mix(in srgb, #e0b04f 8%, transparent); font-size: 13px; color: var(--text); }
-.pwarn > b { color: #e0b04f; font-weight: 600; }
-.pwarn .pw { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; }
-.pwarn .pw img { width: 18px; height: 18px; border-radius: 4px; }
+/* A talent in a build that the last patch changed: small ▲ / ▼ / ◆ on its top-left corner, the change in its hover */
+.slot .ic .pcm { position: absolute; top: -5px; left: -5px; width: 15px; height: 15px; border-radius: 50%; background: var(--c) center / 8px no-repeat; box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }
+.slot .ic .pcm.up { --c: var(--good); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 9 8H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.slot .ic .pcm.down { --c: var(--bad); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8.5 9 2H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.slot .ic .pcm.mixed, .slot .ic .pcm.same { --c: #e0b04f; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 8.5 5 5 8.5 1.5 5z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.tip .tpatch { margin-top: 6px; padding: 2px 12px; border-radius: 8px; background: #1d1a18; border: 1px solid #3d3531; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.tip .tpatch .pc-e { grid-template-columns: 1fr; padding: 6px 0 8px; border-top: 0; }
+.tip .tpatch .pc-ic, .tip .tpatch .pc-n { display: none; }
+.tip .tpatch .pc-l { margin: 0; }
+.tip .tpatch > b { display: block; padding-top: 8px; font: 600 12px var(--sans); color: #e0b04f; }
 .mu { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
 .mu:empty { display: none; }
 .mug { display: grid; gap: 7px; }
@@ -471,6 +501,7 @@ function changedPicks(b, p) {
   if (!b || !p) return [];
   return p.changes.map(e => [PatchKit.lookup(hero, e), e]).filter(([t]) => t?.lvl && b.picks[LEVELS.indexOf(t.lvl)] && hero.talents[t.lvl][b.picks[LEVELS.indexOf(t.lvl)] - 1]?.name === t.name);
 }
+let PXOPEN = false;   // "Show changes" stays open while you look at other heroes
 function drawPatch() {
   const box = document.getElementById("patchx");
   if (!box || !hero) return;
@@ -478,18 +509,40 @@ function drawPatch() {
   const [last, ...older] = PATCH;
   // Talents in Jun's builds get an "In my build" tag
   const picked = new Set((BUILDS[hero.id] || []).flatMap(b => changedPicks(b, last).map(([t]) => PatchKit.norm(t.name))));
-  const head = (p, tag) => `<div class="px-h">${tag}<h2>${pday(p.date)} patch</h2>${PatchKit.verdict(p.verdict)}<small>${pago(p.date)}</small><a href="${esc(p.url)}" target="_blank" rel="noopener">Full notes ↗</a></div>`;
-  box.innerHTML = `<section class="px" aria-label="Patch changes">
-    ${head(last, `<span class="pc-tag">Last change</span>`)}
-    <div class="px-body">${PatchKit.entries(hero, last.changes, { hero: hero.id, picked })}</div>
-    ${PatchKit.take(last.take)}
-    ${older.length ? `<details><summary>Earlier patches (${older.length})</summary>${older.map(p => `<div class="px-old">${head(p, "")}<div class="px-body">${PatchKit.entries(hero, p.changes, { hero: hero.id })}</div>${PatchKit.take(p.take)}</div>`).join("")}</details>` : ""}
+  const head = p => `<div class="px-h"><h2>${pday(p.date)} patch</h2>${PatchKit.verdict(p.verdict)}<small>${pago(p.date)}</small><a href="${esc(p.url)}" target="_blank" rel="noopener">Full notes ↗</a></div>`;
+  const MAX = 10, list = last.changes;
+  const icons = list.slice(0, list.length > MAX ? MAX - 1 : MAX).map((e, n) => {
+    const t = PatchKit.lookup(hero, e), d = e.lines.map(l => l.d), v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : "";
+    const src = t?.icon ? icon(t.icon) : portrait(hero.id);
+    return `<span class="pi" data-tip="p-${n}"${v ? ` data-v="${v}"` : ""}><img src="${src}" alt="${esc(e.name || "Base stats")}"></span>`;
+  }).join("") + (list.length > MAX ? `<span class="pi-more">+${list.length - MAX + 1}</span>` : "");
+  const old = Date.now() - new Date(last.date) > 60 * 864e5;
+  box.innerHTML = `<section class="px${old ? " old" : ""}${PXOPEN ? " open" : ""}" aria-label="Patch changes">
+    <div class="px-bar"><span class="px-lab">Last patch change</span><b>${pday(last.date)}</b>${PatchKit.verdict(last.verdict)}<small>${pago(last.date)}</small>
+      <span class="px-icons">${icons}</span>
+      <button class="px-tog" type="button" aria-expanded="${PXOPEN}">${PXOPEN ? "Hide" : "Show"} changes<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="px-more"${PXOPEN ? "" : " hidden"}>
+      <div class="px-body">${PatchKit.entries(hero, list, { hero: hero.id, picked })}</div>
+      ${PatchKit.take(last.take)}
+      <a class="px-full" href="${esc(last.url)}" target="_blank" rel="noopener">Blizzard's full notes ↗</a>
+      ${older.length ? `<details><summary>Earlier patches (${older.length})</summary>${older.map(p => `<div class="px-old">${head(p)}<div class="px-body">${PatchKit.entries(hero, p.changes, { hero: hero.id })}</div>${PatchKit.take(p.take)}</div>`).join("")}</details>` : ""}
+    </div>
   </section>`;
-  // A note on each build that takes a talent the last patch changed (only for 4 months after that patch)
+  box.querySelector(".px-tog").onclick = () => { PXOPEN = !PXOPEN; drawPatch(); };
+  box.querySelector(".px-icons").onclick = () => { if (!HOVER.matches && !PXOPEN) { PXOPEN = true; drawPatch(); } };   // phones: tap the icons to open
+  // Talents in a build that the last patch changed get a small mark (only for 4 months after that patch)
   const fresh = Date.now() - new Date(last.date) < 120 * 864e5;
-  for (const el of app.querySelectorAll("[data-pw]")) {
-    const hit = fresh ? changedPicks(buildOf(el.dataset.pw), last) : [];
-    el.innerHTML = hit.length ? `<b>Changed in the ${pday(last.date)} patch:</b>${hit.map(([t, e]) => { const d = e.lines.map(l => l.d); const v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : ""; return `<span class="pw"><img src="${icon(t.icon)}" alt="">${esc(t.name)}${v === "up" || v === "down" ? `<i class="pc-m ${v}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>` : ""}</span>`; }).join("")}` : "";
+  for (const card of app.querySelectorAll(".bcard[data-b]")) {
+    card.querySelectorAll(".pcm").forEach(m => m.remove());
+    if (!fresh) continue;
+    const slots = card.querySelectorAll(".strip .slot");
+    for (const [t, e] of changedPicks(buildOf(card.dataset.b), last)) {
+      const slot = slots[LEVELS.indexOf(t.lvl)], ic = slot?.querySelector(".ic");
+      if (!ic) continue;
+      const d = e.lines.map(l => l.d), v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : "same";
+      ic.insertAdjacentHTML("beforeend", `<span class="pcm ${v}" aria-label="Changed in the ${pday(last.date)} patch"></span>`);
+      slot.dataset.pc = last.changes.indexOf(e);
+    }
   }
 }
 function drawMatchups() {
@@ -526,7 +579,6 @@ function buildCard(b, key) {
         ${sitRow(b.alt)}
         ${faces("Take it vs", b.good)}${faces("Take it with", b.with, "with")}
         ${noteHtml(b.note, b)}
-        <div class="pwarn" data-pw="${key}"></div>
         <span class="clickhint">Click or tap the card to show it on the talents</span>
       </div>`;
 }
@@ -814,6 +866,15 @@ app.addEventListener("mouseover", e => {
     tip.innerHTML = `<div class="hname tagl"><b>${esc(tagLabel(TL, t))}:</b> ${esc(list.join(", ") || "no heroes yet")}</div>`;
     tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = r.bottom + 6 + "px"; return;
   }
+  if (el.dataset.tip.startsWith("p-")) {   // a small icon in the patch bar: what changed on it
+    const e = PATCH?.[0]?.changes[+el.dataset.tip.slice(2)];
+    if (!e) return;
+    tip.innerHTML = `<div class="ptip">${PatchKit.entries(hero, [e], { hero: hero.id })}</div>`;
+    tip.on = el; tip.hidden = false;
+    const rc = el.getBoundingClientRect(), w = tip.offsetWidth;
+    tip.style.left = Math.max(12, Math.min(rc.left + rc.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = rc.bottom + 8 + "px";
+    return;
+  }
   if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}${heroStats(h.id)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
   if (el.dataset.tip.startsWith("o-")) {   // another hero's talent named in a note
     const [, o, r, i] = el.dataset.tip.split("-"), ab = r === "a", t = ab ? OTHER[o]?.abilities[i] : OTHER[o]?.talents[LEVELS[r]]?.[i - 1];
@@ -829,6 +890,7 @@ app.addEventListener("mouseover", e => {
   if (!t) return;
   const sit = el.dataset.sit ? [...el.dataset.sit].map(n => hero.talents[LEVELS[a]][n - 1]?.name).filter(Boolean) : [];
   tip.innerHTML = card(t, "", "div", k === "t" ? +b : 0) + (sit.length ? `<div class="tsit"><b>Situational:</b> ${sit.map(esc).join(", ")}</div>` : "")
+    + (el.dataset.pc && PATCH?.[0]?.changes[el.dataset.pc] ? `<div class="tpatch"><b>Changed in the ${pday(PATCH[0].date)} patch</b>${PatchKit.entries(hero, [PATCH[0].changes[el.dataset.pc]], { hero: hero.id })}</div>` : "")
     + (el.dataset.note ? `<div class="tnote"><b>Jun's note:</b> ${noteText(el.dataset.note, el.closest(".bcard") && buildOf(el.closest(".bcard").dataset.b))}</div>` : "");
   tip.on = el; tip.hidden = false;
   const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
