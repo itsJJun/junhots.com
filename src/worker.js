@@ -11,9 +11,12 @@
 //   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends,
 //                         or {games: [...]} (up to 200) from the GUI's "Import old replays" button
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
+//   GET  /api/patch-notes -> everyone: Blizzard's official patch notes list, with the heroes each one changed (src/patch-notes.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
+
+import { patchNotes } from "./patch-notes.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -174,7 +177,7 @@ function cleanGame(g) {
 // Every page and every hero's builds page, for search engines.
 async function sitemap(url, env) {
   const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
-  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/tierlist-maker/", "/overlay/", "/updates/", ...heroes.map(h => `/builds/${h[0]}`)];
+  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/patch-notes/", "/tierlist-maker/", "/overlay/", "/updates/", ...heroes.map(h => `/builds/${h[0]}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}\n</urlset>\n`;
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
@@ -242,6 +245,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/media" && request.method === "GET") return media(request, ctx);
+    if (url.pathname === "/api/patch-notes" && request.method === "GET") return patchNotes(request, env, ctx);
 
     if (url.pathname === "/api/builds") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
