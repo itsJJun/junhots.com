@@ -194,7 +194,32 @@ a.hlink { text-decoration: none; }
 /* Ability row under the hero name: small chips, tap one to read it */
 /* Matchups from Jun's tier list: three short rows of small portraits under the abilities */
 /* What the last patch changed on this hero (public/patch-changes.js), and every patch before it */
-.px { position: relative; z-index: 1; margin-top: 22px; padding: 16px 18px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+/* Slim bar by default: date, Buff/Nerf, the changed talents as small icons; "Show changes" opens the full list */
+.px-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.px-bar .px-lab { font-size: 13px; color: var(--muted); }
+.px-bar > b { font-weight: 600; font-size: 14px; }
+.px-bar > small { color: var(--muted); font-size: 12.5px; }
+.px-icons { display: flex; gap: 6px; flex-wrap: wrap; margin-left: 4px; }
+.px-icons .pi { position: relative; width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line); }
+.px-icons .pi img { display: block; width: 100%; height: 100%; border-radius: 6px; object-fit: cover; }
+.px-icons .pi[data-v]::after { content: ""; position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--surface); background: var(--c) center / 7px no-repeat; }
+.px-icons .pi[data-v="up"] { --c: var(--good); } .px-icons .pi[data-v="down"] { --c: var(--bad); } .px-icons .pi[data-v="mixed"] { --c: #e0b04f; }
+.px-icons .pi[data-v="up"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 9 8H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi[data-v="down"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8.5 9 2H1z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi[data-v="mixed"]::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 8.5 5 5 8.5 1.5 5z' fill='%2312100f'/%3E%3C/svg%3E"); }
+.px-icons .pi-more { align-self: center; font: 600 12px var(--mono); color: var(--muted); }
+.px-tog { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: 500 13px var(--sans); cursor: pointer; white-space: nowrap; }
+.px-tog:hover { border-color: var(--muted); }
+.px-tog svg { width: 10px; height: 10px; transition: transform .2s; }
+.px-tog[aria-expanded="true"] svg { transform: rotate(180deg); }
+.px.old .px-bar { opacity: .72; }
+.px.old:hover .px-bar, .px.open .px-bar { opacity: 1; }
+.px-more { margin-top: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
+.px-more .px-full { display: inline-block; margin: 4px 0 8px; color: var(--muted); font-size: 13px; text-decoration: none; }
+.px-more .px-full:hover { color: var(--accent); }
+.tip .ptip { width: 340px; max-width: calc(100vw - 24px); padding: 4px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 16px 40px rgba(0, 0, 0, .55); }
+@media (max-width: 640px) { .px-icons { margin-left: 0; } }
+.px { position: relative; z-index: 1; margin-top: 22px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .px-h { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-bottom: 6px; }
 .px-h h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 .px-h small { color: var(--muted); font-size: 13px; }
@@ -471,6 +496,7 @@ function changedPicks(b, p) {
   if (!b || !p) return [];
   return p.changes.map(e => [PatchKit.lookup(hero, e), e]).filter(([t]) => t?.lvl && b.picks[LEVELS.indexOf(t.lvl)] && hero.talents[t.lvl][b.picks[LEVELS.indexOf(t.lvl)] - 1]?.name === t.name);
 }
+let PXOPEN = false;   // "Show changes" stays open while you look at other heroes
 function drawPatch() {
   const box = document.getElementById("patchx");
   if (!box || !hero) return;
@@ -478,13 +504,27 @@ function drawPatch() {
   const [last, ...older] = PATCH;
   // Talents in Jun's builds get an "In my build" tag
   const picked = new Set((BUILDS[hero.id] || []).flatMap(b => changedPicks(b, last).map(([t]) => PatchKit.norm(t.name))));
-  const head = (p, tag) => `<div class="px-h">${tag}<h2>${pday(p.date)} patch</h2>${PatchKit.verdict(p.verdict)}<small>${pago(p.date)}</small><a href="${esc(p.url)}" target="_blank" rel="noopener">Full notes ↗</a></div>`;
-  box.innerHTML = `<section class="px" aria-label="Patch changes">
-    ${head(last, `<span class="pc-tag">Last change</span>`)}
-    <div class="px-body">${PatchKit.entries(hero, last.changes, { hero: hero.id, picked })}</div>
-    ${PatchKit.take(last.take)}
-    ${older.length ? `<details><summary>Earlier patches (${older.length})</summary>${older.map(p => `<div class="px-old">${head(p, "")}<div class="px-body">${PatchKit.entries(hero, p.changes, { hero: hero.id })}</div>${PatchKit.take(p.take)}</div>`).join("")}</details>` : ""}
+  const head = p => `<div class="px-h"><h2>${pday(p.date)} patch</h2>${PatchKit.verdict(p.verdict)}<small>${pago(p.date)}</small><a href="${esc(p.url)}" target="_blank" rel="noopener">Full notes ↗</a></div>`;
+  const MAX = 10, list = last.changes;
+  const icons = list.slice(0, list.length > MAX ? MAX - 1 : MAX).map((e, n) => {
+    const t = PatchKit.lookup(hero, e), d = e.lines.map(l => l.d), v = d.includes(1) && d.includes(-1) ? "mixed" : d.includes(1) ? "up" : d.includes(-1) ? "down" : "";
+    const src = t?.icon ? icon(t.icon) : portrait(hero.id);
+    return `<span class="pi" data-tip="p-${n}"${v ? ` data-v="${v}"` : ""}><img src="${src}" alt="${esc(e.name || "Base stats")}"></span>`;
+  }).join("") + (list.length > MAX ? `<span class="pi-more">+${list.length - MAX + 1}</span>` : "");
+  const old = Date.now() - new Date(last.date) > 60 * 864e5;
+  box.innerHTML = `<section class="px${old ? " old" : ""}${PXOPEN ? " open" : ""}" aria-label="Patch changes">
+    <div class="px-bar"><span class="px-lab">Last patch change</span><b>${pday(last.date)}</b>${PatchKit.verdict(last.verdict)}<small>${pago(last.date)}</small>
+      <span class="px-icons">${icons}</span>
+      <button class="px-tog" type="button" aria-expanded="${PXOPEN}">${PXOPEN ? "Hide" : "Show"} changes<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="px-more"${PXOPEN ? "" : " hidden"}>
+      <div class="px-body">${PatchKit.entries(hero, list, { hero: hero.id, picked })}</div>
+      ${PatchKit.take(last.take)}
+      <a class="px-full" href="${esc(last.url)}" target="_blank" rel="noopener">Blizzard's full notes ↗</a>
+      ${older.length ? `<details><summary>Earlier patches (${older.length})</summary>${older.map(p => `<div class="px-old">${head(p)}<div class="px-body">${PatchKit.entries(hero, p.changes, { hero: hero.id })}</div>${PatchKit.take(p.take)}</div>`).join("")}</details>` : ""}
+    </div>
   </section>`;
+  box.querySelector(".px-tog").onclick = () => { PXOPEN = !PXOPEN; drawPatch(); };
+  box.querySelector(".px-icons").onclick = () => { if (!HOVER.matches && !PXOPEN) { PXOPEN = true; drawPatch(); } };   // phones: tap the icons to open
   // A note on each build that takes a talent the last patch changed (only for 4 months after that patch)
   const fresh = Date.now() - new Date(last.date) < 120 * 864e5;
   for (const el of app.querySelectorAll("[data-pw]")) {
@@ -813,6 +853,15 @@ app.addEventListener("mouseover", e => {
     const t = el.dataset.tip.slice(2), list = heroesWithTag(TL, t, Object.keys(byId).filter(h => !TIER_SHARED[h])).map(h => tierKey(h) === "chogall" ? "Cho'gall" : byId[h].name);
     tip.innerHTML = `<div class="hname tagl"><b>${esc(tagLabel(TL, t))}:</b> ${esc(list.join(", ") || "no heroes yet")}</div>`;
     tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = r.bottom + 6 + "px"; return;
+  }
+  if (el.dataset.tip.startsWith("p-")) {   // a small icon in the patch bar: what changed on it
+    const e = PATCH?.[0]?.changes[+el.dataset.tip.slice(2)];
+    if (!e) return;
+    tip.innerHTML = `<div class="ptip">${PatchKit.entries(hero, [e], { hero: hero.id })}</div>`;
+    tip.on = el; tip.hidden = false;
+    const rc = el.getBoundingClientRect(), w = tip.offsetWidth;
+    tip.style.left = Math.max(12, Math.min(rc.left + rc.width / 2 - w / 2, innerWidth - w - 12)) + "px"; tip.style.top = rc.bottom + 8 + "px";
+    return;
   }
   if (el.dataset.tip.startsWith("h-")) { const h = byId[el.dataset.tip.slice(2)]; tip.innerHTML = `<div class="hname">${esc(h.name)}${heroStats(h.id)}</div>`; tip.on = el; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.firstChild.offsetWidth; tip.style.left = Math.max(12, r.left + r.width / 2 - w / 2) + "px"; tip.style.top = r.bottom + 6 + "px"; return; }
   if (el.dataset.tip.startsWith("o-")) {   // another hero's talent named in a note
