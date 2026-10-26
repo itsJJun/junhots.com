@@ -71,7 +71,7 @@
 .team + .team { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
 .team h3 { margin: 0 0 10px; font-size: 12px; font-weight: 500; color: var(--muted); }
 .team h3::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--c); }
-.slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.slots { display: grid; grid-template-columns: repeat(5, minmax(0, 72px)); gap: 8px; }
 .slot { all: unset; box-sizing: border-box; cursor: pointer; position: relative; aspect-ratio: 1; border-radius: 10px; border: 1px dashed #463d38; display: grid; place-items: center; color: var(--muted); font-size: 22px; font-weight: 300; transition: border-color .15s, color .15s, background .15s; }
 .slot:hover, .slot:focus-visible { border-color: var(--brand); color: var(--brand); background: rgba(242, 106, 75, 0.06); }
 .slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
@@ -107,33 +107,54 @@
 .empty { color: var(--muted); font-size: 14px; padding: 6px 0; }
 .note { margin: 14px 0 0; font-size: 12px; color: var(--muted); }
 
-/* Hero chooser: a search box and every hero, opens over the page */
-dialog { width: min(640px, calc(100vw - 24px)); max-height: min(78vh, 680px); padding: 0; border: 1px solid #3d3531; border-radius: 14px; background: var(--surface); color: var(--text); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6); overflow: hidden; }
-dialog[open] { display: flex; flex-direction: column; animation: pop .14s ease-out; }
-dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
-@keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
-.dh { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
-.dh input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 15px var(--sans); }
-.dh input:focus { outline: none; border-color: var(--brand); }
-.dh .x { all: unset; cursor: pointer; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--muted); font-size: 20px; }
-.dh .x:hover { color: var(--text); background: var(--surface-2); }
-.dt { font-size: 12px; color: var(--muted); padding: 10px 14px 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px 8px; padding: 12px 14px 16px; overflow-y: auto; }
-.hc { all: unset; cursor: pointer; text-align: center; border-radius: 8px; }
-.hc img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: var(--surface-2); border: 1px solid transparent; transition: border-color .12s, transform .12s; }
+/* Hero picker: always open under the draft. The row it adds to is picked with the "Add to" buttons or by tapping a slot. */
+.slot.next { border: 1.5px solid var(--brand); color: var(--brand); background: rgba(242, 106, 75, 0.08); box-shadow: 0 0 0 3px rgba(242, 106, 75, 0.12); }
+.chooser { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.chooser h3 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--muted); }
+.addto { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 10px; }
+.addto .tab { justify-content: center; font-size: 12.5px; height: 30px; padding: 0 6px; white-space: nowrap; }
+.addto .tab::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.addto .tab[aria-pressed="true"]::before { background: #1f0b05; }
+.addto .tab small { font: 500 11px var(--mono); opacity: .7; }
+.qrow { display: flex; gap: 8px; align-items: center; }
+.qrow input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px var(--sans); }
+.qrow input:focus { outline: none; border-color: var(--brand); }
+.qrow .reset { height: 36px; padding: 0 12px; }
+.qrow .reset[disabled] { opacity: .4; cursor: default; pointer-events: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; margin-top: 10px; padding-top: 2px; }
+.hc { all: unset; position: relative; cursor: pointer; border-radius: 7px; }
+.hc img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; background: var(--surface-2); border: 1.5px solid transparent; transition: border-color .12s, transform .12s; }
 .hc:hover img, .hc:focus-visible img { border-color: var(--brand); transform: translateY(-2px); }
-.hc span { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hc[disabled] { cursor: default; opacity: .3; }
-.hc[disabled] img { transform: none; border-color: transparent; }
+.hc[disabled] { cursor: default; opacity: .22; }
+.hc[disabled] img { transform: none; border-color: transparent; filter: grayscale(1); }
+.hc.first img { border-color: var(--brand); }
+.hc .tip { display: none; position: absolute; z-index: 3; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); padding: 3px 7px; border-radius: 5px; background: #0d0b0a; border: 1px solid var(--line); font-size: 11px; white-space: nowrap; pointer-events: none; }
+.hc:hover .tip, .hc:focus-visible .tip, .hc.first .tip { display: block; }
+.hc.first .tip { bottom: auto; top: calc(100% + 4px); border-color: var(--brand); }
+.grid .empty { grid-column: 1 / -1; }
+/* A suggested hero is picked (or banned) with one click; its builds are behind the small link */
+.pick .bl { grid-column: 4; justify-self: end; font-size: 11px; color: var(--muted); text-decoration: none; padding: 2px 0; }
+.pick .bl:hover { color: var(--brand); }
+.pick .adv { grid-row: 1; }
+.pick .act { display: none; }
+.pick:hover .adv small, .pick:focus-visible .adv small { display: none; }
+.pick:hover .act, .pick:focus-visible .act { display: block; margin-top: 3px; font: 600 10.5px var(--sans); color: var(--brand); }
+.pick.added { animation: added .35s ease-out; }
+@keyframes added { 50% { border-color: var(--good); } }
+.toast { position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translate(-50%, 12px); opacity: 0; z-index: 20; display: flex; gap: 12px; align-items: center; padding: 9px 14px; border-radius: 10px; background: #0d0b0a; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(0,0,0,.5); font-size: 13px; transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast button { all: unset; cursor: pointer; color: var(--brand); font-weight: 600; }
 
 @media (max-width: 860px) { .board { grid-template-columns: 1fr; } }
 @media (max-width: 520px) {
   .panel { padding: 14px; }
   .slots { gap: 6px; }
-  dialog { width: 100vw; max-width: 100vw; max-height: 85vh; margin: auto 0 0; border-radius: 14px 14px 0 0; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  .grid { max-height: 280px; overflow-y: auto; }
+  .addto .tab { font-size: 11.5px; padding: 0 4px; }
+  .addto .tab small { display: none; }
+  .hc .tip { display: none !important; }
 }
-@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } .pick, .slot, .hc img { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pick, .slot, .hc img { transition: none; } .pick.added { animation: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -160,10 +181,16 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
 
   <div class="board">
     <section class="panel" aria-label="The draft">
-      <h2>The draft <small>Tap a slot to add a hero or ban</small></h2>
+      <h2>The draft <small>Click a hero below to add it</small></h2>
       <div class="team" style="--c:var(--bad)"><h3>Enemy team</h3><div class="slots" id="enemy"></div><div class="bans"><span>Bans</span><span style="display:contents" id="eban"></span></div></div>
       <div class="edge" id="edge"></div>
       <div class="team" style="--c:var(--good)"><h3>Your team</h3><div class="slots" id="ally"></div><div class="bans"><span>Bans</span><span style="display:contents" id="aban"></span></div></div>
+      <div class="chooser">
+        <h3>Add a hero to</h3>
+        <div class="addto seg" id="addto" role="group" aria-label="Add to"></div>
+        <div class="qrow"><input id="q" type="text" placeholder="Search heroes (just start typing)" autocomplete="off" aria-label="Search heroes"><button class="reset" id="undo" type="button" disabled title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Undo</button></div>
+        <div class="grid" id="grid"></div>
+      </div>
     </section>
     <section class="panel" aria-label="Best picks">
       <h2><span class="seg kind" id="kind" role="group" aria-label="Show"><button class="tab" data-kind="pick" aria-pressed="true">Best picks</button><button class="tab" data-kind="ban" aria-pressed="false">Best bans</button></span><small id="for"></small></h2>
@@ -180,11 +207,7 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
   </footer>
 </div>
 
-<dialog id="chooser" aria-label="Choose a hero">
-  <div class="dh"><input id="q" type="text" placeholder="Search heroes" autocomplete="off" aria-label="Search heroes"><button class="x" type="button" aria-label="Close">×</button></div>
-  <div class="dt" id="dt"></div>
-  <div class="grid" id="grid"></div>
-</dialog>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
@@ -297,11 +320,12 @@ function drawPicks() {
   document.getElementById("note").textContent = ban
     ? `The heroes that would help the enemy most against your team, with the enemy's edge if they picked one (now ${100 - Math.round(now)}%).`
     : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
-  document.getElementById("picks").innerHTML = full ? `<div class="empty">${ban ? "Your 3 bans are in." : "Your team is full."}</div>` : top.length ? top.map(p => {
+  const done = full ? (ban ? "Your 3 bans are in." : "Your team is full.") : ban && draft.enemy.length >= 5 ? "The enemy team is full, so there's nothing left to ban." : "";
+  document.getElementById("picks").innerHTML = done ? `<div class="empty">${done}</div>` : top.length ? top.map(p => {
     const t = TL.tiers.find(x => x.id === p.t), h = byId[p.id];
-    return `<a class="pick" href="/builds/${p.id}"><img src="${unitImg(p.id)}" alt="">
+    return `<div class="pick" role="button" tabindex="0" data-add="${p.id}" aria-label="${ban ? "Ban" : "Pick"} ${esc(unitName(p.id))}"><img src="${unitImg(p.id)}" alt="">
       <span class="top"><b>${esc(unitName(p.id))}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.lift?.tier > 0 ? ` <i class="up">→ ${esc(M.tierName(p.lift.combo.tier))}</i>` : ""}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}</span></span>
-      <span class="why">${p.why.length ? p.why.map(([c, w, cls]) => `<span style="--c:${c}"${cls ? ` class="${cls}"` : ""}>${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small></span></a>`;
+      <span class="why">${p.why.length ? p.why.map(([c, w, cls]) => `<span style="--c:${c}"${cls ? ` class="${cls}"` : ""}>${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small><span class="act">${ban ? "Click to ban" : "Click to pick"}</span></span><a class="bl" href="/builds/${p.id}">Builds ›</a></div>`;
   }).join("") : '<div class="empty">No heroes left for this role.</div>';
   document.querySelectorAll(".why .ri").forEach(s => { s.style.width = s.style.height = "12px"; s.style.verticalAlign = "-2px"; });
 }
@@ -311,11 +335,12 @@ function drawSlots() {
     // A pick shows Cho and Gall in their own slots (two players); a ban shows Cho'gall
     const id = draft[side][i], nm = id && (isPick(side) ? byId[id].name : unitName(id)), pic = id && (isPick(side) ? img(id) : unitImg(id));
     return id ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(nm)}" aria-label="Remove ${esc(nm)}"><img src="${pic}" alt=""><span class="nm">${esc(nm)}</span></button>`
-      : `<button class="slot" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
+      : `<button class="slot${side === target && i === draft[side].length ? " next" : ""}" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
   };
   for (const k in SIZE) document.getElementById(k).innerHTML = [...Array(SIZE[k]).keys()].map(i => slot(k, i)).join("");
 }
 const LABEL = { enemy: "Add to the enemy team", ally: "Add to your team", eban: "Enemy ban", aban: "Your team's ban" };
+const ROWS = [["enemy", "Enemy", "bad"], ["eban", "Enemy bans", "bad"], ["ally", "Your team", "good"], ["aban", "Your bans", "good"]];
 let kind = "pick";
 document.getElementById("kind").addEventListener("click", e => {
   const b = e.target.closest("[data-kind]");
@@ -325,45 +350,96 @@ document.getElementById("kind").addEventListener("click", e => {
   drawPicks();
 });
 
-function draw() { drawSlots(); drawEdge(); drawPicks(); save(); }
+function draw() { drawSlots(); drawEdge(); drawPicks(); drawAddTo(); drawGrid(); save(); }
 
-// Hero chooser
-const dlg = document.getElementById("chooser"), qbox = document.getElementById("q");
-let target = null;
+// Hero picker: always open under the draft. A click adds the hero to the row picked in "Add to"
+// (tapping an empty slot picks its row too). When that row fills up, it moves on to its partner row.
+const qbox = document.getElementById("q"), undoBtn = document.getElementById("undo"), toast = document.getElementById("toast");
+let target = "enemy", undos = [], toastT = 0;
+function drawAddTo() {
+  document.getElementById("addto").innerHTML = ROWS.map(([k, label, c]) =>
+    `<button class="tab" data-to="${k}" style="--c:var(--${c})" aria-pressed="${k === target}">${label} <small>${draft[k].length}/${SIZE[k]}</small></button>`).join("");
+}
 function drawGrid() {
   const taken = allTaken(), k = norm(qbox.value);
   // One Cho'gall tile (found by "cho", "gall" or "chogall"); it needs two open slots for a pick
   const list = HEROES.filter(h => h.id !== "gall" && (!k || norm(unitName(h.id)).includes(k) || (h.id === "chogall" && "gall".includes(k))));
-  document.getElementById("grid").innerHTML = list.map(h => { const off = taken.has(h.id) || !roomFor(target, h.id);
-    return `<button class="hc" data-pick="${h.id}"${off ? " disabled" : ""}${!taken.has(h.id) && off ? ' title="Cho\'gall needs two open slots"' : ""}><img src="${unitImg(h.id)}" alt="" loading="lazy"><span>${esc(unitName(h.id))}</span></button>`; }).join("") || '<div class="empty">No hero by that name.</div>';
+  let first = true;
+  document.getElementById("grid").innerHTML = list.map(h => { const off = taken.has(h.id) || !roomFor(target, h.id), nm = unitName(h.id);
+    const tip = taken.has(h.id) ? `${nm} (taken)` : off ? (draft[target].length >= SIZE[target] ? `${nm} (row is full)` : "Cho'gall needs two open slots") : nm;
+    const cls = k && !off && first ? (first = false, " first") : "";
+    return `<button class="hc${cls}" data-pick="${h.id}"${off ? " disabled" : ""} aria-label="${esc(tip)}"><img src="${unitImg(h.id)}" alt="" loading="lazy"><span class="tip">${esc(tip)}</span></button>`; }).join("") || '<div class="empty">No hero by that name.</div>';
 }
-function choose(side) {
-  target = side;
-  document.getElementById("dt").textContent = LABEL[side];
-  qbox.value = "";
-  drawGrid();
-  dlg.showModal();
-  if (matchMedia("(hover: hover)").matches) qbox.focus();
+function add(side, id) {
+  if (allTaken().has(id) || !roomFor(side, id)) return false;
+  undos.push(JSON.stringify(draft));
+  draft[side].push(...addIds(side, id));
+  // A full row hands over to its partner row (enemy <-> your team, enemy bans <-> your bans), then any row with room
+  const NEXT = { enemy: "ally", ally: "enemy", eban: "aban", aban: "eban" };
+  if (draft[side].length >= SIZE[side] && side === target) target = [NEXT[side], ...ROWS.map(r => r[0])].find(k => draft[k].length < SIZE[k]) || target;
+  undoBtn.disabled = false;
+  const where = { enemy: "the enemy team", ally: "your team", eban: "the enemy bans", aban: "your bans" }[side];
+  toast.innerHTML = `<span>${esc(unitName(id))} added to ${where}</span><button type="button" data-undo>Undo</button>`;
+  toast.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove("on"), 3500);
+  return true;
 }
+function undo() {
+  if (!undos.length) return;
+  Object.assign(draft, JSON.parse(undos.pop()));
+  undoBtn.disabled = !undos.length;
+  toast.classList.remove("on");
+  draw();
+}
+undoBtn.addEventListener("click", undo);
+toast.addEventListener("click", e => { if (e.target.closest("[data-undo]")) undo(); });
+document.getElementById("addto").addEventListener("click", e => {
+  const b = e.target.closest("[data-to]");
+  if (!b) return;
+  target = b.dataset.to;
+  draw();
+});
 qbox.addEventListener("input", drawGrid);
-qbox.addEventListener("keydown", e => { if (e.key === "Enter") document.querySelector(".hc:not([disabled])")?.click(); });
-dlg.addEventListener("click", e => {
-  if (e.target === dlg || e.target.closest(".x")) return dlg.close();
+qbox.addEventListener("keydown", e => {
+  if (e.key === "Enter") document.querySelector(".hc.first")?.click();   // only with something typed
+  if (e.key === "Escape") { qbox.value = ""; drawGrid(); qbox.blur(); }
+});
+document.getElementById("grid").addEventListener("click", e => {
   const b = e.target.closest("[data-pick]");
   if (!b || b.disabled) return;
-  draft[target].push(...addIds(target, b.dataset.pick));
-  dlg.close();
-  draw();
+  if (add(target, b.dataset.pick)) { qbox.value = ""; draw(); if (document.activeElement !== qbox && matchMedia("(hover: hover)").matches) qbox.focus({ preventScroll: true }); }
+});
+// A suggested hero: Best picks adds it to your team, Best bans to your bans. "Builds ›" still opens its builds.
+const fromSuggestion = card => {
+  const id = card.dataset.add;
+  if (add(kind === "ban" ? "aban" : "ally", id)) draw();
+};
+document.getElementById("picks").addEventListener("click", e => {
+  if (e.target.closest("a")) return;
+  const c = e.target.closest("[data-add]");
+  if (c) fromSuggestion(c);
+});
+document.getElementById("picks").addEventListener("keydown", e => {
+  const c = e.target.closest("[data-add]");
+  if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); fromSuggestion(c); }
 });
 document.addEventListener("click", e => {
   const s = e.target.closest(".slot[data-side]");
   if (!s) return;
   const side = s.dataset.side;
-  // Removing Cho or Gall removes both
-  if (s.classList.contains("full")) { const id = draft[side][+s.dataset.i]; draft[side] = draft[side].filter(x => x !== id && x !== PAIR[id]); draw(); }
-  else choose(side);
+  // Removing Cho or Gall removes both. An empty slot makes its row the one the picker adds to.
+  if (s.classList.contains("full")) { undos.push(JSON.stringify(draft)); undoBtn.disabled = false; const id = draft[side][+s.dataset.i]; draft[side] = draft[side].filter(x => x !== id && x !== PAIR[id]); }
+  else target = side;
+  draw();
 });
-document.getElementById("clear").addEventListener("click", () => { for (const k in SIZE) draft[k] = []; draw(); });
+// Start typing anywhere to search (desktop); Ctrl+Z undoes the last change (in the search box only while it's empty)
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && (document.activeElement !== qbox || !qbox.value)) { e.preventDefault(); undo(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || !/\p{L}/u.test(e.key)) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+  qbox.focus({ preventScroll: true });
+});
+document.getElementById("clear").addEventListener("click", () => { undos.push(JSON.stringify(draft)); undoBtn.disabled = false; for (const k in SIZE) draft[k] = []; target = "enemy"; draw(); });
 
 if (!MAPS.includes(draft.map)) draft.map = "Overall";
 mapPicker(document.getElementById("map"), { value: draft.map, overall: "Any map", onChange: m => { draft.map = m; draw(); } });
@@ -384,6 +460,7 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).th
   const seen = new Set();   // drop unknown heroes and any hero listed twice
   for (const k in SIZE) draft[k] = draft[k].filter(id => byId[id] && !seen.has(id) && seen.add(id));
   fixPairs();
+  target = ROWS.map(r => r[0]).find(k => draft[k].length < SIZE[k]) || "enemy";
   draw();
 }).catch(() => { document.getElementById("picks").innerHTML = '<div class="empty">The tier list couldn\'t load. Refresh the page to try again.</div>'; });
 </script>
