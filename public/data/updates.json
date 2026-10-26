@@ -1,4 +1,5 @@
 [
+  { "date": "2026-10-26", "area": "overlay", "title": "Easier to read win/loss dots", "text": "The win/loss dots next to the score are now all full circles, so losses are easy to see on stream too. Losing streaks show as solid blue dots." },
   { "date": "2026-10-26", "area": "website", "title": "Builds button on the tier list", "text": "Click a hero on the tier list and the info box now has a button that takes you straight to that hero's builds. Cho'gall gets one for Cho and one for Gall." },
   { "date": "2026-10-25", "area": "website", "title": "New numbers on the home page", "text": "The numbers under the intro now show heroes, total builds, when the tier list was last updated and the current patch. Click any of them to jump to that page." },
   { "date": "2026-10-25", "area": "website", "title": "Clearer level labels on builds", "text": "Builds now label levels as LV 1, LV 4 and so on, with the level number brighter, so they no longer read like Lv 11." },
