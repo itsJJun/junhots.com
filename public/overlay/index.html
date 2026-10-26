@@ -5,11 +5,11 @@
 <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Stream overlay for Heroes of the Storm · JunHotS</title>
-<meta name="description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, tier list and match-start draft banner.">
+<meta name="description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, a match-start draft banner, the !tierlist popup, chat commands and a tier list editor.">
 <meta property="og:title" content="Stream overlay for Heroes of the Storm · JunHotS">
-<meta property="og:description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, tier list and match-start draft banner.">
+<meta property="og:description" content="The junhots Heroes of the Storm stream overlay: live talents, rank and streak, a match-start draft banner, the !tierlist popup, chat commands and a tier list editor.">
 <meta property="og:url" content="https://junhots.com/overlay/">
-<meta property="og:image" content="https://junhots.com/img/og/_overlay.jpg">
+<meta property="og:image" content="https://junhots.com/img/og/_overlay.jpg?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
@@ -22,12 +22,83 @@
 <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">
 <style>
-.shots { display: grid; gap: 40px; margin-top: 8px; }
-.shot { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: center; }
-.shot img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
-.shot b { display: block; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
-.shot p { margin: 0; color: var(--muted); }
-@media (max-width: 720px) { .shot { grid-template-columns: 1fr; gap: 14px; } }
+/* Big in-game shot with numbered pins that jump to each part below */
+.stage { position: relative; margin-top: 8px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 30px 80px -40px rgba(242, 106, 75, .35); }
+.stage img { display: block; width: 100%; height: auto; }
+.pin { position: absolute; display: grid; place-items: center; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; background: var(--brand); color: #1f0b05; font: 700 13px/1 var(--sans); box-shadow: 0 0 0 4px rgba(242, 106, 75, .28), 0 4px 14px rgba(0, 0, 0, .5); transition: transform .2s; }
+.pin:hover, .pin:focus-visible { transform: scale(1.15); }
+.pin::after { content: attr(data-label); position: absolute; left: 36px; white-space: nowrap; padding: 3px 9px; border-radius: 6px; background: rgba(18, 16, 15, .92); color: var(--text); font-weight: 500; font-size: 12px; opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s; pointer-events: none; }
+.pin.l::after { left: auto; right: 36px; transform: translateX(4px); }
+.pin:hover::after, .pin:focus-visible::after { opacity: 1; transform: none; }
+/* Jump links under the shot */
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 8px; }
+.jump a { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; color: var(--muted); transition: border-color .2s, color .2s; }
+.jump a:hover { border-color: rgba(242, 106, 75, .5); color: var(--text); }
+.jump a span { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--surface-2); color: var(--accent); font-size: 11px; font-weight: 700; }
+
+/* Feature rows: picture one side, words the other, alternating */
+.feat { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 44px; align-items: center; padding-block: 56px; border-top: 1px solid var(--line); scroll-margin-top: 16px; }
+.feat:first-of-type { border-top: 0; }
+.feat.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
+.feat.flip > .media { order: 2; }
+/* Wide pictures (the banner, the three panel states) get the full width under the words */
+.feat.wide { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+.feat.wide > .media { order: 2; }
+.feat.wide > .txt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 44px; align-items: start; }
+.feat.wide > .txt > ul { margin-top: 30px; }
+.feat .num { font: 600 12px/1 var(--mono); color: var(--accent); letter-spacing: .08em; }
+.feat h2 { margin: 10px 0 10px; font-size: clamp(22px, 3vw, 28px); line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; }
+.feat p { margin: 0; color: var(--muted); }
+.feat ul { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; font-size: 14px; }
+.feat li { position: relative; padding-left: 20px; }
+.feat li::before { content: ""; position: absolute; left: 3px; top: .62em; width: 6px; height: 6px; border-radius: 2px; background: var(--brand); transform: rotate(45deg); }
+.feat li b { font-weight: 600; }
+.feat li a, .feat p a { color: var(--accent); }
+.feat li a:hover, .feat p a:hover { text-decoration: underline; }
+.media img, .media video { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.cap { margin-top: 8px; font-size: 12px; color: var(--muted); }
+code, .k { font: 500 .92em var(--mono); color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+.c10 { color: #ffc45c; } .c20 { color: #f26a4b; } .gold { color: var(--combo); }
+
+/* Rank and streak: three states side by side */
+.states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.states figure { margin: 0; }
+.states figcaption { margin-top: 7px; font-size: 12px; color: var(--muted); }
+.states figcaption b { color: var(--text); font-weight: 600; }
+
+/* Chat commands: a Twitch-chat look */
+.chat { border: 1px solid var(--line); border-radius: 12px; background: #0e0d10; padding: 14px 16px; display: grid; gap: 10px; font-size: 13.5px; line-height: 1.5; }
+.chat .top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #26232b; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8a8494; }
+.chat .top i { font-style: normal; display: inline-flex; align-items: center; gap: 6px; } .chat .top i::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e5484d; }
+.msg b { font-weight: 700; }
+.msg .t { color: #efeff1; }
+.msg.bot { padding: 8px 10px; border-radius: 8px; background: #18161c; border-left: 2px solid var(--brand); }
+.msg.bot .t { white-space: pre-line; }
+.v1 { color: #1e90ff; } .v2 { color: #ff7f50; } .v3 { color: #9acd32; } .v4 { color: #daa520; } .me { color: #f26a4b; }
+.cmds { margin-top: 18px; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 14px; align-items: baseline; }
+.cmds dt { white-space: nowrap; } .cmds dd { margin: 0; color: var(--muted); }
+
+/* Call to action at the bottom */
+.cta { margin: 8px 0 56px; padding: 32px; border-radius: 14px; border: 1px solid var(--line); background: radial-gradient(600px 220px at 0% 0%, rgba(242, 106, 75, .14), transparent 70%), var(--surface); display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.cta h2 { margin: 0 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.cta p { margin: 0; color: var(--muted); max-width: 560px; }
+.cta .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn.pri { background: var(--brand); border-color: var(--brand); color: #1f0b05; font-weight: 600; }
+.btn.pri:hover { background: var(--accent); }
+
+@media (max-width: 860px) {
+  .feat, .feat.flip { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 40px; }
+  .feat.flip > .media, .feat.wide > .media { order: 0; margin-top: 0; }
+  .feat.wide > .txt { display: block; }
+  .feat.wide > .txt > ul { margin-top: 18px; }
+  .pin { width: 22px; height: 22px; margin: -11px 0 0 -11px; font-size: 11px; box-shadow: 0 0 0 3px rgba(242, 106, 75, .28); }
+  .pin::after { display: none; }
+}
+@media (max-width: 520px) {
+  .states { grid-template-columns: 1fr; }
+  .cta { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .pin, .jump a { transition: none; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -44,16 +115,155 @@
   <header class="page-head">
     <div>
       <h1 data-edit="overlay_title">Stream overlay</h1>
-      <p class="sub" data-edit="overlay_text">The overlay you see on my stream. Other streamers asked for it, so I'm getting it ready to share.</p>
+      <p class="sub" data-edit="overlay_text">The overlay you see on my stream: live talents, rank and streak, a draft banner at match start and my tier list on screen when chat asks. Other streamers asked for it, so I'm getting it ready to share.</p>
       <a class="whatsnew" href="/updates/#overlay" data-latest="overlay" hidden></a>
     </div>
     <span class="soon" data-edit="overlay_badge">Download coming soon</span>
   </header>
-  <div class="shots">
-    <div class="shot"><img src="/img/previews/overlay-talents.webp" width="840" height="345" alt="Talent panel in the corner of a Heroes of the Storm game"><div><b data-edit="feature1_title">Live talents</b><p data-edit="feature1_text">Shows your talent picks as you take them.</p></div></div>
-    <div class="shot"><img src="/img/previews/overlay-panel.webp" width="520" height="160" alt="Talent panel with rank badge and win streak" loading="lazy"><div><b data-edit="feature2_title">Rank and streak</b><p data-edit="feature2_text">Your rank badge, win/loss banner and a header that heats up on a win streak.</p></div></div>
-    <div class="shot"><img src="/img/previews/overlay-banner.webp" width="1160" height="230" alt="Match start banner with tiers, win rates and match edge" loading="lazy"><div><b data-edit="feature3_title">Tier list and draft</b><p data-edit="feature3_text">Viewers type !tierlist, and both teams get tiers and win rates when the match starts.</p></div></div>
-    <div class="shot"><img src="/img/previews/overlay-popup.webp" width="891" height="343" alt="Tier list popup on stream" loading="lazy"><div><b data-edit="feature4_title">Tier list on stream</b><p data-edit="feature4_text">When chat types !tierlist between games, the tier list pops up on screen for a few seconds.</p></div></div>
+
+  <!-- Pins sit on the parts of the 1920x1080 shot they point at (left/top in %) -->
+  <div class="stage">
+    <img src="/img/previews/overlay-hero.webp" srcset="/img/previews/overlay-hero-960.webp 960w, /img/previews/overlay-hero.webp 1600w" sizes="(max-width: 1212px) calc(100vw - 32px), 1180px" width="1600" height="900" alt="The overlay in a Heroes of the Storm match: talent panel above the hero portrait, tier tabs under the top bar and the draft edge under the score" fetchpriority="high">
+    <a class="pin" href="#talents" style="left: 24.2%; top: 76.8%" data-label="Live talents" aria-label="Live talents">1</a>
+    <a class="pin" href="#rank" style="left: 24.2%; top: 69.6%" data-label="Rank and streak" aria-label="Rank and streak">2</a>
+    <a class="pin" href="#banner" style="left: 20%; top: 12.4%" data-label="Tier and win rate per hero" aria-label="Tier and win rate per hero">3</a>
+    <a class="pin" href="#banner" style="left: 58.4%; top: 11.6%" data-label="Draft edge" aria-label="Draft edge">4</a>
+  </div>
+  <div class="jump">
+    <a href="#talents"><span>1</span>Live talents</a>
+    <a href="#rank"><span>2</span>Rank and streak</a>
+    <a href="#banner"><span>3</span>Match-start banner</a>
+    <a href="#popup"><span>4</span>!tierlist on stream</a>
+    <a href="#chat"><span>5</span>Chat commands</a>
+    <a href="#editor"><span>6</span>Tier list editor</a>
+  </div>
+
+  <section class="feat" id="talents">
+    <div class="media">
+      <video src="/img/previews/overlay-talents.mp4" poster="/img/previews/overlay-talents-poster.webp" width="560" height="236" autoplay muted loop playsinline preload="metadata" aria-label="Talents filling in one by one, then a Victory"></video>
+    </div>
+    <div>
+      <span class="num">01</span>
+      <h2 data-edit="feature1_title">Live talents</h2>
+      <p data-edit="feature1_text">Every talent slot sits right above the game's own HUD and fills in as you pick. The talent name slides in over the header, and the next slot glows softly in your rank's color.</p>
+      <ul>
+        <li>All 7 levels with the key under each icon, <b class="c10">10</b> in gold and <b class="c20">20</b> in coral</li>
+        <li>No box: a soft dark fade keeps it readable without covering the game</li>
+        <li>Size slider and darkness slider, lined up with the game HUD by default</li>
+        <li>Your hero is found by itself when the match loads, a pick is one hotkey</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="feat wide" id="rank">
+    <div class="media">
+      <div class="states">
+        <figure><img src="/img/previews/overlay-streak.webp" width="480" height="180" alt="Panel on a 5 win streak, warm light and embers" loading="lazy"><figcaption><b>Win streak</b> · warms up from 2 wins</figcaption></figure>
+        <figure><img src="/img/previews/overlay-cold.webp" width="480" height="180" alt="Panel on a 3 loss streak, cold tint" loading="lazy"><figcaption><b>Losing streak</b> · goes cold</figcaption></figure>
+        <figure><img src="/img/previews/overlay-victory.webp" width="480" height="180" alt="Victory takeover with score and streak" loading="lazy"><figcaption><b>Result</b> · Victory or Defeat</figcaption></figure>
+      </div>
+    </div>
+    <div class="txt"><div>
+      <span class="num">02</span>
+      <h2 data-edit="feature2_title">Rank, score and streaks</h2>
+      <p data-edit="feature2_text">Your rank badge, your score this session, win rate and the last 10 games as dots. A win streak warms the panel up, a losing streak turns it cold, and every result gets its own Victory or Defeat moment.</p></div>
+      <ul>
+        <li>Sharp Storm League badge, in the header, on the corner, on the left edge or off</li>
+        <li>Win dots green, losses red, a losing streak icy blue</li>
+        <li>Results count by themselves, a wrong one can be undone</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="feat wide" id="banner">
+    <div class="media">
+      <img src="/img/previews/overlay-banner.webp?v=2" width="1180" height="170" alt="Match banner: tier and win rate under each hero's health bar, draft edge 56% to 44% under the score" loading="lazy">
+      <p class="cap">Shows at the start of a match, then gets out of the way.</p>
+    </div>
+    <div class="txt"><div>
+      <span class="num">03</span>
+      <h2 data-edit="feature3_title">Match-start banner</h2>
+      <p data-edit="feature3_text">When the match loads, a tab under each health bar shows that hero's tier and win rate, and the box under the score shows who has the better draft.</p></div>
+      <ul>
+        <li>Uses the map's own tier list when the map has one</li>
+        <li>Draft edge counts tiers, win rates, counters, synergy and team comp, the same math as the <a href="/draft/">Draft helper</a></li>
+        <li><span class="gold">Power combos</span> like Auriel + Cho'gall get a gold link and play at their combo tier</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="feat flip" id="popup">
+    <div class="media">
+      <img src="/img/previews/overlay-popup.webp?v=2" width="1250" height="825" alt="Tier list popup on stream with tiers S to D and a power combos row" loading="lazy">
+    </div>
+    <div>
+      <span class="num">04</span>
+      <h2 data-edit="feature4_title">Tier list on stream</h2>
+      <p data-edit="feature4_text">When chat types !tierlist between games, my tier list pops up on stream for a few seconds. Viewers can ask for a map or a role.</p>
+      <ul>
+        <li><code>!tierlist ds support</code> shows Dragon Shire supports, in any order</li>
+        <li>Power combos listed along the bottom, with the tier each pair plays at</li>
+        <li>Stays off screen while I'm in a game, chat is told to ask again after</li>
+        <li>Or show it yourself from the control panel for as long as you like</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="feat" id="chat">
+    <div class="media">
+      <div class="chat" aria-label="Example Twitch chat">
+        <div class="top"><span>Stream chat</span><i>Live</i></div>
+        <div class="msg"><b class="v1">kerrigank</b>: <span class="t">!tierlist ds support</span></div>
+        <div class="msg bot"><b class="me">junhots_</b>: <span class="t">Use !tierlist help for all commands · Jun's Support tier list (Dragon Shire)
+🟥 S: Auriel, The Lost Vikings
+🟩 A: Anduin, Brightwing, Lúcio, Malfurion, Medivh, Rehgar, Whitemane, Zarya
+🟦 B: Ana, Deckard, Kharazim, Stukov, Tyrande
+📺 Showing on stream now</span></div>
+        <div class="msg"><b class="v2">deckardfan</b>: <span class="t">what rank</span></div>
+        <div class="msg bot"><b class="me">junhots_</b>: <span class="t">Jun's current rank: Platinum 1</span></div>
+        <div class="msg"><b class="v3">murkyboi</b>: <span class="t">!builds</span></div>
+        <div class="msg bot"><b class="me">junhots_</b>: <span class="t">Visit junhots.com/builds for full builds on every hero</span></div>
+      </div>
+    </div>
+    <div>
+      <span class="num">05</span>
+      <h2 data-edit="feature5_title">Chat commands</h2>
+      <p data-edit="feature5_text">The overlay answers in Twitch chat with your own wording. Each command has its own on/off switch.</p>
+      <dl class="cmds">
+        <dt><code>!tierlist</code></dt><dd>Tier list in chat and on stream, by map and role</dd>
+        <dt><code>!rank</code></dt><dd>Your rank, Master and GM number too. "what rank?" works</dd>
+        <dt><code>!builds</code></dt><dd>Points to every hero's builds on junhots.com</dd>
+        <dt><code>!patch</code></dt><dd>What the latest HotS patch changed</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="feat flip" id="editor">
+    <div class="media">
+      <img src="/img/previews/overlay-editor.webp" width="1288" height="776" alt="Tier list editor with tiers S to D, map picker and role filters" loading="lazy">
+    </div>
+    <div>
+      <span class="num">06</span>
+      <h2 data-edit="feature6_title">Tier list editor</h2>
+      <p data-edit="feature6_text">Drag heroes into tiers, per map if you like. One Save updates the overlay, the chat replies and junhots.com.</p>
+      <ul>
+        <li>Counters, synergy, style tags and power combos for the draft edge</li>
+        <li>Paste win rates straight from Heroes Profile</li>
+        <li>Save as image for Discord or socials</li>
+        <li>After each ranked game, the result goes to my <a href="/games/">match history</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="cta">
+    <div>
+      <h2 data-edit="cta_title">Want it on your stream?</h2>
+      <p data-edit="cta_text">I'm cleaning it up so anyone can set it up in a few minutes. Join the Discord to hear when it's ready.</p>
+    </div>
+    <div class="btns">
+      <a class="btn pri" href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Join the Discord</a>
+      <a class="btn" href="/updates/#overlay">What's new</a>
+    </div>
   </div>
 
   <footer>
@@ -65,5 +275,7 @@
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
+<script>/* No autoplaying clip for people who turned motion off; elsewhere it only plays while on screen */
+{const v=document.querySelector("#talents video");if(v){if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause();v.controls=true}else if("IntersectionObserver"in window){new IntersectionObserver(([e])=>{e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(v)}}}</script>
 </body>
 </html>
