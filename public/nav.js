@@ -421,18 +421,26 @@
     const slot = panel.querySelector(".fb-inbox-slot");
     if (slot) slot.innerHTML = `<a class="fb-inbox" href="/inbox/">${ic('<path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6l2-8Z"/>').replace("<svg", '<svg width="15" height="15"')}Your inbox · <b>${n} new</b></a>`;
   }
-  // Jun only (logged in): how many messages are new, at most one check a minute while browsing
+  // Jun only (logged in): how many messages are new, at most one check a minute while browsing.
+  // The inbox page writes the exact number here after every Done/Delete, so the badge follows at once (in every tab).
   async function newCount() {
-    let pw = "", cached; try { pw = localStorage.getItem("junhots_admin") || ""; cached = JSON.parse(sessionStorage.getItem("junhots_fbnew") || "null"); } catch {}
+    let pw = "", cached; try { pw = localStorage.getItem("junhots_admin") || ""; cached = JSON.parse(localStorage.getItem("junhots_fbnew") || "null"); } catch {}
     if (!pw) return null;
     if (cached && Date.now() - cached.t < 60e3) return cached.n;
     const r = await fetch("/api/feedback?count=1", { headers: { authorization: "Bearer " + pw } }).catch(() => null);
     if (!r?.ok) return null;
     const n = (await r.json()).new;
-    try { sessionStorage.setItem("junhots_fbnew", JSON.stringify({ n, t: Date.now() })); } catch {}
+    try { localStorage.setItem("junhots_fbnew", JSON.stringify({ n, t: Date.now() })); } catch {}
     return n;
   }
-  newCount().then(n => { if (n) btn.insertAdjacentHTML("beforeend", `<b title="${n} new in your inbox">${n}</b>`); });
+  const badge = n => {
+    btn.querySelector("b")?.remove();
+    if (n) btn.insertAdjacentHTML("beforeend", `<b title="${n} new in your inbox">${n}</b>`);
+    const link = panel.querySelector(".fb-inbox b");
+    if (link) link.textContent = n + " new";
+  };
+  newCount().then(badge);
+  addEventListener("storage", e => { if (e.key === "junhots_fbnew") try { badge(JSON.parse(e.newValue)?.n || 0); } catch {} });
   function open() {
     if (!panel.hidden) return;
     form();
