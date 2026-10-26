@@ -31,6 +31,7 @@ window.foldTierlist = tl => {
     }
     tl[k] = Object.fromEntries(Object.entries(out).filter(([, l]) => l.length));
   }
+  if (Array.isArray(tl.combos)) tl.combos = tl.combos.map(c => ({ ...c, a: tierKey(c.a), b: tierKey(c.b) })).filter(c => c.a !== c.b);
   return tl;
 };
 

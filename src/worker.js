@@ -22,7 +22,7 @@ import { patchNotes, patchTakes } from "./patch-notes.js";
 const KEY = "builds";
 const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
-const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates", "tags"];
+const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates", "tags", "combos"];
 const GAMES_KEY = "games";
 const MAX_GAMES = 5000;
 const MAX_BATCH = 200;
