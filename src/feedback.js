@@ -5,13 +5,18 @@
 //   DELETE /api/feedback?id=...   -> Jun only: removes a message
 // Each message is its own KV key ("fb:<newest-first stamp>"), so two visitors sending at once never overwrite each other.
 // Spam guard, invisible to people: a hidden field only bots fill in (hp), forms sent faster than a person can type (ms),
-// at most RATE messages per visitor per hour, and messages stuffed with links are dropped.
+// a burst limit per visitor that costs no storage (FEEDBACK_LIMIT in wrangler.jsonc), Cloudflare Turnstile when its keys
+// are set (TURNSTILE_SITEKEY + secret TURNSTILE_SECRET), at most RATE messages per visitor per hour, at most DAY_CAP
+// messages a day in total (so a big attack can't use up the free storage quota the builds and tier list share),
+// and messages stuffed with links are dropped.
+//   GET /api/feedback?config -> everyone: the Turnstile site key ("" when Turnstile is off)
 
 const TYPES = { bug: "Bug", idea: "Idea", info: "Wrong info", other: "Other" };
 const COLORS = { bug: 0xef7d8b, idea: 0xf5c04a, info: 0xf58b70, other: 0xa89f99 };
 const MAX_TEXT = 1500;
 const MAX_KEPT = 500;
 const RATE = 5;
+const DAY_CAP = 100;
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -31,10 +36,27 @@ async function send(request, env, ctx) {
   if (text.length < 3) return json({ error: "Write a little more first." }, 400);
   if ((text.match(/https?:\/\//g) || []).length > 6) return json({ ok: true });
 
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  if (env.FEEDBACK_LIMIT && !(await env.FEEDBACK_LIMIT.limit({ key: ip })).success)
+    return json({ error: "Slow down a little and try again in a minute." }, 429);
+  if (env.TURNSTILE_SECRET) {
+    const form = new FormData();
+    form.append("secret", env.TURNSTILE_SECRET);
+    form.append("response", String(body.token || ""));
+    form.append("remoteip", ip);
+    const check = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form })
+      .then(r => r.json()).catch(() => ({ success: false }));
+    if (!check.success) return json({ error: "Couldn't check you're human. Close the form, open it again and resend." }, 403);
+  }
+
   const rk = await visitorKey(request);
   const sent = Number(await env.BUILDS.get(rk)) || 0;
   if (sent >= RATE) return json({ error: "Thanks, that's plenty for now. Try again in an hour." }, 429);
+  const dk = "fbday:" + new Date().toISOString().slice(0, 10);
+  const today = Number(await env.BUILDS.get(dk)) || 0;
+  if (today >= DAY_CAP) return json({ error: "The inbox is full for today. Try again tomorrow, or message Jun on Discord." }, 429);
   await env.BUILDS.put(rk, String(sent + 1), { expirationTtl: 3600 });
+  await env.BUILDS.put(dk, String(today + 1), { expirationTtl: 2 * 86400 });
 
   const now = Date.now();
   const item = {
@@ -89,6 +111,7 @@ async function list(env) {
 export async function feedback(request, env, ctx, passwordOk) {
   if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
   if (request.method === "POST") return send(request, env, ctx);
+  if (request.method === "GET" && new URL(request.url).searchParams.has("config")) return json({ sitekey: env.TURNSTILE_SITEKEY || "" });
   if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
   if (request.method === "GET") {
     if (!new URL(request.url).searchParams.has("count")) return list(env);
