@@ -73,6 +73,12 @@
 .rel > div:nth-child(2) h3::before { background: var(--bad); }
 .rel > div:nth-child(3) h3::before { background: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.go-builds { display: flex; gap: 8px; }
+.go-builds a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none; background: color-mix(in srgb, var(--brand) 16%, var(--surface-2)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent); transition: background .15s; }
+.go-builds a:hover { background: color-mix(in srgb, var(--brand) 28%, var(--surface-2)); }
+.go-builds svg { width: 14px; height: 14px; color: var(--accent); transition: transform .15s; }
+.go-builds a:hover svg { transform: translateX(3px); }
+
 .chip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
 .chip:hover { border-color: #4a413c; }
 .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
@@ -184,6 +190,10 @@ function chips(ids) {
   const list = ids.filter(id => byId[id]), tags = ids.filter(isTag);   // heroes, then style tags ("Dive")
   return list.length || tags.length ? `<div class="chips">${list.map(id => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}${tags.map(t => `<span class="chip tagc" style="--t:${tagColor(TL, t)}" title="${esc(tagLabel(TL, t))}: ${esc(heroesWithTag(TL, t, HEROES.map(h => h.id)).map(h => byId[h].name).join(", "))}">${tagIcon(TL, t)}${esc(tagLabel(TL, t))}</span>`).join("")}</div>` : '<span class="none">None</span>';
 }
+// Link to the hero's Builds page. Cho'gall is one tier list entry but two heroes on Builds.
+const GO = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const buildLinks = id => `<div class="go-builds">${(id === "chogall" ? [["chogall", "Cho"], ["gall", "Gall"]] : [[id, byId[id].name]])
+  .map(([b, n]) => `<a href="/builds/${b}">${esc(n)} builds${GO}</a>`).join("")}</div>`;
 let anchor = null;   // the hero card the popup points at
 const phone = () => matchMedia("(max-width: 640px)").matches;
 function renderDetail() {
@@ -199,7 +209,8 @@ function renderDetail() {
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
       <div><h3>Weak against</h3>${chips(beatenBy(selected))}</div>
       <div><h3>Good with</h3>${chips(goodWith(selected))}</div>
-    </div>`;
+    </div>
+    ${buildLinks(selected)}`;
   box.hidden = false;
   scrim.hidden = !phone();
   place();
