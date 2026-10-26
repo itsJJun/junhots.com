@@ -7,6 +7,8 @@
 //               + 1 for each enemy one of its heroes counters, + 0.6 for each "good with" pair
 //               + tags: 0.4 for each enemy a hero beats only by tag ("good against Dive"), at most 1.2 per hero;
 //                 0.25 for each pair good together only by tag. A hero-to-hero entry for the same pair counts instead.
+//               + power combos: with both heroes of a combo on the team ("Auriel + Cho'gall → S"), each plays at least
+//                 at the combo's tier ("+" = one step past the top tier), and a low win rate stops counting against it
 //               - team comp: no healer, no tank, no ranged damage, doubled tanks/healers (only once the team is mostly picked)
 //   edge        = 100 / (1 + e^(-(your score - their score) / 4))
 // An empty slot counts as a typical good pick (the average of the 20 best heroes on this map), so a team that has
@@ -48,6 +50,19 @@ window.draftModel = (TL, HEROES) => {
   const withByTag = (a, b) => { a = key(a); b = key(b); const s = TL.synergy || {};
     return a === b ? null : tagsOf(b).find(t => (s[a] || []).includes(t)) || tagsOf(a).find(t => (s[b] || []).includes(t)) || null; };
 
+  // Power combos: TL.combos = [{ a, b, tier }]. The ones a team has both heroes of, and what each hero gains from them.
+  const comboVal = t => t === "+" ? (TL.tiers.length ? tierVal(TL.tiers[0].id) + 1 : null) : TL.tiers.some(x => x.id === t) ? tierVal(t) : null;
+  const combosOf = team => { const ks = new Set(team.map(key));
+    return (TL.combos || []).filter(c => c.a !== c.b && ks.has(c.a) && ks.has(c.b) && comboVal(c.tier) != null); };
+  function comboLift(id, team, map) {
+    const k = key(id);
+    let best = null;
+    for (const c of combosOf(team)) if ((c.a === k || c.b === k) && (!best || comboVal(c.tier) > comboVal(best.tier))) best = c;
+    if (!best) return null;
+    const tier = Math.max(0, comboVal(best.tier) - tierVal(tierId(id, map)));
+    return { combo: best, partner: best.a === k ? best.b : best.a, tier, wr: Math.max(0, -wrVal(id)), v: tier + Math.max(0, -wrVal(id)) };
+  }
+
   function comp(team) {
     const n = team.length, roles = team.map(id => roleOf[id]), count = r => roles.filter(x => x === r).length;
     const ramp = Math.max(0, (n - 2) / 3);   // 0 with 2 heroes or fewer, full at 5
@@ -66,10 +81,11 @@ window.draftModel = (TL, HEROES) => {
   }
   function teamScore(team, opp, map) {
     const b = base(map), open = 5 - team.length;
-    const parts = { tiers: open * b.tiers, wr: open * b.wr, counters: 0, synergy: 0, comp: comp(team) };
+    const parts = { tiers: open * b.tiers, wr: open * b.wr, counters: 0, synergy: 0, combo: 0, comp: comp(team) };
     for (const h of team) {
       parts.tiers += tierVal(tierId(h, map));
       parts.wr += wrVal(h);
+      parts.combo += comboLift(h, team, map)?.v || 0;
     }
     const mine = once(team), theirs = once(opp);
     for (const h of mine) {
@@ -80,7 +96,7 @@ window.draftModel = (TL, HEROES) => {
       if (goodWith(mine[i], mine[k])) parts.synergy += W.synergy;
       else if (withByTag(mine[i], mine[k])) parts.synergy += W.tagSynergy;
     }
-    parts.total = parts.tiers + parts.wr + parts.counters + parts.synergy + parts.comp;
+    parts.total = parts.tiers + parts.wr + parts.counters + parts.synergy + parts.combo + parts.comp;
     return parts;
   }
   function edge(ally, enemy, map = "Overall") {
@@ -89,7 +105,8 @@ window.draftModel = (TL, HEROES) => {
     return { pct, a, e };
   }
   // The matchups behind an edge, biggest first: [{ v (+ helps your team, − theirs), text }]
-  function explain(ally, enemy) {
+  const tierName = t => t === "+" ? (TL.tiers[0]?.name || "") + "+" : TL.tiers.find(x => x.id === t)?.name || t;
+  function explain(ally, enemy, map = "Overall") {
     const name = id => HEROES.find(h => h.id === id)?.name || id, tagName = t => TL.tagNames?.[t.slice(4)] || t.slice(4);
     const out = [];
     for (const [team, opp, sign, own, other] of [[ally, enemy, 1, "", "their"], [enemy, ally, -1, "Their ", "your"]]) {
@@ -116,11 +133,18 @@ window.draftModel = (TL, HEROES) => {
         if (goodWith(a, b)) out.push({ v: sign * W.synergy, text: `${own}${name(a)} + ${name(b)} work well together` });
         else if (withByTag(a, b)) out.push({ v: sign * W.tagSynergy, text: `${own}${name(a)} + ${name(b)} work well together (${tagName(withByTag(a, b))})` });
       }
+      // "Auriel + Cho'gall power combo (Cho'gall plays as S)"
+      const cname = k => k === "chogall" ? "Cho'gall" : name(k);
+      for (const c of combosOf(team)) {
+        const lifts = once(team).map(k => [k, team.filter(h => key(h) === k).map(h => comboLift(h, team, map)).filter(l => l && l.combo === c)]).filter(([, ls]) => ls.length);
+        const v = lifts.reduce((s, [, ls]) => s + ls.reduce((t, l) => t + l.v, 0), 0), up = lifts.filter(([, ls]) => ls.some(l => l.tier > 0)).map(([k]) => cname(k));
+        if (v > 0.05) out.push({ v: sign * v, combo: true, text: `${own}${cname(c.a)} + ${cname(c.b)} power combo${up.length ? ` (${up.length > 1 ? "both play" : up[0] + " plays"} as ${tierName(c.tier)})` : ""}` });
+      }
       const c = comp(team);
       if (c <= -1) out.push({ v: sign * c, text: `${own ? "Their" : "Your"} team comp has a hole (${["Healer", "Tank"].filter(r => !team.some(id => roleOf[id] === r)).map(r => "no " + r.toLowerCase()).join(", ") || "doubled roles"})` });
     }
     return out.sort((x, y) => Math.abs(y.v) - Math.abs(x.v));
   }
   const shown = pct => Math.round(Math.max(10, Math.min(90, pct)));   // never claim more than 90%
-  return { W, tierId, tierVal, wrOf, wrVal, beats, goodWith, beatsByTag, withByTag, comp, teamScore, edge, explain, shown };
+  return { W, tierId, tierVal, wrOf, wrVal, beats, goodWith, beatsByTag, withByTag, comboVal, combosOf, comboLift, tierName, comp, teamScore, edge, explain, shown };
 };

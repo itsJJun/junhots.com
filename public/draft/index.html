@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/map-picker.css">
 <style>
+:root { --combo: #f5c04a; }
 .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .seg { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
@@ -99,6 +100,9 @@
 .pick .meta i { font-style: normal; font-family: var(--mono); }
 
 .why { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.pick .meta .up { color: var(--combo); font-family: inherit; font-weight: 600; }
+.why .cmb, .whys .cmb { color: var(--combo); font-weight: 600; }
+.why .cmb::before, .whys .cmb::before { border-radius: 1px; transform: rotate(45deg); box-shadow: 0 0 6px var(--combo); }
 .why span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--c, var(--muted)); }
 .empty { color: var(--muted); font-size: 14px; padding: 6px 0; }
 .note { margin: 14px 0 0; font-size: 12px; color: var(--muted); }
@@ -191,6 +195,8 @@ dialog::backdrop { background: rgba(5, 6, 8, 0.65); }
 // and the picks and bans that move it most. The draft lives in the link (?m=map&e=enemies&a=allies&eb=&ab=),
 // so a draft can be shared.
 const img = id => `/img/heroes/${id}.webp`;
+const unitImg = id => id === "chogall" ? "/img/heroes/chogall-both.webp" : img(id);
+const unitName = id => id === "chogall" ? "Cho'gall" : byId[id].name;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 let HEROES = [], byId = {}, TL = null, role = "All";
@@ -201,7 +207,24 @@ const SIZE = { enemy: 5, ally: 5, eban: 3, aban: 3 };
 const PARAM = { enemy: "e", ally: "a", eban: "eb", aban: "ab" };
 const draft = { map: q.get("m") || "Overall" };
 for (const k in SIZE) draft[k] = list(PARAM[k]).slice(0, SIZE[k]);
-const allTaken = () => new Set(Object.keys(SIZE).flatMap(k => draft[k]));
+// Cho'gall is one hero: a pick fills two slots (Cho + Gall), a ban takes one ban slot (stored as Cho).
+// "Cho'gall" stands for both in the chooser and the best picks/bans.
+const PAIR = { chogall: "gall", gall: "chogall" };
+const isPick = k => k === "ally" || k === "enemy";
+const unitOf = id => id === "gall" ? "chogall" : id;   // the one entry Cho'gall is listed as
+const addIds = (k, id) => id === "chogall" && isPick(k) ? ["chogall", "gall"] : [id];
+const roomFor = (k, id) => SIZE[k] - draft[k].length >= addIds(k, id).length;
+const allTaken = () => { const t = new Set(Object.keys(SIZE).flatMap(k => draft[k])); for (const a in PAIR) if (t.has(a)) t.add(PAIR[a]); return t; };
+// A link from before (or by hand) with only Cho or Gall: picks get the other half if there's room, bans keep one Cho'gall
+function fixPairs() {
+  for (const k in SIZE) {
+    const ids = [...new Set(draft[k].map(id => isPick(k) ? id : unitOf(id)))];
+    if (isPick(k) && ids.includes("chogall") !== ids.includes("gall")) {
+      if (ids.length < SIZE[k]) ids.push(ids.includes("chogall") ? "gall" : "chogall"); else ids.splice(ids.findIndex(id => PAIR[id]), 1);
+    }
+    draft[k] = ids;
+  }
+}
 
 function save() {
   const p = new URLSearchParams();
@@ -222,12 +245,12 @@ const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1);
 function drawEdge() {
   const box = document.getElementById("edge");
   if (!draft.ally.length && !draft.enemy.length) { box.innerHTML = `<div class="row"><span>Add heroes to see which team has the edge.</span></div>`; return; }
-  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct), whys = M.explain(draft.ally, draft.enemy).slice(0, 3);
+  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct), whys = M.explain(draft.ally, draft.enemy, draft.map).slice(0, 3);
   const part = (label, k) => { const v = a[k] - e[k]; return Math.abs(v) < 0.05 ? "" : `<span>${label} <i style="color:var(--${v > 0 ? "good" : "bad"})">${sgn(v)}</i></span>`; };
   box.innerHTML = `<div class="row"><span class="you">Your team <b>${p}%</b></span><span class="them"><b>${100 - p}%</b> Enemy</span></div>
     <div class="bar"><span style="--w:${p}%"></span></div>
-    <div class="parts">${[part("Tiers", "tiers"), part("Win rates", "wr"), part("Counters", "counters"), part("Synergy", "synergy"), part("Team comp", "comp")].join("")}${whys.length ? `<span class="hint">${matchMedia("(hover: hover)").matches ? "Hover" : "Tap"} for why</span>` : ""}</div>
-    ${whys.length ? `<div class="whys">${whys.map(w => `<span style="--c:var(--${w.v > 0 ? "good" : "bad"})">${esc(w.text)} <small>${sgn(w.v)}</small></span>`).join("")}</div>` : ""}`;
+    <div class="parts">${[part("Tiers", "tiers"), part("Win rates", "wr"), part("Counters", "counters"), part("Synergy", "synergy"), part("Combos", "combo"), part("Team comp", "comp")].join("")}${whys.length ? `<span class="hint">${matchMedia("(hover: hover)").matches ? "Hover" : "Tap"} for why</span>` : ""}</div>
+    ${whys.length ? `<div class="whys">${whys.map(w => `<span style="--c:var(--${w.v > 0 ? "good" : "bad"})"${w.combo ? ' class="cmb"' : ""}>${esc(w.text)} <small>${sgn(w.v)}</small></span>`).join("")}</div>` : ""}`;
 }
 document.getElementById("edge").addEventListener("click", e => e.currentTarget.classList.toggle("open"));
 
@@ -249,8 +272,11 @@ function reasons(h, team, opp, own) {
   const palsT = byTag(team.filter(a => !pals.includes(a)), a => M.withByTag(h, a), (a, t) => has(sy[k(h)], t), "likes");
   if (strong.length || strongT.length) why.push([own ? "var(--good)" : "var(--bad)", "Strong vs " + [strong.length ? names(strong) : "", ...strongT].filter(Boolean).join(", ")]);
   if (weak.length || weakT.length) why.push([own ? "var(--bad)" : "var(--good)", "Weak vs " + [weak.length ? names(weak) : "", ...weakT].filter(Boolean).join(", ")]);
+  // Power combo: this hero and one already picked play as a higher tier together
+  const lift = M.comboLift(h, [...team, ...addIds("ally", h)], draft.map);
+  if (lift) why.unshift(["var(--combo)", `Power combo with ${own ? "" : "their "}${lift.partner === "chogall" ? "Cho'gall" : byId[lift.partner]?.name || lift.partner}${lift.tier > 0 ? ` (plays as ${M.tierName(lift.combo.tier)})` : ""}`, "cmb"]);
   if (pals.length || palsT.length) why.push(["var(--accent)", "Good with " + [pals.length ? names(pals) : "", ...palsT].filter(Boolean).join(", ")]);
-  const fix = comp([...team, h]) - comp(team), g = byId[h].grole;
+  const fix = comp([...team, ...addIds("ally", h)]) - comp(team), g = byId[h].grole;
   if (fix > 0.4) why.push(["var(--muted)", `${own ? "Your" : "Their"} team needs a ${g === "Healer" ? "healer" : g === "Tank" ? "tank" : "ranged hero"}`]);
   return why;
 }
@@ -259,29 +285,32 @@ function drawPicks() {
   const taken = allTaken(), ban = kind === "ban";
   const full = ban ? draft.aban.length >= 3 : draft.ally.length >= 5;
   const now = edge(draft.ally, draft.enemy).pct;
-  const list = HEROES.filter(h => !taken.has(h.id) && (role === "All" || h.grole === role)).map(h => {
+  // Cho'gall needs two open slots on the team that would pick it
+  const list = HEROES.filter(h => h.id !== "gall" && !taken.has(h.id) && (role === "All" || h.grole === role) && roomFor(ban ? "enemy" : "ally", h.id)).map(h => {
     // pick: how much your edge goes up with this hero; ban: how much it would go down if the enemy took it
-    const after = ban ? 100 - edge(draft.ally, [...draft.enemy, h.id]).pct : edge([...draft.ally, h.id], draft.enemy).pct;
-    return { id: h.id, adv: after, after: M.shown(after), t: tierId(h.id), wr: wrOf(h.id), why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true) };
+    const add = addIds("ally", h.id), team = ban ? [...draft.enemy, ...add] : [...draft.ally, ...add];
+    const after = ban ? 100 - edge(draft.ally, team).pct : edge(team, draft.enemy).pct;
+    return { id: h.id, adv: after, after: M.shown(after), t: tierId(h.id), wr: wrOf(h.id), lift: M.comboLift(h.id, team, draft.map), why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true) };
   }).sort((x, y) => y.adv - x.adv);
   const top = list.slice(0, ban ? 6 : 8);
   document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
   document.getElementById("note").textContent = ban
     ? `The heroes that would help the enemy most against your team, with the enemy's edge if they picked one (now ${100 - Math.round(now)}%).`
-    : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with" and team comp. A guide, not a promise: play what you're good at.`;
+    : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
   document.getElementById("picks").innerHTML = full ? `<div class="empty">${ban ? "Your 3 bans are in." : "Your team is full."}</div>` : top.length ? top.map(p => {
     const t = TL.tiers.find(x => x.id === p.t), h = byId[p.id];
-    return `<a class="pick" href="/builds/${p.id}"><img src="${img(p.id)}" alt="">
-      <span class="top"><b>${esc(h.name)}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}</span></span>
-      <span class="why">${p.why.length ? p.why.map(([c, w]) => `<span style="--c:${c}">${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small></span></a>`;
+    return `<a class="pick" href="/builds/${p.id}"><img src="${unitImg(p.id)}" alt="">
+      <span class="top"><b>${esc(unitName(p.id))}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.lift?.tier > 0 ? ` <i class="up">→ ${esc(M.tierName(p.lift.combo.tier))}</i>` : ""}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}</span></span>
+      <span class="why">${p.why.length ? p.why.map(([c, w, cls]) => `<span style="--c:${c}"${cls ? ` class="${cls}"` : ""}>${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small></span></a>`;
   }).join("") : '<div class="empty">No heroes left for this role.</div>';
   document.querySelectorAll(".why .ri").forEach(s => { s.style.width = s.style.height = "12px"; s.style.verticalAlign = "-2px"; });
 }
 
 function drawSlots() {
   const slot = (side, i) => {
-    const id = draft[side][i];
-    return id ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(byId[id].name)}" aria-label="Remove ${esc(byId[id].name)}"><img src="${img(id)}" alt=""><span class="nm">${esc(byId[id].name)}</span></button>`
+    // A pick shows Cho and Gall in their own slots (two players); a ban shows Cho'gall
+    const id = draft[side][i], nm = id && (isPick(side) ? byId[id].name : unitName(id)), pic = id && (isPick(side) ? img(id) : unitImg(id));
+    return id ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(nm)}" aria-label="Remove ${esc(nm)}"><img src="${pic}" alt=""><span class="nm">${esc(nm)}</span></button>`
       : `<button class="slot" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
   };
   for (const k in SIZE) document.getElementById(k).innerHTML = [...Array(SIZE[k]).keys()].map(i => slot(k, i)).join("");
@@ -303,8 +332,10 @@ const dlg = document.getElementById("chooser"), qbox = document.getElementById("
 let target = null;
 function drawGrid() {
   const taken = allTaken(), k = norm(qbox.value);
-  const list = HEROES.filter(h => !k || norm(h.name).includes(k));
-  document.getElementById("grid").innerHTML = list.map(h => `<button class="hc" data-pick="${h.id}"${taken.has(h.id) ? " disabled" : ""}><img src="${img(h.id)}" alt="" loading="lazy"><span>${esc(h.name)}</span></button>`).join("") || '<div class="empty">No hero by that name.</div>';
+  // One Cho'gall tile (found by "cho", "gall" or "chogall"); it needs two open slots for a pick
+  const list = HEROES.filter(h => h.id !== "gall" && (!k || norm(unitName(h.id)).includes(k) || (h.id === "chogall" && "gall".includes(k))));
+  document.getElementById("grid").innerHTML = list.map(h => { const off = taken.has(h.id) || !roomFor(target, h.id);
+    return `<button class="hc" data-pick="${h.id}"${off ? " disabled" : ""}${!taken.has(h.id) && off ? ' title="Cho\'gall needs two open slots"' : ""}><img src="${unitImg(h.id)}" alt="" loading="lazy"><span>${esc(unitName(h.id))}</span></button>`; }).join("") || '<div class="empty">No hero by that name.</div>';
 }
 function choose(side) {
   target = side;
@@ -320,7 +351,7 @@ dlg.addEventListener("click", e => {
   if (e.target === dlg || e.target.closest(".x")) return dlg.close();
   const b = e.target.closest("[data-pick]");
   if (!b || b.disabled) return;
-  draft[target].push(b.dataset.pick);
+  draft[target].push(...addIds(target, b.dataset.pick));
   dlg.close();
   draw();
 });
@@ -328,7 +359,8 @@ document.addEventListener("click", e => {
   const s = e.target.closest(".slot[data-side]");
   if (!s) return;
   const side = s.dataset.side;
-  if (s.classList.contains("full")) { draft[side].splice(+s.dataset.i, 1); draw(); }
+  // Removing Cho or Gall removes both
+  if (s.classList.contains("full")) { const id = draft[side][+s.dataset.i]; draft[side] = draft[side].filter(x => x !== id && x !== PAIR[id]); draw(); }
   else choose(side);
 });
 document.getElementById("clear").addEventListener("click", () => { for (const k in SIZE) draft[k] = []; draw(); });
@@ -351,6 +383,7 @@ Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).th
   M = draftModel(TL, HEROES);
   const seen = new Set();   // drop unknown heroes and any hero listed twice
   for (const k in SIZE) draft[k] = draft[k].filter(id => byId[id] && !seen.has(id) && seen.add(id));
+  fixPairs();
   draw();
 }).catch(() => { document.getElementById("picks").innerHTML = '<div class="empty">The tier list couldn\'t load. Refresh the page to try again.</div>'; });
 </script>
