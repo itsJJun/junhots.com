@@ -18,6 +18,22 @@ window.tierImg = id => `/img/heroes/${id === "chogall" ? "chogall-both" : id}.we
 // tier "+" = one step past the top tier. comboTier gives { name, color } with color an index into the page's PALETTE.
 window.LINK_ICON = '<svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4L12 18.4"/></svg>';
 window.combosOf = (tl, id) => (tl.combos || []).filter(c => (c.tier === "+" || tl.tiers.some(t => t.id === c.tier)) && (!id || c.a === id || c.b === id));
+// Combos grouped by a shared hero, so "Stitches + Anduin" and "Stitches + Medivh" show as one card: Stitches + Anduin or Medivh.
+// The hero in the most combos leads a group (same combo tier only); combos left over stay pairs. Strongest combo tier first.
+window.comboGroups = (tl, list) => {
+  const left = [...list], out = [];
+  while (left.length) {
+    const n = {};
+    left.forEach(c => { n[c.a] = (n[c.a] || 0) + 1; n[c.b] = (n[c.b] || 0) + 1; });
+    const hub = Object.keys(n).reduce((x, y) => n[y] > n[x] ? y : x);
+    const mine = n[hub] > 1 ? left.filter(c => c.a === hub || c.b === hub) : [left[0]];
+    const lead = n[hub] > 1 ? hub : left[0].a;
+    for (const t of new Set(mine.map(c => c.tier))) out.push({ hub: lead, tier: t, partners: mine.filter(c => c.tier === t).map(c => c.a === lead ? c.b : c.a) });
+    mine.forEach(c => left.splice(left.indexOf(c), 1));
+  }
+  const rank = t => t === "+" ? -1 : tl.tiers.findIndex(x => x.id === t);
+  return out.sort((x, y) => rank(x.tier) - rank(y.tier) || y.partners.length - x.partners.length);
+};
 window.comboTier = (tl, t) => { const x = t === "+" ? tl.tiers[0] : tl.tiers.find(y => y.id === t); return { name: (x?.name || "") + (t === "+" ? "+" : ""), color: x?.color || 0 }; };
 
 window.foldTierlist = tl => {

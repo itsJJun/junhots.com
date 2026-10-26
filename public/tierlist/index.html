@@ -84,13 +84,15 @@
 .combos h2 .lk { width: 15px; height: 15px; }
 .combos h2 small { font-size: 12px; font-weight: 400; color: var(--muted); }
 .combos .cl { display: flex; flex-wrap: wrap; gap: 8px; }
-.cmb { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 5px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
+.cmb { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 12px 5px 5px; box-sizing: border-box; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
 .cmb button { all: unset; cursor: pointer; position: relative; display: block; border-radius: 6px; }
 .cmb .ft { position: absolute; left: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 3px; box-sizing: border-box; display: grid; place-items: center; border-radius: 4px; font: 700 11px/1 var(--sans); color: var(--c); background: #12100f; box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, var(--line)); }
 .cmb img { display: block; width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }
 .cmb .lk { width: 13px; height: 13px; color: var(--combo); margin: 0 -3px; }
-.cmb .nm { margin-left: 2px; }
-.cmb .to { font: 700 16px var(--sans); color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
+.cmb .ps { display: flex; gap: 6px; }
+.cmb .nm { margin-left: 2px; min-width: 0; line-height: 1.3; }
+.cmb .nm i { font-style: normal; color: var(--muted); }
+.cmb .to { flex: none; white-space: nowrap; font: 700 16px var(--sans); color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
 .cmb .to::before { content: "→ "; font-weight: 400; font-size: 13px; color: var(--muted); text-shadow: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .go-builds { display: flex; gap: 8px; }
@@ -258,10 +260,12 @@ function place() {
 function drawCombos() {
   // a role tab shows the combos with a hero of that role
   const list = combosOf(TL).filter(c => byId[c.a] && byId[c.b] && (role === "All" || byId[c.a].grole === role || byId[c.b].grole === role));
-  document.getElementById("combos").innerHTML = list.length ? `<h2>${LINK_ICON}Power combos <small>Much stronger together: on the same team, both play as the tier on the right.</small></h2><div class="cl">${list.map(c => { const t = comboTier(TL, c.tier);
+  // one card per shared hero: "Stitches + Anduin or Medivh"
+  document.getElementById("combos").innerHTML = list.length ? `<h2>${LINK_ICON}Power combos <small>Much stronger together: on the same team, both play as the tier on the right.</small></h2><div class="cl">${comboGroups(TL, list).map(g => { const t = comboTier(TL, g.tier);
     const face = id => { const own = TL.tiers.find(x => x.id === tierOf(id));
       return `<button data-hero="${id}" title="${esc(byId[id].name)}${own ? ` · ${esc(own.name)} tier alone` : ""}"><img src="${img(id)}" alt="">${own ? `<span class="ft" style="--c:${PALETTE[own.color % PALETTE.length]}">${esc(own.name)}</span>` : ""}</button>`; };
-    return `<div class="cmb">${face(c.a)}${LINK_ICON}${face(c.b)}<span class="nm">${esc(byId[c.a].name)} + ${esc(byId[c.b].name)}</span><b class="to" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></div>`; }).join("")}</div>` : "";
+    const names = g.partners.map(p => esc(byId[p].name)), or = names.length > 1 ? names.slice(0, -1).join(", ") + " <i>or</i> " + names.at(-1) : names[0];
+    return `<div class="cmb">${face(g.hub)}${LINK_ICON}<span class="ps">${g.partners.map(face).join("")}</span><span class="nm">${esc(byId[g.hub].name)} + ${or}</span><b class="to" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></div>`; }).join("")}</div>` : "";
 }
 function closeDetail() { selected = null; anchor = null; render(); }
 function render() {
