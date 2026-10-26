@@ -92,7 +92,10 @@ export async function feedback(request, env, ctx, passwordOk) {
   if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
   if (request.method === "GET") {
     if (!new URL(request.url).searchParams.has("count")) return list(env);
-    return json({ new: (await keysOf(env)).filter(k => !k.metadata?.done).length });
+    // The key list can lag a minute behind a Done/Delete; reading the few "new" messages themselves is up to date
+    const fresh = (await keysOf(env)).filter(k => !k.metadata?.done);
+    const items = await Promise.all(fresh.map(k => env.BUILDS.get(k.name, "json")));
+    return json({ new: items.filter(i => i && !i.done).length });
   }
   const id = request.method === "DELETE" ? new URL(request.url).searchParams.get("id") : null;
   if (request.method === "DELETE") {

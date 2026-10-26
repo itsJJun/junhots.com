@@ -121,8 +121,9 @@ async function load() {
   draw();
 }
 function draw() {
-  try { sessionStorage.removeItem("junhots_fbnew"); } catch {}   // the Feedback button's "new" count re-checks
   const n = { new: ITEMS.filter(i => !i.done).length, done: ITEMS.filter(i => i.done).length, all: ITEMS.length };
+  // The Feedback button's badge reads this, so it matches the inbox right away (no waiting for the server)
+  try { localStorage.setItem("junhots_fbnew", JSON.stringify({ n: n.new, t: Date.now() })); } catch {}
   for (const k in n) document.getElementById("n-" + k).textContent = n[k];
   document.title = (n.new ? `(${n.new}) ` : "") + "Feedback inbox · JunHotS";
   const list = ITEMS.filter(i => SHOW === "all" || (SHOW === "done") === !!i.done);
