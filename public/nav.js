@@ -309,6 +309,8 @@
 .fb-send { margin-left: auto; height: 36px; padding: 0 16px; border-radius: 9px; border: 0; background: var(--brand, #f26a4b); color: #1a0f0b; font: 600 13.5px var(--sans, "Geist", sans-serif); cursor: pointer; transition: filter .12s, opacity .12s; }
 .fb-send:hover { filter: brightness(1.08); }
 .fb-send:disabled { opacity: .45; cursor: default; filter: none; }
+.fb-human:empty { display: none; }
+.fb-human { margin: -2px 0; }
 .fb-err { margin: -4px 0 0; font-size: 12.5px; color: var(--bad, #ef7d8b); }
 .fb-done { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 26px 20px 28px; }
 .fb-done .fb-ok { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: rgba(95, 207, 143, .12); color: var(--good, #5fcf8f); margin-bottom: 4px; }
@@ -377,6 +379,7 @@
         <div class="fb-meta"><span>From <b>${where()}</b></span><span class="fb-count"></span></div>
         <input type="text" name="name" maxlength="60" autocomplete="nickname" placeholder="Your name or Discord (optional, if you want a reply)" value="${(DRAFT.name || "").replace(/"/g, "&quot;")}">
         <input class="fb-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="fb-human"></div>
         <p class="fb-err" hidden></p>
         <div class="fb-foot"><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">${BUBBLE}Rather chat? Discord</a><button class="fb-send" type="submit">Send</button></div>
       </form>`;
@@ -398,15 +401,40 @@
       const err = f.querySelector(".fb-err");
       send.disabled = true; send.textContent = "Sending…"; err.hidden = true;
       const r = await fetch("/api/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-        type: DRAFT.type || "idea", text: ta.value, name: f.name.value, page: location.pathname + location.hash, hp: f.website.value, ms: Date.now() - openedAt,
+        type: DRAFT.type || "idea", text: ta.value, name: f.name.value, page: location.pathname + location.hash, hp: f.website.value, ms: Date.now() - openedAt, token: human.token(),
       }) }).catch(() => null);
       const data = r && await r.json().catch(() => ({}));
       if (r?.ok) { DRAFT = { name: DRAFT.name }; keep(); thanks(); return; }
       err.textContent = data?.error || "Couldn't send. Check your connection and try again.";
       err.hidden = false; send.textContent = "Send"; send.disabled = false;
+      human.reset();
     });
+    human.mount(panel.querySelector(".fb-human"));
     inboxLink();
   }
+  // Cloudflare Turnstile (only when Jun has set it up): checks quietly in the background and only asks for a click
+  // when it isn't sure. The script loads the first time the form opens, not on every page.
+  const human = (() => {
+    let id = null, conf;
+    const site = () => conf ??= fetch("/api/feedback?config").then(r => r.json()).then(c => c.sitekey || "").catch(() => "");
+    const script = () => window.turnstile ? Promise.resolve() : new Promise(res => {
+      const el = document.createElement("script");
+      el.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      el.onload = res; el.onerror = res;
+      document.head.append(el);
+    });
+    return {
+      async mount(slot) {
+        id = null;
+        const key = await site();
+        if (!key || !slot) return;
+        await script();
+        if (window.turnstile && slot.isConnected) id = turnstile.render(slot, { sitekey: key, theme: "dark", appearance: "interaction-only", size: "flexible" });
+      },
+      token: () => (id != null && window.turnstile?.getResponse(id)) || "",
+      reset: () => { if (id != null) window.turnstile?.reset(id); },
+    };
+  })();
   function thanks() {
     const auto = setTimeout(() => { if (panel.querySelector(".fb-done")) close(); }, 3000);
     panel.addEventListener("pointerdown", () => clearTimeout(auto), { once: true });
