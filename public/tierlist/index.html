@@ -72,6 +72,26 @@
 .rel > div:nth-child(1) h3::before { background: var(--good); }
 .rel > div:nth-child(2) h3::before { background: var(--bad); }
 .rel > div:nth-child(3) h3::before { background: var(--accent); }
+.rel > div:nth-child(4) h3::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; vertical-align: 1px; background: var(--combo); border-radius: 1px; transform: rotate(45deg); box-shadow: 0 0 6px var(--combo); }
+.chip .ct { font: 600 12px var(--sans); color: var(--muted); }
+.chip .ct b { color: var(--c); }
+/* Power combos: a gold link badge on the portrait, and the pairs listed under the tiers */
+.port .cb { position: absolute; right: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; color: #1a1205; background: var(--combo); box-shadow: 0 0 0 2px var(--surface), 0 0 8px rgba(245, 192, 74, 0.55); }
+.port .cb .lk { width: 11px; height: 11px; }
+.combos { margin-top: 14px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--combo) 30%, var(--line)); border-radius: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--combo) 7%, var(--surface)), var(--surface) 60%); }
+.combos:empty { display: none; }
+.combos h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 10px; font: 600 14px var(--sans); color: var(--combo); }
+.combos h2 .lk { width: 15px; height: 15px; }
+.combos h2 small { font-size: 12px; font-weight: 400; color: var(--muted); }
+.combos .cl { display: flex; flex-wrap: wrap; gap: 8px; }
+.cmb { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 5px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
+.cmb button { all: unset; cursor: pointer; position: relative; display: block; border-radius: 6px; }
+.cmb .ft { position: absolute; left: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 3px; box-sizing: border-box; display: grid; place-items: center; border-radius: 4px; font: 700 11px/1 var(--sans); color: var(--c); background: #12100f; box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, var(--line)); }
+.cmb img { display: block; width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }
+.cmb .lk { width: 13px; height: 13px; color: var(--combo); margin: 0 -3px; }
+.cmb .nm { margin-left: 2px; }
+.cmb .to { font: 700 16px var(--sans); color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
+.cmb .to::before { content: "→ "; font-weight: 400; font-size: 13px; color: var(--muted); text-shadow: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .go-builds { display: flex; gap: 8px; }
 .go-builds a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none; background: color-mix(in srgb, var(--brand) 16%, var(--surface-2)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent); transition: background .15s; }
@@ -135,6 +155,7 @@
   <p class="hint">Click a hero to see counters, synergy and win rate.</p>
   <div class="moved" id="moved"></div>
   <div class="tiers" id="tiers"></div>
+  <div class="combos" id="combos"></div>
   <div class="updated" id="updated"></div>
 
   <footer>
@@ -209,6 +230,8 @@ function renderDetail() {
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
       <div><h3>Weak against</h3>${chips(beatenBy(selected))}</div>
       <div><h3>Good with</h3>${chips(goodWith(selected))}</div>
+      ${combosOf(TL, selected).length ? `<div><h3>Power combo</h3><div class="chips">${combosOf(TL, selected).map(c => { const p = c.a === selected ? c.b : c.a, t = comboTier(TL, c.tier);
+        return byId[p] ? `<button class="chip" data-hero="${p}"><img src="${img(p)}" alt="">${esc(byId[p].name)} <span class="ct">both play as <b style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></span></button>` : ""; }).join("")}</div></div>` : ""}
     </div>
     ${buildLinks(selected)}`;
   box.hidden = false;
@@ -231,6 +254,15 @@ function place() {
   box.style.left = `${left + scrollX}px`;
   box.style.top = `${(below ? r.bottom + gap : r.top - gap - hgt) + scrollY}px`;
 }
+// "Power combos" under the tiers: the two heroes, their names and the tier both play at together
+function drawCombos() {
+  // a role tab shows the combos with a hero of that role
+  const list = combosOf(TL).filter(c => byId[c.a] && byId[c.b] && (role === "All" || byId[c.a].grole === role || byId[c.b].grole === role));
+  document.getElementById("combos").innerHTML = list.length ? `<h2>${LINK_ICON}Power combos <small>Much stronger together: on the same team, both play as the tier on the right.</small></h2><div class="cl">${list.map(c => { const t = comboTier(TL, c.tier);
+    const face = id => { const own = TL.tiers.find(x => x.id === tierOf(id));
+      return `<button data-hero="${id}" title="${esc(byId[id].name)}${own ? ` · ${esc(own.name)} tier alone` : ""}"><img src="${img(id)}" alt="">${own ? `<span class="ft" style="--c:${PALETTE[own.color % PALETTE.length]}">${esc(own.name)}</span>` : ""}</button>`; };
+    return `<div class="cmb">${face(c.a)}${LINK_ICON}${face(c.b)}<span class="nm">${esc(byId[c.a].name)} + ${esc(byId[c.b].name)}</span><b class="to" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></div>`; }).join("")}</div>` : "";
+}
 function closeDetail() { selected = null; anchor = null; render(); }
 function render() {
   const box = document.getElementById("tiers");
@@ -238,9 +270,10 @@ function render() {
     const list = HEROES.filter(h => tierOf(h.id) === t.id && (role === "All" || h.grole === role))
       .sort((a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0));
     return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
-      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${(m => m && map === "Overall" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
+      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${combosOf(TL, h.id).length ? `<i class="cb" title="Power combo with ${esc(combosOf(TL, h.id).map(c => byId[c.a === h.id ? c.b : c.a]?.name).filter(Boolean).join(", "))}">${LINK_ICON}</i>` : ""}${(m => m && map === "Overall" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
     }</div></div>`;
   }).join("");
+  drawCombos();
   renderDetail();
 }
 document.addEventListener("click", e => {
@@ -252,7 +285,7 @@ document.addEventListener("click", e => {
     if (b.classList.contains("hero-card")) anchor = null;   // re-found after render
     render();
     anchor = document.querySelector(`.hero-card[data-hero="${id}"]`) || anchor;
-    if (b.classList.contains("chip") && anchor) {   // a chip opens that hero in place and scrolls its card into view
+    if (!b.classList.contains("hero-card") && anchor) {   // a chip (or a combo picture) opens that hero in place and scrolls its card into view
       anchor.scrollIntoView({ block: "center", behavior: phone() ? "auto" : "smooth" });
     }
     place();
