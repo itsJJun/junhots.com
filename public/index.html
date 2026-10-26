@@ -102,6 +102,10 @@ a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 .mini .good { color: var(--good); } .mini .bad { color: var(--bad); } .mini .mid { color: var(--muted); }
 .mini .port .mv { position: absolute; left: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
 .mini .port .mv svg { width: 9px; height: 9px; color: #12100f; }
+.mini .port .cb { position: absolute; right: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; color: #1a1205; background: var(--combo); box-shadow: 0 0 0 2px var(--surface), 0 0 8px rgba(245, 192, 74, 0.55); }
+.mini .port .cb .lk { width: 11px; height: 11px; }
+.c-tier .meta .cmbs { display: inline-flex; align-items: center; gap: 4px; color: var(--combo); }
+.c-tier .meta .cmbs .lk { width: 13px; height: 13px; }
 .c-tier .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; font-size: 13px; color: var(--muted); }
 .c-tier .meta:empty { display: none; }
 .c-tier .meta strong { color: var(--text); font-weight: 500; }
@@ -274,10 +278,11 @@ Promise.all([
     const list = rows.map(r => r[0]).filter(id => tl.overall?.[id] === t.id).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
     if (!list.length) return "";
     return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${t.name}</div><div class="heroes">${list.map(id => { const m = moveOf(id);
-      return `<div class="h"><span class="port"><img src="${tierImg(id)}" alt="" loading="lazy">${roleIcon(grole[id], "rb")}${m ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})">${arrow(m.up)}</i>` : ""}</span><span>${tname[id]}</span><div class="wr ${wrClass(wr(id))}">${wr(id) == null ? "" : wr(id).toFixed(1) + "%"}</div></div>`; }).join("")}</div></div>`;
+      return `<div class="h"><span class="port"><img src="${tierImg(id)}" alt="" loading="lazy">${roleIcon(grole[id], "rb")}${combosOf(tl, id).length ? `<i class="cb">${LINK_ICON}</i>` : ""}${m ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})">${arrow(m.up)}</i>` : ""}</span><span>${tname[id]}</span><div class="wr ${wrClass(wr(id))}">${wr(id) == null ? "" : wr(id).toFixed(1) + "%"}</div></div>`; }).join("")}</div></div>`;
   }).join("")}</div>`;
   const moved = Object.keys(tl.changes || {}).filter(id => tname[id] && moveOf(id)).sort((a, b) => tl.changes[b].at - tl.changes[a].at);
   document.getElementById("tlmeta").innerHTML = (tl.updated ? `<span>Updated <strong>${new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" })}</strong></span>` : "") +
+    (combosOf(tl).length ? `<span class="cmbs" title="${combosOf(tl).map(c => `${tname[c.a]} + ${tname[c.b]}`).join(", ")}">${LINK_ICON}${combosOf(tl).length} power combo${combosOf(tl).length > 1 ? "s" : ""}</span>` : "") +
     (moved.length ? `<span>${moved.length} moved this week</span><span class="mvs">${moved.slice(0, 6).map(id => { const m = moveOf(id); return `<span title="${tname[id]}"><img src="${tierImg(id)}" alt="${tname[id]}">${arrow(m.up).replace("<svg", `<svg style="--c:var(--${m.up ? "good" : "bad"})"`)}</span>`; }).join("")}</span>` : "");
   const pool = [...best];
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }

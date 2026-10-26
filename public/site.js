@@ -14,6 +14,12 @@ window.tierRows = rows => rows.filter(r => !TIER_SHARED[r[0]]).map(r => r[0] ===
 window.tierImg = id => `/img/heroes/${id === "chogall" ? "chogall-both" : id}.webp`;
 // Moves Gall's tiers, counters, synergy and win rate onto Cho'gall (lists saved before they were one hero).
 // Where both were set, Cho's stays; lists are merged.
+// Power combos (public/edge.js): pairs Jun marked as much stronger together. tl.combos = [{ a, b, tier }],
+// tier "+" = one step past the top tier. comboTier gives { name, color } with color an index into the page's PALETTE.
+window.LINK_ICON = '<svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4L12 18.4"/></svg>';
+window.combosOf = (tl, id) => (tl.combos || []).filter(c => (c.tier === "+" || tl.tiers.some(t => t.id === c.tier)) && (!id || c.a === id || c.b === id));
+window.comboTier = (tl, t) => { const x = t === "+" ? tl.tiers[0] : tl.tiers.find(y => y.id === t); return { name: (x?.name || "") + (t === "+" ? "+" : ""), color: x?.color || 0 }; };
+
 window.foldTierlist = tl => {
   if (!tl || typeof tl !== "object") return tl;
   const fold = m => { if (!m) return; for (const [a, b] of Object.entries(TIER_SHARED)) if (a in m) { if (!(b in m)) m[b] = m[a]; delete m[a]; } };
