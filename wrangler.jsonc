@@ -10,9 +10,9 @@
     "run_worker_first": ["/api/*", "/builds/*", "/sitemap.xml"]
   },
   // Storage for "Jun's builds". The id comes from Cloudflare: Storage & databases -> KV.
-  // Turnstile site key for the feedback form (public, fine to commit; the secret TURNSTILE_SECRET is set in Cloudflare).
-  // Plain variables live here because each deploy replaces the ones typed in the dashboard.
-  "vars": { "TURNSTILE_SITEKEY": "0x4AAAAAAFnFbjOdr4t1Aziw" },
+  // Keep the plain variables typed in the Cloudflare dashboard (like TURNSTILE_SITEKEY for the feedback form)
+  // when a push deploys; without this each deploy would remove them. Secrets are always kept.
+  "keep_vars": true,
   // Feedback form: at most 3 sends per visitor per minute, checked before anything touches storage (src/feedback.js)
   "ratelimits": [
     { "name": "FEEDBACK_LIMIT", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
