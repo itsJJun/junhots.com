@@ -266,3 +266,201 @@
   }] });
   document.head.append(s);
 })();
+
+// Feedback: a small button in the corner (and a footer link) opens a short form; messages go to Jun's inbox (/inbox/, src/feedback.js).
+(() => {
+  if (location.pathname.startsWith("/inbox")) return;
+  const css = document.createElement("style");
+  css.textContent = `
+.fb-btn { position: fixed; right: 18px; bottom: calc(18px + var(--fb-lift, 0px)); z-index: 18; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 12px; border-radius: 999px; border: 1px solid #3d3531; background: rgba(26, 23, 22, .92); backdrop-filter: blur(6px); color: #f4efec; font: 500 13px/1 var(--sans, "Geist", system-ui, sans-serif); cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); transition: border-color .15s, transform .15s, opacity .2s; }
+.fb-btn svg { width: 16px; height: 16px; color: var(--brand, #f26a4b); }
+.fb-btn:hover { border-color: #5a4c45; transform: translateY(-1px); }
+.fb-btn[aria-expanded="true"] { opacity: 0; pointer-events: none; }
+.fb-btn.away { transform: translateY(calc(100% + 24px)); opacity: 0; pointer-events: none; }
+.fb-btn b { min-width: 18px; height: 18px; padding: 0 5px; margin-right: -4px; border-radius: 9px; background: var(--brand, #f26a4b); color: #1a0f0b; font: 700 11px/18px var(--sans, "Geist", sans-serif); text-align: center; }
+@media (max-width: 640px) { .fb-btn { right: 14px; bottom: calc(14px + var(--fb-lift, 0px)); width: 44px; height: 44px; padding: 0; justify-content: center; } .fb-btn span { display: none; } .fb-btn svg { width: 19px; height: 19px; } .fb-btn b { position: absolute; top: -4px; right: -2px; margin: 0; } }
+.fb-panel { position: fixed; right: 18px; bottom: 18px; z-index: 55; width: 360px; max-width: calc(100vw - 32px); border-radius: 14px; border: 1px solid #3d3531; background: var(--surface, #1a1716); box-shadow: 0 24px 60px rgba(0, 0, 0, .6); color: var(--text, #f4efec); font: 14px/1.45 var(--sans, "Geist", system-ui, sans-serif); transform-origin: bottom right; animation: fb-in .16s cubic-bezier(.22, 1, .36, 1); }
+@keyframes fb-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@media (max-width: 640px) { .fb-panel { right: 0; left: 0; bottom: 0; width: auto; max-width: none; border-radius: 16px 16px 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); transform-origin: bottom; } }
+.fb-head { display: flex; align-items: start; gap: 10px; padding: 16px 16px 4px; }
+.fb-head h2 { margin: 0; font: 600 16px/1.3 var(--display, "Sora", sans-serif); letter-spacing: -.01em; }
+.fb-head p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted, #a89f99); }
+.fb-x { margin-left: auto; flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; border: 0; background: none; color: var(--muted, #a89f99); cursor: pointer; }
+.fb-x:hover { background: var(--surface-2, #221e1c); color: var(--text, #f4efec); }
+.fb-x svg { width: 14px; height: 14px; }
+.fb-body { display: grid; gap: 12px; padding: 12px 16px 16px; }
+.fb-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.fb-types button { display: grid; justify-items: center; gap: 4px; padding: 9px 4px 8px; border-radius: 9px; border: 1px solid var(--line, #332d2a); background: var(--bg, #12100f); color: var(--muted, #a89f99); font: 500 12px/1.1 var(--sans, "Geist", sans-serif); cursor: pointer; transition: border-color .12s, color .12s, background .12s; }
+.fb-types button svg { width: 18px; height: 18px; }
+.fb-types button:hover { color: var(--text, #f4efec); border-color: #4a413c; }
+.fb-types button[aria-pressed="true"] { color: var(--text, #f4efec); border-color: var(--brand, #f26a4b); background: rgba(242, 106, 75, .08); }
+.fb-types button[aria-pressed="true"] svg { color: var(--brand, #f26a4b); }
+.fb-panel textarea, .fb-panel input[type=text] { width: 100%; box-sizing: border-box; border-radius: 9px; border: 1px solid var(--line, #332d2a); background: var(--bg, #12100f); color: var(--text, #f4efec); font: 14px/1.45 var(--sans, "Geist", sans-serif); padding: 10px 12px; outline: none; transition: border-color .12s; }
+.fb-panel textarea { min-height: 112px; resize: vertical; }
+.fb-panel textarea:focus, .fb-panel input[type=text]:focus { border-color: var(--brand, #f26a4b); }
+.fb-panel ::placeholder { color: #6f6560; }
+.fb-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: -6px; font-size: 11.5px; color: #7d736d; }
+.fb-meta b { font-weight: 500; color: var(--muted, #a89f99); }
+.fb-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.fb-foot { display: flex; align-items: center; gap: 10px; }
+.fb-foot a { font-size: 12.5px; color: var(--muted, #a89f99); display: inline-flex; align-items: center; gap: 6px; }
+.fb-foot a:hover { color: var(--text, #f4efec); }
+.fb-foot a svg { width: 15px; height: 15px; }
+.fb-send { margin-left: auto; height: 36px; padding: 0 16px; border-radius: 9px; border: 0; background: var(--brand, #f26a4b); color: #1a0f0b; font: 600 13.5px var(--sans, "Geist", sans-serif); cursor: pointer; transition: filter .12s, opacity .12s; }
+.fb-send:hover { filter: brightness(1.08); }
+.fb-send:disabled { opacity: .45; cursor: default; filter: none; }
+.fb-err { margin: -4px 0 0; font-size: 12.5px; color: var(--bad, #ef7d8b); }
+.fb-done { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 26px 20px 28px; }
+.fb-done .fb-ok { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: rgba(95, 207, 143, .12); color: var(--good, #5fcf8f); margin-bottom: 4px; }
+.fb-done .fb-ok svg { width: 22px; height: 22px; stroke-dasharray: 24; stroke-dashoffset: 24; animation: fb-tick .4s .1s ease-out forwards; }
+@keyframes fb-tick { to { stroke-dashoffset: 0; } }
+.fb-done h2 { margin: 0; font: 600 16px var(--display, "Sora", sans-serif); }
+.fb-done p { margin: 0; font-size: 13px; color: var(--muted, #a89f99); }
+.fb-done button { margin-top: 10px; font: 500 13px var(--sans, "Geist", sans-serif); color: var(--muted, #a89f99); background: none; border: 1px solid var(--line, #332d2a); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.fb-done button:hover { color: var(--text, #f4efec); border-color: #4a413c; }
+.fb-inbox { display: flex; align-items: center; gap: 8px; margin: 0 16px; padding: 8px 10px; border-radius: 9px; background: var(--surface-2, #221e1c); font-size: 12.5px; color: var(--muted, #a89f99); }
+.fb-inbox:hover { color: var(--text, #f4efec); }
+.fb-inbox b { color: var(--brand, #f26a4b); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .fb-panel, .fb-done .fb-ok svg { animation: none; stroke-dashoffset: 0; } }`;
+  document.head.append(css);
+
+  const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const BUBBLE = ic('<path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20.5l1.4-4.6A7.5 7.5 0 1 1 20 12.5Z"/>');
+  const TYPES = [
+    ["bug", "Bug", ic('<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4.5 8.5 7 10M19.5 8.5 17 10M4.5 18.5 7 17M19.5 18.5 17 17"/>'), "What happened, and what did you expect?"],
+    ["idea", "Idea", ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>'), "What would make the site better for you?"],
+    ["info", "Wrong info", ic('<path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17h.01"/>'), "Which hero, build or tier looks wrong, and why?"],
+    ["other", "Other", BUBBLE, "Anything else you want Jun to know."],
+  ];
+  const where = () => {
+    const p = location.pathname, hero = p.match(/^\/builds\/([a-z0-9]+)/)?.[1] || location.hash.slice(1).split("?")[0];
+    const name = { "/": "Home", "/tierlist/": "Tier list", "/tierlist-maker/": "Tier list maker", "/draft/": "Draft helper", "/games/": "Match history", "/patch-notes/": "Patch notes", "/overlay/": "Overlay", "/updates/": "Updates" }[p];
+    if (p.startsWith("/builds")) return hero ? "Builds · " + hero.charAt(0).toUpperCase() + hero.slice(1) : "Builds";
+    return name || p;
+  };
+  let DRAFT = {}; try { DRAFT = JSON.parse(localStorage.getItem("junhots_feedback") || "{}"); } catch {}
+  const keep = () => { try { localStorage.setItem("junhots_feedback", JSON.stringify(DRAFT)); } catch {} };
+
+  const btn = document.createElement("button");
+  btn.className = "fb-btn";
+  btn.type = "button";
+  btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = BUBBLE + "<span>Feedback</span>";
+  btn.title = "Send feedback to Jun";
+  document.body.append(btn);
+  // Also in the footer, next to Updates
+  const social = document.querySelector("footer .social");
+  if (social) {
+    const a = document.createElement("a");
+    a.href = "#feedback"; a.textContent = "Feedback";
+    a.addEventListener("click", e => { e.preventDefault(); open(); });
+    social.prepend(a);
+  }
+
+  const panel = document.createElement("div");
+  panel.className = "fb-panel";
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-label", "Send feedback");
+  panel.hidden = true;
+  document.body.append(panel);
+  let openedAt = 0;
+
+  function form() {
+    const type = DRAFT.type || "idea";
+    panel.innerHTML = `
+      <div class="fb-head"><div><h2>Send feedback</h2><p>Goes straight to Jun. Bugs, ideas, a build that looks off, anything.</p></div>
+        <button class="fb-x" type="button" aria-label="Close">${ic('<path d="M6 6l12 12M18 6 6 18"/>')}</button></div>
+      <div class="fb-inbox-slot"></div>
+      <form class="fb-body" novalidate>
+        <div class="fb-types" role="group" aria-label="Type">${TYPES.map(([k, n, svg]) => `<button type="button" data-t="${k}" aria-pressed="${k === type}">${svg}${n}</button>`).join("")}</div>
+        <textarea name="text" maxlength="1500" aria-label="Your message" placeholder="${TYPES.find(t => t[0] === type)[3]}">${(DRAFT.text || "").replace(/</g, "&lt;")}</textarea>
+        <div class="fb-meta"><span>From <b>${where()}</b></span><span class="fb-count"></span></div>
+        <input type="text" name="name" maxlength="60" autocomplete="nickname" placeholder="Your name or Discord (optional, if you want a reply)" value="${(DRAFT.name || "").replace(/"/g, "&quot;")}">
+        <input class="fb-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="fb-err" hidden></p>
+        <div class="fb-foot"><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">${BUBBLE}Rather chat? Discord</a><button class="fb-send" type="submit">Send</button></div>
+      </form>`;
+    const f = panel.querySelector("form"), ta = f.text, send = f.querySelector(".fb-send"), count = f.querySelector(".fb-count");
+    const sync = () => { const n = ta.value.trim().length; send.disabled = n < 3; count.textContent = n > 1200 ? `${1500 - ta.value.length} left` : ""; };
+    sync();
+    ta.addEventListener("input", () => { DRAFT.text = ta.value; keep(); sync(); });
+    f.name.addEventListener("input", () => { DRAFT.name = f.name.value; keep(); });
+    f.querySelectorAll(".fb-types button").forEach(b => b.addEventListener("click", () => {
+      DRAFT.type = b.dataset.t; keep();
+      f.querySelectorAll(".fb-types button").forEach(x => x.setAttribute("aria-pressed", x === b));
+      ta.placeholder = TYPES.find(t => t[0] === b.dataset.t)[3];
+      ta.focus();
+    }));
+    ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !send.disabled) f.requestSubmit(); });
+    panel.querySelector(".fb-x").addEventListener("click", close);
+    f.addEventListener("submit", async e => {
+      e.preventDefault();
+      const err = f.querySelector(".fb-err");
+      send.disabled = true; send.textContent = "Sending…"; err.hidden = true;
+      const r = await fetch("/api/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+        type: DRAFT.type || "idea", text: ta.value, name: f.name.value, page: location.pathname + location.hash, hp: f.website.value, ms: Date.now() - openedAt,
+      }) }).catch(() => null);
+      const data = r && await r.json().catch(() => ({}));
+      if (r?.ok) { DRAFT = { name: DRAFT.name }; keep(); thanks(); return; }
+      err.textContent = data?.error || "Couldn't send. Check your connection and try again.";
+      err.hidden = false; send.textContent = "Send"; send.disabled = false;
+    });
+    inboxLink();
+  }
+  function thanks() {
+    const auto = setTimeout(() => { if (panel.querySelector(".fb-done")) close(); }, 3000);
+    panel.addEventListener("pointerdown", () => clearTimeout(auto), { once: true });
+    panel.innerHTML = `<div class="fb-done"><span class="fb-ok">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}</span><h2>Thanks!</h2><p>Jun reads every message.</p><button type="button">Close</button></div>`;
+    panel.querySelector("button").addEventListener("click", close);
+    panel.querySelector("button").focus();
+  }
+  // Jun only (logged in on the Builds page): a link to the inbox with how many messages are new
+  async function inboxLink() {
+    const n = await newCount();
+    if (n == null) return;
+    const slot = panel.querySelector(".fb-inbox-slot");
+    if (slot) slot.innerHTML = `<a class="fb-inbox" href="/inbox/">${ic('<path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6l2-8Z"/>').replace("<svg", '<svg width="15" height="15"')}Your inbox · <b>${n} new</b></a>`;
+  }
+  // Jun only (logged in): how many messages are new, at most one check a minute while browsing
+  async function newCount() {
+    let pw = "", cached; try { pw = localStorage.getItem("junhots_admin") || ""; cached = JSON.parse(sessionStorage.getItem("junhots_fbnew") || "null"); } catch {}
+    if (!pw) return null;
+    if (cached && Date.now() - cached.t < 60e3) return cached.n;
+    const r = await fetch("/api/feedback?count=1", { headers: { authorization: "Bearer " + pw } }).catch(() => null);
+    if (!r?.ok) return null;
+    const n = (await r.json()).new;
+    try { sessionStorage.setItem("junhots_fbnew", JSON.stringify({ n, t: Date.now() })); } catch {}
+    return n;
+  }
+  newCount().then(n => { if (n) btn.insertAdjacentHTML("beforeend", `<b title="${n} new in your inbox">${n}</b>`); });
+  function open() {
+    if (!panel.hidden) return;
+    form();
+    openedAt = Date.now();
+    panel.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    // On phones the keyboard would cover the form before they've picked a type, so only focus with a mouse
+    if (matchMedia("(hover: hover)").matches) panel.querySelector("textarea").focus({ preventScroll: true });
+  }
+  function close() {
+    panel.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    btn.focus({ preventScroll: true });
+  }
+  btn.addEventListener("click", open);
+  // Sit above a bar stuck to the bottom of the page (the "Your build" bar on Builds) instead of covering its buttons
+  const lift = () => {
+    const bar = document.querySelector(".mine"), r = bar?.getBoundingClientRect();
+    btn.style.setProperty("--fb-lift", r && r.height && r.top < innerHeight && r.bottom >= innerHeight - 2 ? innerHeight - r.top + "px" : "0px");
+  };
+  // Phones: tuck the button away while scrolling down through content, bring it back when scrolling up
+  let lastY = scrollY;
+  addEventListener("scroll", () => {
+    const y = scrollY, small = innerWidth <= 640, atEnd = innerHeight + y >= document.documentElement.scrollHeight - 40;
+    if (Math.abs(y - lastY) > 8) { btn.classList.toggle("away", small && y > lastY && y > 120 && !atEnd); lastY = y; }
+  }, { passive: true });
+  addEventListener("scroll", lift, { passive: true }); addEventListener("resize", lift); addEventListener("click", () => setTimeout(lift, 50)); lift();
+  if (location.hash === "#feedback") open();
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) close(); });
+  document.addEventListener("pointerdown", e => { if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target) && !e.target.closest('a[href="#feedback"]')) close(); });
+})();

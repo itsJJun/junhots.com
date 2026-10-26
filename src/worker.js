@@ -13,11 +13,15 @@
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
 //   GET  /api/patch-notes -> everyone: Blizzard's official patch notes list, with the heroes each one changed and how (src/patch-notes.js)
 //   GET/PUT /api/patch-takes -> Jun's one-line take on a hero in a patch (PUT needs the password)
+//   POST /api/feedback -> everyone: send Jun a feedback message (the Feedback button in nav.js)
+//   GET/PATCH/DELETE /api/feedback -> Jun only (password): the inbox at /inbox/ (src/feedback.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
+// Optional secret FEEDBACK_WEBHOOK: a Discord webhook link, so each feedback message also pings Jun's Discord.
 
 import { patchNotes, patchTakes } from "./patch-notes.js";
+import { feedback } from "./feedback.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -248,6 +252,7 @@ export default {
     if (url.pathname === "/api/media" && request.method === "GET") return media(request, ctx);
     if (url.pathname === "/api/patch-notes" && request.method === "GET") return patchNotes(request, env, ctx);
     if (url.pathname === "/api/patch-takes") return patchTakes(request, env, passwordOk);
+    if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
 
     if (url.pathname === "/api/builds") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
