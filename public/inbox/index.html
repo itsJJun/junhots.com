@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feedback inbox · JunHotS</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+<style>
+/* Jun's feedback inbox: the messages visitors send with the Feedback button. Only works after Jun login. */
+.seg { display: inline-flex; padding: 3px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.seg button { font: 500 13px var(--sans); color: var(--muted); background: none; border: 0; border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.seg .n { color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.head-side { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ghost { font: 500 13px var(--sans); color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.ghost:hover { color: var(--text); border-color: #4a413c; }
+
+.list { display: grid; gap: 10px; }
+.msg { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 14px; padding: 16px 16px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.msg.done { background: transparent; }
+.msg.done .text, .msg.done .ic { opacity: .55; }
+.ic { grid-row: span 3; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--line); color: var(--c); }
+.ic svg { width: 17px; height: 17px; }
+.top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; font-size: 13px; color: var(--muted); }
+.top b { color: var(--c); font-weight: 600; }
+.top a { color: var(--muted); text-decoration: underline; text-decoration-color: #4a413c; text-underline-offset: 3px; }
+.top a:hover { color: var(--text); }
+.text { grid-column: 2 / 4; margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; }
+.who { grid-column: 2 / 4; display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 6px; font-size: 12.5px; color: #7d736d; }
+.who .name { color: var(--text); font-weight: 500; }
+.acts { display: flex; gap: 6px; align-self: start; }
+.acts button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font: 500 12.5px var(--sans); cursor: pointer; }
+.acts button:hover { color: var(--text); border-color: #4a413c; }
+.acts button svg { width: 14px; height: 14px; }
+.acts .del:hover { color: var(--bad); border-color: rgba(239, 125, 139, .5); }
+.msg:not(.done) .ok { color: var(--good); border-color: rgba(95, 207, 143, .35); }
+.empty { padding: 56px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; }
+.empty b { display: block; color: var(--text); font: 600 16px var(--display); margin-bottom: 4px; }
+
+.login { max-width: 360px; margin: 24px 0; display: grid; gap: 10px; padding: 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.login input { height: 40px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px var(--sans); padding: 0 12px; outline: none; }
+.login input:focus { border-color: var(--brand); }
+.login button { height: 38px; border-radius: 9px; border: 0; background: var(--brand); color: #1a0f0b; font: 600 14px var(--sans); cursor: pointer; }
+.login .err { margin: 0; color: var(--bad); font-size: 13px; }
+@media (max-width: 640px) {
+  .msg { grid-template-columns: 34px minmax(0, 1fr); }
+  .acts { grid-column: 1 / -1; justify-content: end; order: 9; margin-top: 8px; }
+  .text, .who { grid-column: 2 / -1; }
+}
+</style>
+<script src="/nav.js" defer></script>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">Jun<span>HotS</span></a>
+    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
+    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
+  </nav>
+
+  <header class="page-head">
+    <div>
+      <h1>Feedback inbox</h1>
+      <p class="sub">What visitors sent with the Feedback button. Only you can see this page.</p>
+    </div>
+    <div class="head-side" id="side" hidden>
+      <div class="seg" role="group" aria-label="Show">
+        <button type="button" data-f="new" aria-pressed="true">New<span class="n" id="n-new"></span></button>
+        <button type="button" data-f="done" aria-pressed="false">Done<span class="n" id="n-done"></span></button>
+        <button type="button" data-f="all" aria-pressed="false">All<span class="n" id="n-all"></span></button>
+      </div>
+      <button class="ghost" id="refresh" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <form class="login" id="login" hidden>
+    <b>Jun login</b>
+    <input type="password" id="pw" placeholder="Website password" autocomplete="current-password" aria-label="Website password">
+    <p class="err" id="pwerr" hidden>Wrong password.</p>
+    <button type="submit">Open inbox</button>
+  </form>
+  <div class="list" id="list"></div>
+
+  <footer>
+    <span>© 2026 Jun · junhots.com</span>
+    <span class="social"><a href="/updates/">Updates</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
+    <span>Not affiliated with Blizzard Entertainment</span>
+  </footer>
+</div>
+
+<script>
+const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const TYPES = {
+  bug: ["Bug", "#ef7d8b", ic('<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4.5 8.5 7 10M19.5 8.5 17 10M4.5 18.5 7 17M19.5 18.5 17 17"/>')],
+  idea: ["Idea", "#f5c04a", ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>')],
+  info: ["Wrong info", "#f58b70", ic('<path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17h.01"/>')],
+  other: ["Other", "#a89f99", ic('<path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20.5l1.4-4.6A7.5 7.5 0 1 1 20 12.5Z"/>')],
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 1440 * 7 ? Math.round(m / 1440) + " d ago" : new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short" }); };
+let PW = ""; try { PW = localStorage.getItem("junhots_admin") || ""; } catch {}
+let ITEMS = [], SHOW = "new";
+
+const api = (method, body, q = "") => fetch("/api/feedback" + q, { method, headers: { authorization: "Bearer " + PW, ...(body ? { "content-type": "application/json" } : {}) }, body: body && JSON.stringify(body) });
+
+async function load() {
+  const r = await api("GET").catch(() => null);
+  if (r?.status === 401) { PW = ""; try { localStorage.removeItem("junhots_admin"); } catch {} return showLogin(); }
+  if (!r?.ok) { document.getElementById("list").innerHTML = `<div class="empty"><b>Couldn't load</b>Check your connection and press Refresh.</div>`; return; }
+  ITEMS = (await r.json()).items;
+  document.getElementById("login").hidden = true;
+  document.getElementById("side").hidden = false;
+  draw();
+}
+function draw() {
+  try { sessionStorage.removeItem("junhots_fbnew"); } catch {}   // the Feedback button's "new" count re-checks
+  const n = { new: ITEMS.filter(i => !i.done).length, done: ITEMS.filter(i => i.done).length, all: ITEMS.length };
+  for (const k in n) document.getElementById("n-" + k).textContent = n[k];
+  document.title = (n.new ? `(${n.new}) ` : "") + "Feedback inbox · JunHotS";
+  const list = ITEMS.filter(i => SHOW === "all" || (SHOW === "done") === !!i.done);
+  document.getElementById("list").innerHTML = list.length ? list.map(i => {
+    const [label, color, svg] = TYPES[i.type] || TYPES.other;
+    return `<article class="msg${i.done ? " done" : ""}" style="--c:${color}" data-id="${esc(i.id)}">
+      <span class="ic">${svg}</span>
+      <div class="top"><b>${label}</b>${i.page ? `<a href="${esc(i.page)}">${esc(i.page)}</a>` : ""}<span>· ${ago(i.at)}</span></div>
+      <div class="acts">
+        <button class="ok" type="button">${i.done ? ic('<path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/>') + "Not done" : ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>') + "Done"}</button>
+        <button class="del" type="button" aria-label="Delete">${ic('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>')}</button>
+      </div>
+      <p class="text">${esc(i.text)}</p>
+      <div class="who">${i.name ? `<span class="name">${esc(i.name)}</span>` : "<span>No name</span>"}<span>${esc(i.device || "")}${i.country ? " · " + esc(i.country) : ""}</span><span>${new Date(i.at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</span></div>
+    </article>`;
+  }).join("") : `<div class="empty"><b>${SHOW === "new" ? "All caught up" : "Nothing here"}</b>${SHOW === "new" ? "New messages show up here." : ""}</div>`;
+}
+document.getElementById("list").addEventListener("click", async e => {
+  const b = e.target.closest("button"), card = e.target.closest(".msg");
+  if (!b || !card) return;
+  const item = ITEMS.find(i => i.id === card.dataset.id);
+  if (b.classList.contains("del")) {
+    if (!confirm("Delete this message?")) return;
+    ITEMS = ITEMS.filter(i => i !== item); draw();
+    saved(api("DELETE", null, "?id=" + encodeURIComponent(item.id)));
+  } else {
+    item.done = !item.done; draw();
+    saved(api("PATCH", { id: item.id, done: item.done }));
+  }
+});
+// Changes show at once; if the server didn't take one, reload so the page shows what's really saved
+const saved = req => req.then(r => { if (!r.ok) throw 0; }).catch(() => { alert("Couldn't save that change. Reloading the inbox."); load(); });
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  SHOW = b.dataset.f;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  draw();
+}));
+document.getElementById("refresh").addEventListener("click", load);
+function showLogin() {
+  document.getElementById("side").hidden = true;
+  document.getElementById("list").innerHTML = "";
+  document.getElementById("login").hidden = false;
+  document.getElementById("pw").focus();
+}
+document.getElementById("login").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = document.getElementById("pw").value;
+  const r = await fetch("/api/login", { method: "POST", headers: { authorization: "Bearer " + pw } }).catch(() => null);
+  if (!r?.ok) { document.getElementById("pwerr").hidden = false; return; }
+  PW = pw; try { localStorage.setItem("junhots_admin", pw); } catch {}
+  load();
+});
+PW ? load() : showLogin();
+</script>
+</body>
+</html>
