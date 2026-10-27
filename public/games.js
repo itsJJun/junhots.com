@@ -6,6 +6,11 @@
   const TIERS = [1, 4, 7, 10, 13, 16, 20];
   // The game's end-of-match awards (names as the replay decoder writes them, lower-cased)
   const AWARDS = { mvp: "MVP", highestkillstreak: "Dominator", mostxpcontribution: "Experienced", mostherodamagedone: "Painbringer", mostsiegedamagedone: "Siege Master", mostdamagetaken: "Bulwark", mosthealing: "Main Healer", moststuns: "Stunner", mostmerccampscaptured: "Headhunter", mostkills: "Finisher", hattrick: "Hat Trick", clutchhealer: "Clutch Healer", mostprotection: "Protector", zerodeaths: "Sole Survivor", mostroots: "Trapper", zerooutnumbereddeaths: "Team Player", mostdaredevilescapes: "Daredevil", mostescapes: "Escape Artist", mostsilences: "Silencer", mostteamfightdamagetaken: "Guardian", mostteamfighthealingdone: "Combat Medic", mostteamfightherodamagedone: "Scrapper", mostvengeancesperformed: "Avenger", mostimmortaldamage: "Immortal Slayer", mostcoinspaid: "Moneybags", mostcursedamagedone: "Master of the Curse", mostdragonshrinescaptured: "Shriner", mostdamagetoplants: "Garden Terror", mostskullscollected: "Skull Collector", mostdamagetominions: "Guardian Slayer", mosttimeintemple: "Temple Master", mostgemsturnedin: "Jeweler", mostaltardamage: "Cannoneer", mostdamagedonetozerg: "Zerg Crusher", mostnukedamagedone: "Da Bomb", mosttimepushing: "Pusher", mosttimeonpoint: "Point Guard", mostinterruptedcageunlocks: "Loyal Defender", mostseedscollected: "Seed Collector" };
+  // Award icon files in /img/awards (the award's name without spaces); Seed Collector has no icon
+  const awIcon = name => { const k = name.toLowerCase().replace(/[^a-z]/g, ""); return k && k !== "seedcollector" ? `/img/awards/${k}.webp` : ""; };
+  // Map art in /img/maps, by the map's name ("Blackheart's Bay" -> blackhearts-bay)
+  const mapArt = m => m ? `/img/maps/${m.toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-")}.webp` : "";
+  const MAP_ART = new Set(["Alterac Pass", "Battlefield of Eternity", "Blackheart's Bay", "Braxis Holdout", "Cursed Hollow", "Dragon Shire", "Garden of Terror", "Hanamura Temple", "Haunted Mines", "Infernal Shrines", "Sky Temple", "Tomb of the Spider Queen", "Towers of Doom", "Volskaya Foundry", "Warhead Junction"]);
   const num = n => n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
   const len = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   const ago = d => {
@@ -55,10 +60,11 @@
     function card(g) {
       const h = byId[g.hero], e = edge(g), b = best(g), aw = award(g), win = g.result === "win";
       const meta = [g.map, g.len ? len(g.len) : "", ago(g.at)].filter(Boolean).map(esc).join(" · ");
-      const stats = g.me ? `<div class="gc-stats">${kda(g.me)}<small>K / D / A</small>${b ? `<span><b>${num(b[0])}</b> ${b[1]}</span>` : ""}${aw ? `<span class="gc-aw">${esc(aw)}</span>` : ""}</div>` : "";
+      const stats = g.me ? `<div class="gc-stats">${kda(g.me)}<small>K / D / A</small>${b ? `<span><b>${num(b[0])}</b> ${b[1]}</span>` : ""}${aw ? `<span class="gc-aw${awIcon(aw) ? " ic" : ""}">${awIcon(aw) ? `<img src="${awIcon(aw)}" alt="">` : ""}${esc(aw)}</span>` : ""}</div>` : "";
       const edgeRow = e != null ? `<a class="gc-edge" href="${draftLink(g)}" title="Open this draft in the Draft helper"><i style="--w:${e}%"></i><span><b>${e}%</b> draft edge</span></a>` : "";
       const teams = g.ally?.length || g.enemy?.length ? `<div class="gc-teams">${team("Your team", g.ally, g.aban, g.lvl?.[0], "good", g.hero)}${edgeRow}${team("Enemy", g.enemy, g.eban, g.lvl?.[1], "bad")}</div>` : "";
-      return `<div class="gc${teams ? "" : " solo"}" style="--c:var(--${win ? "good" : "bad"})">
+      const art = MAP_ART.has(g.map) ? `;--art:url(${mapArt(g.map)})` : "";
+      return `<div class="gc${teams ? "" : " solo"}${art ? " art" : ""}" style="--c:var(--${win ? "good" : "bad"})${art}">
         <div class="gc-me">
           <div class="gc-top">
             <img class="gc-hero" src="/img/heroes/${g.hero}.webp" alt="">
@@ -84,6 +90,6 @@
       }).join("");
     }
 
-    return { byId, edge, best, award, card, fill, kda, num, len, ago, esc };
+    return { byId, edge, best, award, awIcon, card, fill, kda, num, len, ago, esc };
   };
 })();

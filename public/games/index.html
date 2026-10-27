@@ -29,6 +29,10 @@
 .sum div { display: grid; gap: 2px; }
 .sum small { font-size: 12px; color: var(--muted); }
 .sum b { font: 600 20px/1.2 var(--mono); }
+.sum .aws { display: flex; gap: 12px; }
+.sum .aws > span { display: inline-flex; align-items: center; gap: 3px; }
+.sum .aws img { width: 30px; height: 30px; margin-block: -3px; }
+.sum .aws b { font-size: 15px; color: var(--muted); }
 .sum .w { color: var(--good); } .sum .l { color: var(--bad); }
 /* Filters: heroes I played (most first), map, result */
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
@@ -63,7 +67,8 @@
 .row img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--bg); }
 .row.loss img { filter: saturate(.6) brightness(.85); }
 .row .who { display: grid; min-width: 0; line-height: 1.35; }
-.row .who b { font-weight: 600; }
+.row .who b { font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.row img.aw { width: 22px; height: 22px; border-radius: 0; background: none; margin-block: -4px; filter: none; }
 .row .who span, .row .dim { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row .gc-kda b { font: 600 13px var(--mono); }
 .row .num { font-size: 13px; color: var(--muted); }
@@ -151,6 +156,10 @@ function drawSum(list) {
   const avg = k => stat.reduce((a, g) => a + g.me[k], 0) / stat.length;
   const kda = stat.length ? (avg("k") + avg("a")) / Math.max(1, avg("d")) : null;
   const edged = list.map(g => kit.edge(g)).filter(e => e != null);
+  // Most won awards first, up to five
+  const awc = {};
+  for (const g of list) { const a = kit.award(g); if (a) awc[a] = (awc[a] || 0) + 1; }
+  const aws = Object.entries(awc).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const cell = (label, value) => `<div><small>${label}</small><b>${value}</b></div>`;
   document.getElementById("sum").innerHTML = [
     cell("Record", `<span class="w">${w}</span>–<span class="l">${l}</span>`),
@@ -158,6 +167,7 @@ function drawSum(list) {
     timed.length ? cell("Avg length", kit.len(Math.round(timed.reduce((a, g) => a + g.len, 0) / timed.length))) : "",
     kda != null ? cell("KDA", kda.toFixed(1)) : "",
     edged.length ? cell("Avg draft edge", Math.round(edged.reduce((a, e) => a + e, 0) / edged.length) + "%") : "",
+    aws.length ? `<div><small>Awards</small><span class="aws">${aws.map(([n, k]) => `<span title="${kit.esc(n)}: ${k} game${k > 1 ? "s" : ""}">${kit.awIcon(n) ? `<img src="${kit.awIcon(n)}" alt="${kit.esc(n)}">` : kit.esc(n)}<b>${k}</b></span>`).join("")}</span></div>` : "",
   ].join("");
 }
 
@@ -209,11 +219,11 @@ function fitHeroes() {
 addEventListener("resize", () => { if (kit) fitHeroes(); });
 
 function row(g, i) {
-  const b = kit.best(g), e = kit.edge(g), h = kit.byId[g.hero];
+  const b = kit.best(g), e = kit.edge(g), h = kit.byId[g.hero], aw = kit.award(g);
   const d = new Date(g.at), when = d.toLocaleDateString("en", { month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
   return `<button class="row ${g.result}" data-i="${i}" aria-expanded="false" style="--c:var(--${g.result === "win" ? "good" : "bad"})">
     <span class="bar"></span><img src="/img/heroes/${g.hero}.webp" alt="" loading="lazy">
-    <span class="who"><b>${kit.esc(h.name)} <span style="color:var(--c);font-size:13px;font-weight:500">${g.result === "win" ? "Win" : "Loss"}</span></b><span>${kit.esc(g.map || "Map unknown")}</span></span>
+    <span class="who"><b>${kit.esc(h.name)} <span style="color:var(--c);font-size:13px;font-weight:500">${g.result === "win" ? "Win" : "Loss"}</span>${aw && kit.awIcon(aw) ? `<img class="aw" src="${kit.awIcon(aw)}" alt="${kit.esc(aw)}" title="${kit.esc(aw)}" loading="lazy">` : ""}</b><span>${kit.esc(g.map || "Map unknown")}</span></span>
     <span class="hide">${g.me ? kit.kda(g.me) : '<span class="dim">–</span>'}</span>
     <span class="hide num">${b ? `<b>${kit.num(b[0])}</b> ${b[1]}` : ""}</span>
     <span class="hide ed" title="Draft edge (today's tier list)">${e != null ? `${e}%<i style="--w:${e}%"></i>` : '<span class="dim">–</span>'}</span>

@@ -33,6 +33,8 @@
     ["Volskaya Foundry", "#d7c49e", "Protector"],
   ];
   window.MAPS = INFO.slice(1).map(m => m[0]);
+  // The map's art in /img/maps ("Hanamura Temple" -> hanamura-temple.webp), faded in behind its tile
+  const art = name => `/img/maps/${name.toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-")}.webp`;
   const ico = name => `<svg class="mp-ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
   const car = '<svg class="mp-car" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
@@ -64,7 +66,7 @@
       menu = document.createElement("div");
       menu.className = "mp-menu";
       menu.setAttribute("role", "menu");
-      menu.innerHTML = INFO.map(([n, c, obj]) => `<button role="menuitem" class="${n === cur ? "cur" : ""}${n === "Overall" ? " all" : ""}" style="--c:${c}" data-map="${n}">${ico(n)}<b>${label(n)}</b><small>${n === "Overall" ? "· " + obj : obj}</small></button>`).join("");
+      menu.innerHTML = INFO.map(([n, c, obj]) => `<button role="menuitem" class="${n === cur ? "cur" : ""}${n === "Overall" ? " all" : ""}" style="--c:${c}${n === "Overall" ? "" : `;--art:url(${art(n)})`}" data-map="${n}">${ico(n)}<b>${label(n)}</b><small>${n === "Overall" ? "· " + obj : obj}</small></button>`).join("");
       document.body.append(menu);
       btn.setAttribute("aria-expanded", "true");
       place();

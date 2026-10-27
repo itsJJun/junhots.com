@@ -1,4 +1,5 @@
 [
+  { "date": "2026-10-27", "area": "website", "title": "Award icons and map art", "text": "My games now show the real in-game award icons, like MVP or Hat Trick, and the Match history page counts which awards I get most. Each game card has the map's art faded in behind it, and the map picker on the Tier list, Draft and Match history pages shows each map's art too.", "pic": "award-icons" },
   { "date": "2026-10-27", "area": "website", "title": "Pictures on the Updates page", "text": "Most updates on this page now have a picture of what changed. Click one to see it full size." },
 
   { "date": "2026-10-26", "area": "website", "title": "New Overlay page", "text": "The Overlay page shows the overlay as it looks now, with a short clip of talents being picked, and a section for each part: talents, rank and streaks, the match banner, the !tierlist popup, chat commands and the tier list editor.", "pic": "overlay-page" },
