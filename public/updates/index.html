@@ -52,6 +52,28 @@
 .tag.website { color: var(--accent); background: rgba(242, 106, 75, .1); box-shadow: inset 0 0 0 1px rgba(242, 106, 75, .3); }
 .empty { color: var(--muted); }
 
+/* Optional picture per update: a small thumbnail on the right, click for the full picture */
+.item.has-pic { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 16px; align-items: start; }
+.shot { all: unset; cursor: zoom-in; position: relative; display: block; width: 160px; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease, opacity .25s; }
+.shot::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .15s; }
+.shot:hover img { transform: scale(1.04); }
+.shot:hover::after, .shot:focus-visible::after { box-shadow: inset 0 0 0 1px var(--brand); }
+.shot .zoom { position: absolute; right: 6px; bottom: 6px; z-index: 1; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; background: rgba(18, 16, 15, .78); color: var(--text); opacity: 0; transition: opacity .15s; }
+.shot:hover .zoom, .shot:focus-visible .zoom { opacity: 1; }
+.shot .zoom svg { width: 14px; height: 14px; }
+
+dialog.lb { padding: 0; border: 0; background: none; max-width: min(1200px, 94vw); color: var(--text); overflow: visible; }
+dialog.lb::backdrop { background: rgba(8, 7, 7, .82); backdrop-filter: blur(3px); }
+dialog.lb figure { margin: 0; }
+dialog.lb img { display: block; max-width: 100%; max-height: 82vh; width: auto; height: auto; margin: 0 auto; border-radius: 10px; box-shadow: 0 0 0 1px var(--line), 0 24px 70px rgba(0, 0, 0, .6); cursor: zoom-out; }
+dialog.lb figcaption { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-top: 12px; font-size: 14px; }
+dialog.lb figcaption b { font-weight: 600; }
+dialog.lb figcaption a { color: var(--muted); white-space: nowrap; }
+dialog.lb figcaption a:hover { color: var(--text); }
+dialog.lb .x { all: unset; cursor: pointer; position: absolute; top: -14px; right: -14px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line); }
+dialog.lb .x svg { width: 16px; height: 16px; }
+
 @media (max-width: 720px) {
   .head-side { align-items: start; }
   .day { grid-template-columns: 1fr; gap: 10px; padding-left: 22px; padding-bottom: 28px; }
@@ -60,6 +82,10 @@
   .when { text-align: left; padding-top: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .when .latest { margin-top: 0; }
   .items::before { left: -22px; top: -24px; }
+  .item.has-pic { grid-template-columns: 1fr; gap: 12px; }
+  .shot { width: 100%; }
+  .shot .zoom { opacity: 1; }
+  dialog.lb .x { top: -44px; right: 0; }
 }
 </style>
 <script src="/nav.js" defer></script>
@@ -89,6 +115,7 @@
   </header>
 
   <div class="log" id="log"></div>
+  <dialog class="lb" id="lb" aria-label="Picture"><button class="x" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><figure><img alt=""><figcaption><b></b><a target="_blank" rel="noopener">Open full size ↗</a></figcaption></figure></dialog>
 
   <footer>
     <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
@@ -100,12 +127,14 @@
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script>
-// The list lives in /data/updates.json: one line per update with date, area (overlay, website or both), title and text.
+// The list lives in /data/updates.json: one line per update with date, area (overlay, website or both), title, text
+// and an optional pic: "name" shows /img/updates/name-s.webp as the thumbnail and /img/updates/name.webp when clicked.
 (async () => {
   const log = document.getElementById("log");
   const seg = document.querySelector(".seg");
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const label = { overlay: "Overlay", website: "Website" };
+  const ZOOM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h5v5M9 20H4v-5M20 4l-6 6M4 20l6-6"/></svg>';
   let all = [];
   try { all = await fetch("/data/updates.json").then(r => r.json()); } catch {}
   all.sort((a, b) => b.date.localeCompare(a.date));   // newest day first; same-day order stays as written
@@ -125,7 +154,7 @@
       const day = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
       const sub = d.toLocaleDateString("en-US", { weekday: "long" }) + (d.getFullYear() !== new Date().getFullYear() ? " " + d.getFullYear() : "");
       return `<section class="day"><div class="when"><b>${day}</b><small>${sub}</small>${date === newest ? '<span class="latest">Latest</span>' : ""}</div><div class="items">${
-        us.map(u => `<article class="item"><h3>${esc(u.title)}${areas(u).map(a => `<span class="tag ${a}">${label[a]}</span>`).join("")}</h3><p>${esc(u.text)}</p></article>`).join("")
+        us.map(u => `<article class="item${u.pic ? " has-pic" : ""}"><div><h3>${esc(u.title)}${areas(u).map(a => `<span class="tag ${a}">${label[a]}</span>`).join("")}</h3><p>${esc(u.text)}</p></div>${u.pic ? `<button class="shot" type="button" data-pic="${esc(u.pic)}" aria-label="See a picture: ${esc(u.title)}"><img src="/img/updates/${esc(u.pic)}-s.webp" alt="" loading="lazy" decoding="async" width="704" height="440"><span class="zoom">${ZOOM}</span></button>` : ""}</article>`).join("")
       }</div></section>`;
     }).join("") || '<p class="empty">No updates yet.</p>';
   }
@@ -139,6 +168,19 @@
     pick(b.dataset.f);
     history.replaceState(null, "", b.dataset.f === "all" ? location.pathname : "#" + b.dataset.f);
   });
+  // Click a thumbnail: the full picture in a lightbox (Esc, the backdrop or the picture itself closes it)
+  const lb = document.getElementById("lb"), lbImg = lb.querySelector("img");
+  log.addEventListener("click", e => {
+    const b = e.target.closest(".shot");
+    if (!b) return;
+    const u = all.find(x => x.pic === b.dataset.pic), src = `/img/updates/${b.dataset.pic}.webp`;
+    lbImg.src = src; lbImg.alt = u ? u.title : "";
+    lb.querySelector("b").textContent = u ? u.title : "";
+    lb.querySelector("figcaption a").href = src;
+    lb.showModal();
+  });
+  lb.addEventListener("click", e => { if (e.target === lb || e.target === lbImg || e.target.closest(".x")) lb.close(); });
+  lb.addEventListener("close", () => { lbImg.removeAttribute("src"); });
   pick(["overlay", "website"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "all");
 })();
 </script>
