@@ -1,6 +1,9 @@
 /* One game as a slim card (public/games.js): Home's "My recent games" and the Match history page.
    Left: my line (hero, K/D/A, best stat, award, talents). Right: both teams with the draft edge between them. */
 .gc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 28px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+/* The map's art, faded in behind the top left of the card */
+.gc.art { position: relative; isolation: isolate; overflow: hidden; }
+.gc.art::before { content: ""; position: absolute; z-index: -1; inset: 0 auto 0 0; width: min(560px, 70%); background: var(--art) center 30% / cover; opacity: .26; -webkit-mask-image: linear-gradient(90deg, #000 10%, transparent); mask-image: linear-gradient(90deg, #000 10%, transparent); }
 .gc.solo { grid-template-columns: minmax(0, 1fr); }
 .gc-me { display: grid; align-content: start; gap: 12px; }
 .gc-top { display: flex; align-items: center; gap: 12px; }
@@ -14,6 +17,8 @@
 .gc-stats b { font: 600 14px var(--mono); color: var(--text); }
 .gc-stats > small { margin-left: -9px; font-size: 11px; letter-spacing: .02em; }
 .gc-kda i { font-style: normal; padding-inline: 3px; color: #6d625c; }
+.gc-aw.ic { align-self: center; display: inline-flex; align-items: center; gap: 5px; padding-left: 2px; color: #f3d48a; background: color-mix(in srgb, #e9b949 12%, transparent); border-color: color-mix(in srgb, #e9b949 35%, transparent); }
+.gc-aw img { width: 26px; height: 26px; margin: -4px 0 -4px -6px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
 .gc-aw { padding: 0 8px; border-radius: 999px; font-size: 12px; line-height: 20px; color: var(--accent); background: color-mix(in srgb, var(--brand) 12%, transparent); border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent); }
 /* My talents, one icon per tier */
 .gc-tal { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
