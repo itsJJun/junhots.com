@@ -123,7 +123,7 @@
   live.before(btn);
 
   const PAGES = [
-    ["Home", "/", "Start page"], ["Tier list", "/tierlist/", "Jun's ranked tier list"], ["Builds", "/builds/", "Talent builds for every hero"], ["Draft helper", "/draft/", "Best picks against the enemy team"], ["Match history", "/games/", "My recent ranked games"],
+    ["Home", "/", "Start page"], ["Tier list", "/tierlist/", "Jun's ranked tier list"], ["Builds", "/builds/", "Talent builds for every hero"], ["Draft helper", "/draft/", "Best picks against the enemy team"], ["Match history", "/games/", "My recent ranked games"], ["Stream schedule", "/schedule/", "When I'm live, in your time zone"],
     ["Make a tier list", "/tierlist-maker/", "Rank every hero and share it"], ["Make a build", "/builds/?make", "Pick a hero, make a talent build"], ["Overlay", "/overlay/", "The stream overlay"],
   ];
   const pageIc = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -336,7 +336,7 @@
   ];
   const where = () => {
     const p = location.pathname, hero = p.match(/^\/builds\/([a-z0-9]+)/)?.[1] || location.hash.slice(1).split("?")[0];
-    const name = { "/": "Home", "/tierlist/": "Tier list", "/tierlist-maker/": "Tier list maker", "/draft/": "Draft helper", "/games/": "Match history", "/patch-notes/": "Patch notes", "/overlay/": "Overlay", "/updates/": "Updates" }[p];
+    const name = { "/": "Home", "/tierlist/": "Tier list", "/tierlist-maker/": "Tier list maker", "/draft/": "Draft helper", "/games/": "Match history", "/patch-notes/": "Patch notes", "/overlay/": "Overlay", "/updates/": "Updates", "/schedule/": "Schedule" }[p];
     if (p.startsWith("/builds")) return hero ? "Builds · " + hero.charAt(0).toUpperCase() + hero.slice(1) : "Builds";
     return name || p;
   };
@@ -350,8 +350,10 @@
   btn.innerHTML = BUBBLE + "<span>Feedback</span>";
   btn.title = "Send feedback to Jun";
   document.body.append(btn);
-  // Also in the footer, next to Updates
+  // Also in the footer, next to Updates (plus a Schedule link after Updates on every page)
   const social = document.querySelector("footer .social");
+  const upd = social?.querySelector('a[href="/updates/"]');
+  if (upd && !social.querySelector('a[href="/schedule/"]')) upd.insertAdjacentHTML("afterend", '<a href="/schedule/">Schedule</a>');
   if (social) {
     const a = document.createElement("a");
     a.href = "#feedback"; a.textContent = "Feedback";

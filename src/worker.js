@@ -11,6 +11,7 @@
 //   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends,
 //                         or {games: [...]} (up to 200) from the GUI's "Import old replays" button
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
+//   GET  /api/schedule -> everyone: my next streams from my Twitch schedule (src/schedule.js)
 //   GET  /api/patch-notes -> everyone: Blizzard's official patch notes list, with the heroes each one changed and how (src/patch-notes.js)
 //   GET/PUT /api/patch-takes -> Jun's one-line take on a hero in a patch (PUT needs the password)
 //   POST /api/feedback -> everyone: send Jun a feedback message (the Feedback button in nav.js)
@@ -22,6 +23,7 @@
 
 import { patchNotes, patchTakes } from "./patch-notes.js";
 import { feedback } from "./feedback.js";
+import { schedule } from "./schedule.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -182,7 +184,7 @@ function cleanGame(g) {
 // Every page and every hero's builds page, for search engines.
 async function sitemap(url, env) {
   const heroes = await env.ASSETS.fetch(new URL("/data/heroes.json", url)).then(r => r.json()).catch(() => []);
-  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/patch-notes/", "/tierlist-maker/", "/overlay/", "/updates/", ...heroes.map(h => `/builds/${h[0]}`)];
+  const paths = ["/", "/tierlist/", "/builds/", "/draft/", "/games/", "/patch-notes/", "/tierlist-maker/", "/overlay/", "/updates/", "/schedule/", ...heroes.map(h => `/builds/${h[0]}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}\n</urlset>\n`;
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
@@ -250,6 +252,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/media" && request.method === "GET") return media(request, ctx);
+    if (url.pathname === "/api/schedule" && request.method === "GET") return schedule(request, ctx);
     if (url.pathname === "/api/patch-notes" && request.method === "GET") return patchNotes(request, env, ctx);
     if (url.pathname === "/api/patch-takes") return patchTakes(request, env, passwordOk);
     if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
