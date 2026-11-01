@@ -11,7 +11,8 @@
 //   POST /api/games    -> Jun only (password): the overlay sends one game here when a match ends,
 //                         or {games: [...]} (up to 200) from the GUI's "Import old replays" button
 //   GET  /api/media    -> everyone: my latest YouTube videos and whether I'm live on Twitch (for the Home page)
-//   GET  /api/schedule -> everyone: my next streams from my Twitch schedule (src/schedule.js)
+//   GET  /api/schedule -> everyone: my next streams from my Twitch schedule + my days off (src/schedule.js)
+//   /api/schedule/*   -> Jun only (password): days off, weekly streams editor, Connect Twitch (src/schedule.js)
 //   GET  /api/patch-notes -> everyone: Blizzard's official patch notes list, with the heroes each one changed and how (src/patch-notes.js)
 //   GET/PUT /api/patch-takes -> Jun's one-line take on a hero in a patch (PUT needs the password)
 //   POST /api/feedback -> everyone: send Jun a feedback message (the Feedback button in nav.js)
@@ -23,7 +24,7 @@
 
 import { patchNotes, patchTakes } from "./patch-notes.js";
 import { feedback } from "./feedback.js";
-import { schedule } from "./schedule.js";
+import { schedule, scheduleAdmin, keepTwitchAlive } from "./schedule.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -252,7 +253,8 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/media" && request.method === "GET") return media(request, ctx);
-    if (url.pathname === "/api/schedule" && request.method === "GET") return schedule(request, ctx);
+    if (url.pathname === "/api/schedule" && request.method === "GET") return schedule(request, env, ctx);
+    if (url.pathname.startsWith("/api/schedule/")) return scheduleAdmin(request, env, ctx, passwordOk);
     if (url.pathname === "/api/patch-notes" && request.method === "GET") return patchNotes(request, env, ctx);
     if (url.pathname === "/api/patch-takes") return patchTakes(request, env, passwordOk);
     if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
@@ -337,5 +339,9 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+  // Daily (wrangler.jsonc "triggers"): keep the Twitch login for the schedule editor fresh
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(keepTwitchAlive(env));
   },
 };
