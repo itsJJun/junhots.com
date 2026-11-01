@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="/site.css">
 <style>
 .spg { display: grid; gap: 22px; max-width: 860px; }
+.spg > * { min-width: 0; }
 .spg .page-head { padding-bottom: 0; }
 /* The next stream (or "Live now"), with a countdown and calendar buttons */
 .big { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 24px; align-items: center; padding: 22px 24px; border: 1px solid var(--brand); border-radius: 16px; background: radial-gradient(500px circle at 0 0, rgba(242, 106, 75, .16), transparent 60%), var(--surface); }
@@ -66,6 +67,56 @@
 .foot a { color: var(--accent); }
 .dot.off { background: #8a807a; animation: none; }
 .nav-live.on { color: var(--text); }
+.btn2 { font: 500 13px/1 var(--sans); color: var(--text); height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.btn2:hover { background: var(--surface-2); }
+.btn2.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+/* Away notice (my days off) */
+.away { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid color-mix(in srgb, var(--combo) 40%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--combo) 7%, var(--surface)); font-size: 14px; }
+.away[hidden] { display: none; }
+.away svg { width: 18px; height: 18px; flex: none; color: var(--combo); }
+.away b { font-weight: 600; } .away span { color: var(--muted); }
+.lst .r.dayoff .t { text-decoration: line-through; color: #8a807a; font-weight: 500; }
+.lst .r.dayoff .pill { border-color: color-mix(in srgb, var(--combo) 50%, transparent); color: var(--combo); }
+/* Jun's editor: only after Jun login (the server checks the password on every change) */
+.junlogin button { all: unset; cursor: pointer; color: var(--muted); } .junlogin button:hover { color: var(--text); }
+.ed { display: grid; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.ed[hidden] { display: none; }
+.ed > section { padding: 16px 18px; } .ed > section + section { border-top: 1px solid var(--line); }
+.ed h2 { margin: 0 0 10px; font: 600 15px var(--display); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ed h2 small { font: 400 12px var(--sans); color: var(--muted); }
+.ed h2 .tag { margin-left: auto; font: 500 12px var(--sans); color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.ed h2 .tag i { width: 7px; height: 7px; border-radius: 50%; background: var(--good); } .ed h2 .tag.no i { background: #8a807a; }
+.ed .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ed button, .rb { font: 500 13px var(--sans); color: var(--text); background: none; border: 1px solid var(--line); border-radius: 9px; padding: 7px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+.ed button:hover, .rb:hover { border-color: var(--brand); background: rgba(242, 106, 75, .08); }
+.ed button.pri { background: var(--brand); border-color: var(--brand); color: #1f0b05; font-weight: 600; }
+.ed button.pri:hover { filter: brightness(1.08); }
+.ed button:disabled { opacity: .5; cursor: default; }
+.ed input, .ed select { font: 400 13px var(--sans); color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; height: 34px; padding: 0 10px; color-scheme: dark; }
+.ed select { max-width: 100%; } .wr > * { min-width: 0; }
+.ed input:focus, .ed select:focus { outline: none; border-color: var(--brand); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; } .chips:empty { display: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; font-size: 12px; border: 1px solid color-mix(in srgb, var(--combo) 45%, transparent); color: var(--combo); background: color-mix(in srgb, var(--combo) 8%, transparent); }
+.ed .chip button { all: unset; cursor: pointer; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); } .ed .chip button:hover { color: var(--text); background: var(--surface-2); }
+.pick { display: none; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; } .pick.on { display: flex; }
+.pick label { font-size: 12px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.wk { display: grid; gap: 8px; }
+.wr { display: grid; grid-template-columns: auto 112px 92px minmax(0, 1fr) 34px; gap: 8px; align-items: center; }
+.wr .dz { display: inline-flex; gap: 3px; }
+.ed .wr .dz button { width: 30px; height: 30px; padding: 0; border-radius: 7px; font-size: 11px; color: #6f6560; }
+.ed .wr .dz button.on { color: #1f0b05; background: var(--brand); border-color: var(--brand); font-weight: 700; }
+.ed .wr .x { width: 34px; height: 34px; padding: 0; display: grid; place-items: center; color: var(--muted); }
+.ed .note { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+.ed .note b { color: var(--text); font-weight: 500; }
+.code { display: grid; gap: 10px; justify-items: start; padding: 14px; margin-top: 10px; border: 1px dashed var(--twitch); border-radius: 12px; }
+.code[hidden] { display: none; }
+.code b { font: 700 28px var(--mono); letter-spacing: .12em; }
+.rb, .ed button.rb { padding: 3px 9px; font-size: 12px; border-radius: 999px; color: var(--muted); }
+/* Day off buttons in the list show on hover (always on touch screens) */
+@media (hover: hover) { .lst .r .rb { opacity: 0; transition: opacity .15s; } .lst .r:hover .rb, .lst .r .rb:focus-visible, .lst .r.dayoff .rb { opacity: 1; } }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 99; padding: 10px 16px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(0, 0, 0, .5); font-size: 14px; }
+.toast[hidden] { display: none; }
+@media (max-width: 720px) { .wr { grid-template-columns: 1fr 1fr 34px; } .wr .dz { grid-column: 1 / -1; } .wr .ti { grid-column: 1 / 3; } }
 @media (max-width: 720px) {
   .big { grid-template-columns: 1fr; padding: 20px; } .big .when { font-size: 26px; }
   .lst .r { grid-template-columns: 84px 1fr auto; gap: 12px; padding: 12px 14px; } .lst .ti { display: none; } .lst .t { font-size: 14px; }
@@ -90,7 +141,9 @@
         <p class="sub" id="sub">When I'm live on Twitch, in your own time zone.</p>
       </div>
     </header>
+    <div class="away" id="away" hidden></div>
     <section class="big" id="big" hidden></section>
+    <div class="ed" id="ed" hidden></div>
     <section id="list"></section>
     <p class="foot" data-edit="schedule_note">Plans can change last minute. Follow me on Twitch to get a ping the moment I go live.</p>
   </main>
@@ -99,64 +152,262 @@
     <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
     <span class="social"><a href="/updates/">Updates</a><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
     <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+    <span class="junlogin" id="junlogin"><button type="button" id="login">Jun login</button></span>
   </footer>
 </div>
+<dialog id="loginbox"><form id="loginform" method="dialog">
+  <h2>Jun login</h2>
+  <p>Only for Jun. Lets you set days off and edit your weekly streams.</p>
+  <input type="password" id="pw" autocomplete="current-password" aria-label="Password" required>
+  <p class="err" id="pwerr" hidden>Wrong password.</p>
+  <div class="row-btns"><button class="btn2" value="cancel" formnovalidate>Cancel</button><button class="btn2 primary" value="ok">Log in</button></div>
+</form></dialog>
+<div class="toast" id="toast" hidden></div>
 
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script src="/schedule.js"></script>
 <script>
-(async () => {
-  const S = window.SCHEDULE, T = window.SITE_TEXT || {}, esc = S.esc;
+(() => {
+  const S = window.SCHEDULE, T = window.SITE_TEXT || {}, esc = S.esc, $ = id => document.getElementById(id);
   const CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>';
   const TW = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.3 3 3 6.4v13.1h4.5V22h2.6l2.4-2.5h3.7L21 14.6V3H4.3zm15 10.8-2.9 2.9h-4.5l-2.4 2.4v-2.4H5.6V4.6h13.7v9.2zM16.6 7.8v5h-1.7v-5h1.7zm-4.6 0v5h-1.7v-5H12z"/></svg>';
-  const d = await S.load();
-  const z = S.zone();
-  if (z) document.getElementById("sub").textContent = `${T.schedule_text || "When I'm live on Twitch."} All times are in your time zone (${z}).`;
-  const tw = `https://www.twitch.tv/${d.channel}`;
-  const st = S.state(d), cal = S.calLinks(d.ical);
-  // Top bar Twitch link turns "Live now" here too
-  if (d.live) { const n = document.querySelector(".nav-live"); n.classList.add("on"); n.lastChild.textContent = "Live now"; }
-  else document.querySelectorAll(".nav-live .dot").forEach(x => x.classList.add("off"));
-
-  // The big card
-  const big = document.getElementById("big");
-  const buttons = `<div class="acts">
-    ${cal ? `<a class="sc-btn" href="${cal.google}" target="_blank" rel="noopener">${CAL}Add to Google Calendar</a><a class="sc-btn" href="${cal.webcal}">${CAL}Apple / Outlook calendar</a>` : ""}
-    <a class="sc-btn tw" href="${tw}" target="_blank" rel="noopener">${TW}${d.live ? "Watch on Twitch" : "Follow on Twitch"}</a></div>`;
-  let tick = null;
-  if (d.live || st.soon) {
-    big.classList.add("live");
-    big.innerHTML = `<div><small><i></i>${d.live ? "LIVE NOW" : "STARTING SOON"}</small><div class="when">${d.live ? esc(d.title || "Live on Twitch") : `Today · ${S.time(st.soon.start)}`}</div><div class="what">${st.cur ? `Until about ${S.time(st.cur.end)}` : "Heroes of the Storm"}</div></div>${buttons}`;
-  } else if (st.next) {
-    const n = st.next;
-    big.innerHTML = `<div><small>NEXT STREAM</small><div class="when">${S.dayName(n.start, true)} · ${S.time(n.start)}</div><div class="what">${esc([n.title, n.cat].filter(Boolean).join(" · ") || "Heroes of the Storm")}</div></div>
-      <div class="cdb" aria-label="Time until the next stream"></div>${buttons}`;
-    const box = big.querySelector(".cdb");
-    const draw = () => {
-      let s = Math.max(0, Math.round((n.start - Date.now()) / 1000));
-      if (!s) { clearInterval(tick); location.reload(); return; }
-      const dd = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60, sec = s % 60, p = v => String(v).padStart(2, "0");
-      box.innerHTML = (dd ? [[dd, dd > 1 ? "days" : "day"], [p(h), "hours"], [p(m), "min"]] : [[p(h), "hours"], [p(m), "min"], [p(sec), "sec"]]).map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
-    };
-    draw(); tick = setInterval(draw, 1000);
-  }
-  big.hidden = !big.innerHTML;
-
-  // The list: this week first, "Show next week" for the rest
-  const list = document.getElementById("list");
-  const rows = d.streams.filter(s => s.end > Date.now());
-  if (!rows.length) {
-    list.innerHTML = `<div class="empty">${d.ok ? "No streams on the schedule right now." : "The schedule couldn't load right now."} <a href="${tw}" target="_blank" rel="noopener">Follow on Twitch</a> to know when I go live.</div>`;
-    return;
-  }
-  const row = s => {
-    const now = (d.live || st.soon) && st.cur === s, nxt = !d.live && !st.soon && st.next === s;
-    return `<div class="r ${s.off ? "cx" : now ? "now" : nxt ? "nxt" : ""}"><div class="dy"><b>${S.dayName(s.start)}</b><span>${S.dayName(s.start).length > 3 ? S.wd(s.start) + " " : ""}${S.date(s.start)}</span></div><div class="t">${S.time(s.start)} – ${S.time(s.end)}</div><div class="ti">${esc(s.title)}</div><div>${s.off ? '<span class="pill">Cancelled</span>' : now ? `<span class="pill">${d.live ? "Live" : "Now"}</span>` : nxt ? '<span class="pill">Next</span>' : ""}</div></div>`;
+  const PAUSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>';
+  const X = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  const WDS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
+  let d = null, A = null, tick = null, showAll = false;
+  const toast = msg => { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); };
+  // A stream's day in my stream time zone ("2026-11-01"): days off are whole days there
+  const dayOf = (t, tz) => new Intl.DateTimeFormat("en-CA", { timeZone: tz || d.tz || undefined, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
+  const nice = day => new Date(day + "T12:00:00Z").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  const addDays = (day, n) => new Date(Date.parse(day + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+  const api = async (path, method = "GET", body) => {
+    const r = await fetch("/api/schedule/" + path, { method, headers: { authorization: "Bearer " + ADMIN, ...(body ? { "content-type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined }).catch(() => null);
+    if (r?.status === 401) { setAdmin(""); toast("Wrong password. Log in again."); throw new Error("401"); }
+    const j = await r?.json().catch(() => ({})) || {};
+    if (!r?.ok) throw new Error(j.error || "Couldn't reach the server");
+    return j;
   };
-  const weekEnd = Date.now() + 7 * S.DAY, first = rows.filter(s => s.start < weekEnd), rest = rows.filter(s => s.start >= weekEnd);
-  list.innerHTML = `<div class="lst">${first.map(row).join("")}<div class="later" hidden>${rest.map(row).join("")}</div>${rest.length ? '<button class="more" type="button">Show next week</button>' : ""}</div>`;
-  list.querySelector(".more")?.addEventListener("click", e => { list.querySelector(".later").hidden = false; list.querySelector(".later").style.display = "contents"; e.target.remove(); });
+
+  // ---------- what everyone sees ----------
+  function draw() {
+    const z = S.zone();
+    $("sub").textContent = `${T.schedule_text || "When I'm live on Twitch."}${z ? ` All times are in your time zone (${z}).` : ""}`;
+    const tw = `https://www.twitch.tv/${d.channel}`, st = S.state(d), cal = S.calLinks(d.ical);
+    const nav = document.querySelector(".nav-live");
+    if (d.live) { nav.classList.add("on"); nav.lastChild.textContent = "Live now"; } else nav.querySelectorAll(".dot").forEach(x => x.classList.add("off"));
+
+    // Away notice
+    const aw = $("away"), away = d.away;
+    aw.hidden = !away;
+    // The days as I set them (in my time zone), so a viewer far away doesn't see them shifted by a day
+    if (away) {
+      const a = dayOf(away.from + 12 * 36e5), b = dayOf(away.to - 12 * 36e5);
+      aw.innerHTML = `${PAUSE}<div><b>${away.from <= Date.now() ? "Taking a break" : "Break coming up"}${away.note ? ` · ${esc(away.note)}` : ""}</b> <span>No streams ${a === b ? "on " + nice(a) : `${nice(a)} – ${nice(b)}`}.</span></div>`;
+    }
+
+    // Big card
+    const big = $("big");
+    big.classList.remove("live");
+    clearInterval(tick);
+    const buttons = `<div class="acts">
+      ${cal ? `<a class="sc-btn" href="${cal.google}" target="_blank" rel="noopener">${CAL}Add to Google Calendar</a><a class="sc-btn" href="${cal.webcal}">${CAL}Apple / Outlook calendar</a>` : ""}
+      <a class="sc-btn tw" href="${tw}" target="_blank" rel="noopener">${TW}${d.live ? "Watch on Twitch" : "Follow on Twitch"}</a></div>`;
+    big.innerHTML = "";
+    if (d.live || st.soon) {
+      big.classList.add("live");
+      big.innerHTML = `<div><small><i></i>${d.live ? "LIVE NOW" : "STARTING SOON"}</small><div class="when">${d.live ? esc(d.title || "Live on Twitch") : `Today · ${S.time(st.soon.start)}`}</div><div class="what">${st.cur ? `Until about ${S.time(st.cur.end)}` : "Heroes of the Storm"}</div></div>${buttons}`;
+    } else if (st.next) {
+      const n = st.next;
+      big.innerHTML = `<div><small>NEXT STREAM</small><div class="when">${S.dayName(n.start, true)} · ${S.time(n.start)}</div><div class="what">${esc([n.title, n.cat].filter(Boolean).join(" · ") || "Heroes of the Storm")}</div></div>
+        <div class="cdb" aria-label="Time until the next stream"></div>${buttons}`;
+      const box = big.querySelector(".cdb");
+      const step = () => {
+        const s = Math.max(0, Math.round((n.start - Date.now()) / 1000));
+        if (!s) { clearInterval(tick); refresh(); return; }
+        const dd = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60, sec = s % 60, p = v => String(v).padStart(2, "0");
+        box.innerHTML = (dd ? [[dd, dd > 1 ? "days" : "day"], [p(h), "hours"], [p(m), "min"]] : [[p(h), "hours"], [p(m), "min"], [p(sec), "sec"]]).map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+      };
+      step(); tick = setInterval(step, 1000);
+    }
+    big.hidden = !big.innerHTML;
+
+    // The list: this week first, "Show next week" for the rest
+    const list = $("list"), rows = d.streams.filter(s => s.end > Date.now());
+    if (!rows.length) {
+      list.innerHTML = `<div class="empty">${d.ok ? "No streams on the schedule right now." : "The schedule couldn't load right now."} <a href="${tw}" target="_blank" rel="noopener">Follow on Twitch</a> to know when I go live.</div>`;
+      return;
+    }
+    const row = s => {
+      const now = (d.live || st.soon) && st.cur === s, nxt = !d.live && !st.soon && st.next === s, day = s.off === "day";
+      const pill = day ? '<span class="pill">Day off</span>' : s.off ? '<span class="pill">Cancelled</span>' : now ? `<span class="pill">${d.live ? "Live" : "Now"}</span>` : nxt ? '<span class="pill">Next</span>' : "";
+      const edit = ADMIN && (!s.off || day) ? `<button class="rb" type="button" data-day="${dayOf(s.start)}" data-on="${day ? 1 : 0}">${day ? "Undo" : "Day off"}</button>` : "";
+      return `<div class="r ${day ? "dayoff" : s.off ? "cx" : now ? "now" : nxt ? "nxt" : ""}"><div class="dy"><b>${S.dayName(s.start)}</b><span>${S.dayName(s.start).length > 3 ? S.wd(s.start) + " " : ""}${S.date(s.start)}</span></div><div class="t">${S.time(s.start)} – ${S.time(s.end)}</div><div class="ti">${esc(day && s.note ? s.note : s.title)}</div><div style="display:flex;gap:8px;align-items:center;justify-content:end">${pill}${edit}</div></div>`;
+    };
+    const weekEnd = Date.now() + 7 * S.DAY, first = rows.filter(s => s.start < weekEnd), rest = rows.filter(s => s.start >= weekEnd);
+    list.innerHTML = `<div class="lst">${first.map(row).join("")}${showAll ? rest.map(row).join("") : ""}${rest.length && !showAll ? '<button class="more" type="button">Show next week</button>' : ""}</div>`;
+    list.querySelector(".more")?.addEventListener("click", () => { showAll = true; draw(); });
+    list.querySelectorAll(".rb").forEach(b => b.addEventListener("click", () => setOff([b.dataset.day], b.dataset.on !== "1")));
+  }
+  async function refresh() { d = await S.load(true); draw(); }
+
+  // ---------- Jun's editor ----------
+  function setAdmin(pw) {
+    ADMIN = pw;
+    try { pw ? localStorage.setItem("junhots_admin", pw) : localStorage.removeItem("junhots_admin"); } catch {}
+    $("junlogin").innerHTML = pw ? `Jun editing on · <button type="button" id="logout">Log out</button>` : `<button type="button" id="login">Jun login</button>`;
+    $("logout")?.addEventListener("click", () => setAdmin(""));
+    $("login")?.addEventListener("click", () => { $("pw").value = ""; $("pwerr").hidden = true; $("loginbox").showModal(); });
+    if (pw) loadAdmin(); else { A = null; $("ed").hidden = true; }
+    if (d) draw();
+  }
+  $("loginform").addEventListener("submit", async e => {
+    if (e.submitter?.value === "cancel") return;
+    e.preventDefault();
+    const pw = $("pw").value;
+    const r = await fetch("/api/login", { method: "POST", headers: { authorization: "Bearer " + pw } }).catch(() => null);
+    if (r?.ok) { $("loginbox").close(); setAdmin(pw); toast("Logged in. You can set days off and edit your streams."); }
+    else $("pwerr").hidden = false;
+  });
+
+  async function loadAdmin() {
+    try { A = await api("admin"); } catch (e) { if (e.message !== "401") toast(e.message); return; }
+    A.days ||= {};
+    if (A.rows) A.edit = A.rows.map(r => ({ days: [...r.days], time: r.time, hours: r.hours, title: r.title }));
+    drawEditor();
+  }
+
+  async function setOff(list, on, note = "") {
+    const days = { ...A?.days };
+    for (const k of list) on ? days[k] = note || days[k] || "" : delete days[k];
+    try {
+      const j = await api("off", "PUT", { days });
+      A.days = j.days;
+      toast(j.twitch === "ok" ? "Saved. Your Twitch schedule shows it too." : j.twitch === "not connected" ? "Saved on the website. Connect Twitch below to show it there too." : "Saved on the website, but Twitch said: " + j.twitch);
+    } catch (e) { if (e.message !== "401") toast(e.message); return; }
+    drawEditor(); refresh();
+  }
+
+  function drawEditor() {
+    const ed = $("ed");
+    ed.hidden = !A;
+    if (!A) return;
+    const tz = A.tz || d.tz || "America/Chicago", today = dayOf(Date.now(), tz);
+    // Days off: quick buttons, a range picker, and the ones already set
+    const runs = [];
+    for (const k of Object.keys(A.days).sort()) { const l = runs[runs.length - 1]; if (l && addDays(l.to, 1) === k) l.to = k; else runs.push({ from: k, to: k, note: A.days[k] }); }
+    const twitchTag = A.connected ? `<span class="tag"><i></i>Twitch connected</span>` : `<span class="tag no"><i></i>Website only</span>`;
+    ed.innerHTML = `
+      <section>
+        <h2>Days off <small>Visitors see a break notice; streams on these days get crossed out</small>${twitchTag}</h2>
+        <div class="bar">
+          <button type="button" data-q="0">Today off</button>
+          <button type="button" data-q="1">Tomorrow off</button>
+          <button type="button" id="pickbtn">Pick days…</button>
+        </div>
+        <div class="pick" id="pick">
+          <label>From <input type="date" id="pf" value="${today}" min="${today}"></label>
+          <label>To <input type="date" id="pt" value="${addDays(today, 1)}" min="${today}"></label>
+          <input id="pn" placeholder="Note for viewers (optional), e.g. Business trip" maxlength="60" style="flex:1;min-width:200px">
+          <button type="button" class="pri" id="psave">Save days off</button>
+        </div>
+        <div class="chips">${runs.map(r => `<span class="chip">${r.from === r.to ? nice(r.from) : `${nice(r.from)} – ${nice(r.to)}`}${r.note ? ` · ${esc(r.note)}` : ""}<button type="button" data-from="${r.from}" data-to="${r.to}" aria-label="Remove">${X}</button></span>`).join("")}</div>
+        <p class="note">Days count in your stream time zone (<b>${esc(tz.replace(/_/g, " "))}</b>).${A.connected ? " Your current or next break is also set as your Twitch vacation." : ""} You can also tap <b>Day off</b> on any stream in the list below.</p>
+      </section>
+      <section id="wsec"></section>`;
+    ed.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", () => setOff([addDays(today, +b.dataset.q)], true)));
+    $("pickbtn").addEventListener("click", () => { $("pick").classList.toggle("on"); $("pn").focus(); });
+    $("psave").addEventListener("click", () => {
+      let f = $("pf").value, t = $("pt").value;
+      if (!f || !t) return toast("Pick both dates.");
+      if (t < f) [f, t] = [t, f];
+      const list = []; for (let k = f; k <= t && list.length < 62; k = addDays(k, 1)) list.push(k);
+      setOff(list, true, $("pn").value.trim());
+    });
+    ed.querySelectorAll(".chip button").forEach(b => b.addEventListener("click", () => {
+      const list = []; for (let k = b.dataset.from; k <= b.dataset.to; k = addDays(k, 1)) list.push(k);
+      setOff(list, false);
+    }));
+    drawWeekly();
+  }
+
+  // Weekly streams: edits go straight to Twitch (the site reads them back from there)
+  function drawWeekly() {
+    const w = $("wsec");
+    if (!A.connected) {
+      w.innerHTML = `<h2>Weekly streams <small>Edit here, saved to your Twitch schedule</small></h2>
+        <div class="bar"><button type="button" class="pri" id="conn">${TW.replace("<svg", '<svg width="14" height="14" style="vertical-align:-2px;margin-right:6px"')}Connect Twitch</button></div>
+        <div class="code" id="code" hidden></div>
+        <p class="note">One time only: Twitch asks you to approve "Hots Overlay by Junhots_" (your own app) to manage your schedule. Log in to Twitch as <b>junhots_</b>.</p>`;
+      $("conn").addEventListener("click", connect);
+      return;
+    }
+    // Couldn't read the schedule from Twitch: show why, and no editor (saving an empty list would remove every stream)
+    if (!A.rows) {
+      w.innerHTML = `<h2>Weekly streams <small>Saved to your Twitch schedule</small></h2><p class="note">Couldn't read your Twitch schedule${A.error ? `: ${esc(A.error)}` : ""}. <button type="button" class="rb" id="retry">Try again</button> <button type="button" id="disc" class="rb">Disconnect Twitch</button></p>`;
+      $("retry").addEventListener("click", loadAdmin);
+      $("disc").addEventListener("click", async () => { await api("disconnect", "POST").catch(() => {}); loadAdmin(); refresh(); });
+      return;
+    }
+    if (!A.edit) A.edit = [];
+    const zones = (Intl.supportedValuesOf?.("timeZone") || [A.tz]).filter(z => /^(America|Europe|Asia|Australia|Pacific)\//.test(z) || z === A.tz);
+    w.innerHTML = `<h2>Weekly streams <small>Saved to your Twitch schedule</small><span class="tag"><i></i>${esc(A.login || "junhots_")}</span></h2>
+      <div class="wk">${A.edit.map((r, i) => `<div class="wr" data-i="${i}">
+        <span class="dz">${WDS.map((n, k) => `<button type="button" class="${r.days.includes(k) ? "on" : ""}" data-k="${k}" aria-pressed="${r.days.includes(k)}">${n}</button>`).join("")}</span>
+        <input type="time" value="${r.time}" data-f="time" aria-label="Start time" step="900">
+        <select data-f="hours" aria-label="Length">${[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 12].concat(r.hours).filter((v, j, a) => a.indexOf(v) === j).sort((a, b) => a - b).map(h => `<option value="${h}" ${h === r.hours ? "selected" : ""}>${h} h</option>`).join("")}</select>
+        <input class="ti" value="${esc(r.title)}" data-f="title" placeholder="Stream title" maxlength="140">
+        <button type="button" class="x" data-del aria-label="Remove">${X}</button></div>`).join("")}</div>
+      <div class="bar" style="margin-top:10px">
+        <button type="button" id="addrow">+ Add stream</button>
+        <label class="note" style="margin:0 0 0 auto">Time zone <select id="wtz">${zones.map(z => `<option ${z === A.tz ? "selected" : ""}>${z}</option>`).join("")}</select></label>
+        <button type="button" class="pri" id="wsave">Save to Twitch</button>
+      </div>
+      <p class="note">${A.error ? `Twitch said: ${esc(A.error)} · ` : ""}Times are in the time zone above. Use the day buttons to pick which days a stream repeats. <button type="button" id="disc" class="rb" style="margin-left:6px">Disconnect Twitch</button></p>`;
+    w.querySelectorAll(".wr").forEach(el => {
+      const r = A.edit[+el.dataset.i];
+      el.querySelectorAll(".dz button").forEach(b => b.addEventListener("click", () => { const k = +b.dataset.k; r.days = r.days.includes(k) ? r.days.filter(x => x !== k) : [...r.days, k].sort(); drawWeekly(); }));
+      el.querySelectorAll("[data-f]").forEach(f => f.addEventListener("input", () => { r[f.dataset.f] = f.dataset.f === "hours" ? +f.value : f.value; }));
+      el.querySelector("[data-del]").addEventListener("click", () => { A.edit.splice(+el.dataset.i, 1); drawWeekly(); });
+    });
+    $("addrow").addEventListener("click", () => { A.edit.push({ days: [], time: A.edit[0]?.time || "18:00", hours: A.edit[0]?.hours || 4, title: A.edit[0]?.title || "Heroes of the Storm" }); drawWeekly(); });
+    $("disc").addEventListener("click", async () => { if (!confirm("Disconnect Twitch? Days off stay; weekly streams go back to read-only.")) return; await api("disconnect", "POST").catch(() => {}); loadAdmin(); refresh(); });
+    $("wsave").addEventListener("click", async e => {
+      e.target.disabled = true; e.target.textContent = "Saving…";
+      try {
+        const rows = A.edit.filter(r => r.days.length);
+        if (!rows.length && !confirm("Remove every weekly stream from your Twitch schedule?")) throw new Error("cancel");
+        const j = await api("weekly", "PUT", { tz: $("wtz").value, rows, clearAll: !rows.length });
+        A.rows = j.rows; A.tz = j.tz; A.edit = j.rows.map(r => ({ days: [...r.days], time: r.time, hours: r.hours, title: r.title }));
+        toast(j.changes ? "Saved to Twitch. The schedule is updated." : "Nothing changed.");
+        drawWeekly(); refresh();
+      } catch (err) {
+        if (err.message === "cancel") { e.target.disabled = false; e.target.textContent = "Save to Twitch"; return; }
+        if (err.message !== "401") toast("Twitch said: " + err.message);
+        loadAdmin();   // show what Twitch really has now (a save can stop halfway)
+      }
+    });
+  }
+
+  async function connect() {
+    let c;
+    try { c = await api("connect", "POST"); } catch (e) { if (e.message !== "401") toast(e.message); return; }
+    const box = $("code");
+    box.hidden = false;
+    box.innerHTML = `<span class="note" style="margin:0">Open Twitch, log in as junhots_, and enter this code:</span><b>${esc(c.code)}</b><a class="sc-btn tw" href="${esc(c.url)}" target="_blank" rel="noopener">${TW}Open twitch.tv/activate</a><span class="note" id="cstate" style="margin:0">Waiting for you to approve…</span>`;
+    const end = Date.now() + c.expires * 1000;
+    const poll = async () => {
+      if (Date.now() > end) { $("cstate").textContent = "The code ran out. Press Connect Twitch again."; return; }
+      const j = await api("poll", "POST").catch(() => ({ state: "pending" }));
+      if (j.state === "ok") { toast("Twitch connected!"); loadAdmin(); refresh(); return; }
+      if (j.state === "failed" || j.state === "expired") { $("cstate").textContent = j.message || "That didn't work. Press Connect Twitch again."; return; }
+      setTimeout(poll, (c.interval || 5) * 1000);
+    };
+    setTimeout(poll, (c.interval || 5) * 1000);
+  }
+
+  S.load().then(x => { d = x; draw(); setAdmin(ADMIN); });
 })();
 </script>
 </body>

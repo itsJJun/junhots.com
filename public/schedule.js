@@ -28,10 +28,10 @@
   const zone = () => { try { return (Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop() || "").replace(/_/g, " "); } catch { return ""; } };
 
   let got;
-  const load = () => got ||= Promise.all([
-    fetch("/api/schedule").then(r => r.ok ? r.json() : null).catch(() => null),
+  const load = fresh => (fresh && (got = null), got ||= Promise.all([
+    fetch("/api/schedule", fresh ? { cache: "no-store" } : {}).then(r => r.ok ? r.json() : null).catch(() => null),
     fetch("/api/media").then(r => r.ok ? r.json() : null).catch(() => null),
-  ]).then(([s, m]) => ({ ok: !!s?.ok, streams: s?.streams || [], ical: s?.ical || "", channel: s?.twitch || "junhots_", live: !!m?.twitch?.live, title: m?.twitch?.title || "" }));
+  ]).then(([s, m]) => ({ ok: !!s?.ok, streams: s?.streams || [], away: s?.away || null, tz: s?.tz || "", ical: s?.ical || "", channel: s?.twitch || "junhots_", live: !!m?.twitch?.live, title: m?.twitch?.title || "" })));
 
   // Where we are right now: live, a stream that should be on, or the next one coming
   const state = d => {
@@ -71,6 +71,7 @@
     let main;
     if (st.live) main = `<span class="lb live">${WAVE}${esc(T().schedule_live || "Live now")}</span><strong title="${esc(d.title)}">${esc(d.title || "On Twitch")}</strong>`;
     else if (st.soon) main = `<span class="lb">${CLOCK}${esc(T().schedule_next || "Next stream")}</span><strong>Starting soon</strong><span class="cd">${time(st.soon.start)}</span>`;
+    else if (d.away && d.away.from <= Date.now()) main = `<span class="lb">${CLOCK}Away till ${date(d.away.to - 12 * 36e5)}</span><strong>${dayName(st.next.start)} ${time(st.next.start)}</strong><span class="cd" data-until="${st.next.start}">${until(st.next.start)}</span>`;
     else main = `<span class="lb">${CLOCK}${esc(T().schedule_next || "Next stream")}</span><strong>${dayName(st.next.start)} ${time(st.next.start)}</strong><span class="cd" data-until="${st.next.start}">${until(st.next.start)}</span>`;
     el.innerHTML = `${main}${d.ok ? chips(d) : ""}<a class="more" href="/schedule/">${esc(T().schedule_more || "Schedule")} ›</a>`;
     el.hidden = false;
