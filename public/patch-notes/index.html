@@ -94,10 +94,11 @@
 .face[data-v="mixed"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1.5 8.5 5 5 8.5 1.5 5z' fill='%2312100f'/%3E%3C/svg%3E"); }
 .face[data-v="changed"]::before { display: none; }
 /* Hero changes: one card per hero, filters on top */
-.hc-head { display: flex; align-items: end; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin: 6px 0 14px; }
+.hc-head { margin: 6px 0 14px; }
 .hc-head h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
-.hc-head h2 small { display: block; margin-top: 4px; font: 400 13px var(--sans); color: var(--muted); letter-spacing: 0; }
-.hc-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 100%; }
+.hc-head h2 small { display: block; margin-top: 5px; font: 400 14px var(--sans); color: var(--muted); letter-spacing: 0; }
+.hc-head h2 small a { color: var(--accent); }
+.hc-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 100%; margin: 22px 0 12px; }
 .hsearch { display: flex; align-items: center; gap: 8px; height: 38px; width: 200px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .hsearch:focus-within { border-color: var(--muted); }
 .hsearch svg { flex: none; width: 15px; height: 15px; color: var(--muted); }
@@ -106,15 +107,63 @@
 .seg button .pc-m { margin-right: 4px; }
 .seg button[aria-pressed="true"] .pc-m { color: #1f0b05; }
 .seg button[aria-pressed="true"] .pc-m.same::before { background: #1f0b05; }
-.hcards { columns: 3 330px; column-gap: 14px; }
-.hcard { break-inside: avoid; margin-bottom: 14px; padding: 14px 16px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.hcard > header { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding-bottom: 6px; }
-.hcard > header img { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; background: var(--surface-2); }
-.hcard > header b { display: block; font: 600 16px/1.2 var(--display); }
-.hcard > header a { color: var(--muted); font-size: 12.5px; text-decoration: none; }
-.hcard > header a:hover { color: var(--accent); }
-.hcard .edit { margin-top: 8px; display: flex; gap: 6px; }
-.hcard .edit input { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px var(--sans); }
+/* Which patch's hero changes are shown */
+.pick { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
+.pick button { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font: 500 13px/1 var(--sans); cursor: pointer; }
+.pick button b { color: var(--text); font-weight: 600; }
+.pick button .kind { height: 18px; padding: 0 5px; font-size: 9.5px; }
+.pick button:hover { border-color: var(--muted); }
+.pick button[aria-pressed="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--text); }
+.ptr-note { display: flex; align-items: center; gap: 8px; margin: -4px 0 14px; font-size: 13px; color: #e0b04f; }
+.ptr-note svg { flex: none; width: 15px; height: 15px; }
+/* At a glance: who got buffed, nerfed or both. A face jumps to that hero below */
+.glance { display: flex; flex-wrap: wrap; gap: 14px 28px; padding: 16px 18px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.glance .g { display: grid; gap: 10px; align-content: start; }
+.glance .g > span { display: flex; align-items: center; gap: 7px; font: 600 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--c); }
+.glance .g > span i { font-style: normal; color: var(--muted); }
+.glance .g > span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.glance .g.buff { --c: var(--good); } .glance .g.nerf { --c: var(--bad); } .glance .g.mixed { --c: #e0b04f; } .glance .g.changed { --c: var(--muted); }
+.glance .fs { display: flex; flex-wrap: wrap; gap: 10px; }
+.glance a { display: grid; justify-items: center; gap: 5px; width: 58px; color: var(--muted); font-size: 11.5px; text-decoration: none; text-align: center; }
+.glance a img { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 55%, transparent); transition: transform .15s, box-shadow .15s; }
+.glance a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.glance a:hover { color: var(--text); }
+.glance a:hover img { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--c); }
+/* One full-width block per hero: who + verdict + my take on the left, the changes on the right */
+.hxs { display: grid; gap: 14px; }
+.hx { --c: var(--muted); display: grid; grid-template-columns: 236px minmax(0, 1fr); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden; scroll-margin-top: 16px; }
+.hx.buff { --c: var(--good); } .hx.nerf { --c: var(--bad); } .hx.mixed { --c: #e0b04f; }
+.hx:target { box-shadow: 0 0 0 2px var(--brand); }
+.hx-h { display: flex; flex-direction: column; gap: 12px; padding: 18px; border-right: 1px solid var(--line); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 70%); }
+.hx-who { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; }
+.hx-who img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--surface-2); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 45%, transparent); }
+.hx-who b { display: block; font: 600 19px/1.15 var(--display); letter-spacing: -0.01em; }
+.hx-who small { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); }
+.hx-v { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hx-n { display: inline-flex; gap: 8px; font: 600 12px/1 var(--mono); }
+.hx-n .up { color: var(--good); } .hx-n .down { color: var(--bad); } .hx-n .same { color: var(--muted); }
+.hx-b { display: inline-flex; align-items: center; gap: 6px; width: fit-content; height: 30px; padding: 0 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: 500 13px/1 var(--sans); text-decoration: none; }
+.hx-b:hover { border-color: var(--brand); color: var(--accent); }
+.hx-h .pc-take { margin: 0; font-size: 14px; line-height: 1.4; }
+.hx-h .edit { margin: 0; flex-direction: column; }
+.hx-h .btn-s.ghost { margin: 0; width: fit-content; }
+.hx-e { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 10px; padding: 14px; align-content: start; }
+.hx-e .pc-e { grid-template-columns: 40px minmax(0, 1fr); padding: 12px 14px; border: 0; border-radius: 11px; background: var(--bg); }
+.hx-e .pc-ic { width: 40px; height: 40px; border-radius: 9px; }
+.hx-e .pc-n { font-size: 15px; }
+@media (max-width: 760px) {
+  .hx { grid-template-columns: 1fr; }
+  .hx-h { border-right: 0; border-bottom: 1px solid var(--line); padding: 14px; gap: 10px; }
+  .hx-who { grid-template-columns: 48px minmax(0, 1fr) auto; }
+  .hx-who img { width: 48px; height: 48px; }
+  .hx-e { padding: 10px; gap: 8px; }
+  .hx-e .pc-e { padding: 11px 12px; }
+  .glance { padding: 14px; gap: 12px 20px; }
+  .pick { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -16px; padding-right: 16px; }
+  .pick button { flex: none; }
+}
+.hx .edit { margin-top: 8px; display: flex; gap: 6px; }
+.hx .edit input { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px var(--sans); }
 .btn-s { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: 500 12.5px var(--sans); cursor: pointer; }
 .btn-s:hover { border-color: var(--muted); }
 .btn-s.primary { background: var(--brand); border-color: var(--brand); color: #1f0b05; }
@@ -122,10 +171,9 @@
 .hnone { padding: 24px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; }
 /* A patch row that opens to its hero changes */
 .row .open-b { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: 500 12.5px var(--sans); cursor: pointer; white-space: nowrap; }
-.row .open-b svg { width: 10px; height: 10px; transition: transform .2s; }
-.row .open-b[aria-expanded="true"] svg { transform: rotate(180deg); }
+.row .open-b svg { width: 10px; height: 10px; }
+.row .open-b[aria-pressed="true"] { border-color: var(--brand); color: var(--accent); }
 .row .right { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
-.rowopen { padding: 14px 16px 2px; border-top: 1px solid var(--line); background: var(--bg); }
 .jl { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 dialog.login { padding: 20px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--text); width: min(340px, calc(100vw - 32px)); }
 dialog.login::backdrop { background: rgba(0, 0, 0, .6); }
@@ -172,13 +220,14 @@ dialog.login .err { color: var(--bad); font-size: 13px; margin: 0 0 10px; }
 
   <section id="latest"></section>
   <section id="changes" hidden>
-    <div class="hc-head">
-      <h2 id="hc-title">Hero changes</h2>
-      <div class="hc-tools">
-        <div class="seg small" id="fv" role="group" aria-label="Buffs or nerfs"><button data-v="" aria-pressed="true">All</button><button data-v="buff" aria-pressed="false"><i class="pc-m up"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>Buffs</button><button data-v="nerf" aria-pressed="false"><i class="pc-m down"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>Nerfs</button><button data-v="mixed" aria-pressed="false">Mixed</button></div>
-        <div class="seg small" id="fr" role="group" aria-label="Role"><button data-r="" aria-pressed="true">All roles</button><button data-r="Tank" aria-pressed="false">Tank</button><button data-r="Bruiser" aria-pressed="false">Bruiser</button><button data-r="DPS" aria-pressed="false">DPS</button><button data-r="Support" aria-pressed="false">Support</button></div>
-        <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
-      </div>
+    <div class="hc-head"><h2 id="hc-title">Hero changes</h2></div>
+    <div class="pick" id="pick" role="group" aria-label="Patch"></div>
+    <p class="ptr-note" id="ptrnote" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.8v3.8M8 10.8v.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>PTR is Blizzard's test server. These changes can still change before they go live.</p>
+    <div id="glance"></div>
+    <div class="hc-tools">
+      <div class="seg small" id="fv" role="group" aria-label="Buffs or nerfs"><button data-v="" aria-pressed="true">All</button><button data-v="buff" aria-pressed="false"><i class="pc-m up"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>Buffs</button><button data-v="nerf" aria-pressed="false"><i class="pc-m down"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg></i>Nerfs</button><button data-v="mixed" aria-pressed="false">Mixed</button></div>
+      <div class="seg small" id="fr" role="group" aria-label="Role"><button data-r="" aria-pressed="true">All roles</button><button data-r="Tank" aria-pressed="false">Tank</button><button data-r="Bruiser" aria-pressed="false">Bruiser</button><button data-r="DPS" aria-pressed="false">DPS</button><button data-r="Support" aria-pressed="false">Support</button></div>
+      <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
     </div>
     <div id="hc"></div>
   </section>
@@ -224,11 +273,12 @@ function ago(iso) {
 const fixDay = s => { const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? new Date(+m[3], m[1] - 1, +m[2]).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : s; };
 
 let HEROES = {}, ROLE = {}, ITEMS = [], TAKES = {}, HD = {};
-const OPEN = new Set();   // patch rows opened to show their hero changes
+let SEL = q0("p");   // the patch whose hero changes are shown (?p=<id> in the link); empty = the newest one
 const F = { v: "", r: "", q: "" };
 let ADMIN = ""; try { ADMIN = localStorage.getItem("junhots_admin") || ""; } catch {}
 let EDIT = "";   // "<patch>:<hero>" while Jun types a take
 const q = new URLSearchParams(location.search);
+function q0(k) { return new URLSearchParams(location.search).get(k) || ""; }
 let K = KIND[q.get("k")] ? q.get("k") : "";
 
 const img = id => `/img/heroes/${id}.webp`;
@@ -282,36 +332,62 @@ function drawList() {
     return `<article class="row">
       <div class="d"><b>${day(i.date)}</b><small>${ago(i.date)}</small></div>
       <div class="t"><span><span class="kind k-${i.kind}">${KIND[i.kind]}</span><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(short(i))}</a></span><p>${esc(what + fixes)}</p></div>
-      <div class="right">${hs.length ? `<div class="faces">${faces(hs, 8, i.verdicts)}</div>` : ""}${Object.keys(i.changes || {}).length ? `<button class="open-b" data-open="${i.id}" aria-expanded="${OPEN.has(i.id)}">Changes<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ""}</div>
+      <div class="right">${hs.length ? `<div class="faces">${faces(hs, 8, i.verdicts)}</div>` : ""}${Object.keys(i.changes || {}).length ? `<button class="open-b" data-sel="${i.id}" aria-pressed="${i.id === SEL}">${i.id === SEL ? "Showing" : "Hero changes"}<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 8.5V1.5M2 4.5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ""}</div>
       <span class="go">${ext}</span>
-    </article>${OPEN.has(i.id) ? `<div class="rowopen" data-for="${i.id}">${cards(i)}</div>` : ""}`;
+    </article>`;
   }).join("")}</div>`).join("");
 }
 
-// One card per changed hero: what changed, a Buff / Nerf tag, and my take if I wrote one
+// One block per changed hero: who, Buff / Nerf / Mixed, how many lines went up or down, my take, then every change
+const ARR = '<svg viewBox="0 0 10 10" aria-hidden="true" width="9" height="9"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg>';
+const ARRD = '<svg viewBox="0 0 10 10" aria-hidden="true" width="9" height="9" style="transform:rotate(180deg)"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg>';
+function counts(list) {
+  const d = list.flatMap(e => e.lines.map(l => l.d)), up = d.filter(x => x > 0).length, dn = d.filter(x => x < 0).length;
+  return `<span class="hx-n" title="${up} up, ${dn} down">${up ? `<span class="up">${ARR} ${up}</span>` : ""}${dn ? `<span class="down">${ARRD} ${dn}</span>` : ""}</span>`;
+}
 function cards(i) {
   const ids = Object.keys(i.changes || {}).filter(id => HEROES[id]
     && (!F.v || i.verdicts?.[id] === F.v) && (!F.r || ROLE[id] === F.r) && (!F.q || PatchKit.norm(HEROES[id]).includes(PatchKit.norm(F.q))));
   for (const id of Object.keys(i.changes || {})) if (!(id in HD)) { HD[id] = null; PatchKit.hero(id).then(d => { HD[id] = d; redraw(); }); }
   if (!ids.length) return `<div class="hnone">No hero matches these filters.</div>`;
-  return `<div class="hcards">${ids.map(id => {
-    const k = i.id + ":" + id, take = TAKES[i.id]?.[id] || "";
-    const edit = EDIT === k ? `<form class="edit" data-take="${k}"><input name="t" maxlength="200" value="${esc(take)}" placeholder="Your take, like: still S tier, take In For The Kill" autofocus><button class="btn-s primary">Save</button><button class="btn-s" type="button" data-cancel>Cancel</button></form>`
+  return `<div class="hxs">${ids.map(id => {
+    const k = i.id + ":" + id, take = TAKES[i.id]?.[id] || "", v = i.verdicts?.[id] || "changed";
+    const edit = EDIT === k ? `<form class="edit" data-take="${k}"><input name="t" maxlength="200" value="${esc(take)}" placeholder="Your take, like: still S tier, take In For The Kill" autofocus><span style="display:flex;gap:6px"><button class="btn-s primary">Save</button><button class="btn-s" type="button" data-cancel>Cancel</button></span></form>`
       : ADMIN ? `<button class="btn-s ghost" data-edit="${k}">${take ? "Edit your take" : "+ Add your take"}</button>` : "";
-    return `<article class="hcard"><header><img src="${img(id)}" alt=""><div><b>${esc(HEROES[id])}</b><a href="/builds/${id}">${esc(ROLE[id] || "")} · Builds →</a></div>${PatchKit.verdict(i.verdicts?.[id])}</header>
-      ${PatchKit.entries(HD[id], i.changes[id], { hero: id })}${EDIT === k ? "" : PatchKit.take(take)}${edit}</article>`;
+    return `<article class="hx ${esc(v)}" id="h-${id}">
+      <header class="hx-h">
+        <div class="hx-who"><img src="${img(id)}" alt=""><div><b>${esc(HEROES[id])}</b><small>${esc(ROLE[id] || "")}</small></div></div>
+        <div class="hx-v">${PatchKit.verdict(v)}${counts(i.changes[id])}</div>
+        ${EDIT === k ? "" : PatchKit.take(take)}${edit}
+        <a class="hx-b" href="/builds/${id}">${esc(HEROES[id])} builds →</a>
+      </header>
+      <div class="hx-e">${PatchKit.entries(HD[id], i.changes[id], { hero: id })}</div>
+    </article>`;
   }).join("")}</div>`;
+}
+// Overview of the whole patch, grouped by buffed / mixed / nerfed. Ignores the filters on purpose
+const GROUP = [["buff", "Buffed"], ["mixed", "Buffs and nerfs"], ["nerf", "Nerfed"], ["changed", "Changed"]];
+function glance(i) {
+  const ids = Object.keys(i.changes || {}).filter(id => HEROES[id]);
+  const gs = GROUP.map(([v, name]) => [v, name, ids.filter(id => (i.verdicts?.[id] || "changed") === v)]).filter(g => g[2].length);
+  return `<div class="glance">${gs.map(([v, name, hs]) => `<div class="g ${v}"><span>${name} <i>${hs.length}</i></span><div class="fs">${hs.map(id => `<a href="#h-${id}" data-jump="${id}"><img src="${img(id)}" alt="" loading="lazy"><span>${esc(HEROES[id])}</span></a>`).join("")}</div></div>`).join("")}</div>`;
 }
 let redrawing = 0;
 const redraw = () => { cancelAnimationFrame(redrawing); redrawing = requestAnimationFrame(() => { drawChanges(); drawList(); }); };
 
+// Patches with hero changes (matching the Live / PTR / ... filter at the top), newest first
+const withChanges = () => ITEMS.filter(i => (!K || i.kind === K) && Object.keys(i.changes || {}).length);
 function drawChanges() {
-  const box = document.getElementById("changes"), id = document.getElementById("latest").dataset.id;
-  const i = document.getElementById("latest").innerHTML && ITEMS.find(x => x.id === id);
-  box.hidden = !i || !Object.keys(i.changes || {}).length;
+  const box = document.getElementById("changes"), ps = withChanges();
+  box.hidden = !ps.length;
   if (box.hidden) return;
+  const i = ps.find(x => x.id === SEL) || ps[0];
+  SEL = i.id;
   const n = Object.keys(i.changes).length;
-  document.getElementById("hc-title").innerHTML = `Hero changes<small>${n} hero${n === 1 ? "" : "es"} in the ${full(i.date)} patch, short version. The full notes are on Blizzard's site.</small>`;
+  document.getElementById("hc-title").innerHTML = `Hero changes<small>${n} hero${n === 1 ? "" : "es"} in the ${KIND[i.kind]} patch of ${full(i.date)} · short version, <a href="${esc(i.url)}" target="_blank" rel="noopener">full notes on Blizzard's site ↗</a></small>`;
+  document.getElementById("pick").innerHTML = ps.length > 1 ? ps.slice(0, 6).map(p => `<button data-sel="${p.id}" aria-pressed="${p.id === SEL}"><span class="kind k-${p.kind}">${KIND[p.kind]}</span><b>${day(p.date)}</b>${Object.keys(p.changes).length} heroes</button>`).join("") : "";
+  document.getElementById("ptrnote").hidden = i.kind !== "ptr";
+  document.getElementById("glance").innerHTML = glance(i);
   document.getElementById("hc").innerHTML = cards(i);
 }
 
@@ -328,10 +404,32 @@ for (const [sel, key, attr] of [["#fv", "v", "data-v"], ["#fr", "r", "data-r"]])
   for (const x of document.querySelectorAll(sel + " button")) x.setAttribute("aria-pressed", x === b);
   redraw();
 });
+function clearFilters() {
+  F.v = F.r = F.q = "";
+  document.getElementById("hq").value = "";
+  for (const sel of ["#fv", "#fr"]) for (const x of document.querySelectorAll(sel + " button")) x.setAttribute("aria-pressed", !x.getAttribute(sel === "#fv" ? "data-v" : "data-r"));
+}
 document.getElementById("hq").addEventListener("input", e => { F.q = e.target.value.trim(); redraw(); });
 document.addEventListener("click", async e => {
-  const open = e.target.closest("[data-open]");
-  if (open) { const id = open.dataset.open; OPEN.has(id) ? OPEN.delete(id) : OPEN.add(id); drawList(); return; }
+  const sel = e.target.closest("[data-sel]");
+  if (sel) {
+    SEL = sel.dataset.sel;
+    history.replaceState(null, "", location.pathname + "?" + new URLSearchParams({ ...(K ? { k: K } : {}), p: SEL }));
+    drawChanges(); drawList();
+    if (sel.closest(".row")) document.getElementById("changes").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+  // A face in the overview: clear filters that would hide that hero, then go to it
+  const jump = e.target.closest("[data-jump]");
+  if (jump) {
+    e.preventDefault();
+    const id = jump.dataset.jump;
+    if (!document.getElementById("h-" + id)) { clearFilters(); drawChanges(); }
+    const el = document.getElementById("h-" + id);
+    history.replaceState(null, "", location.pathname + location.search + "#h-" + id);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
   const ed = e.target.closest("[data-edit]");
   if (ed) { EDIT = ed.dataset.edit; redraw(); setTimeout(() => document.querySelector(".edit input")?.focus(), 30); return; }
   if (e.target.closest("[data-cancel]")) { EDIT = ""; redraw(); }
@@ -372,6 +470,7 @@ document.getElementById("kind").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   K = b.dataset.k;
+  SEL = "";
   history.replaceState(null, "", location.pathname + (K ? "?k=" + K : ""));
   draw();
 });
@@ -386,6 +485,7 @@ document.getElementById("kind").addEventListener("click", e => {
   UPDATED = data.updated || 0;
   draw();
   drawSrc();
+  if (location.hash.startsWith("#h-")) setTimeout(() => document.querySelector(location.hash.replace(/[^#\w-]/g, ""))?.scrollIntoView(), 400);
   fetch("/api/patch-takes", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).then(t => { TAKES = t || {}; redraw(); }).catch(() => {});
 })();
 </script>

@@ -19,7 +19,18 @@
 
   const ARROW = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg>';
   const mark = d => d > 0 ? `<i class="pc-m up" title="Buff">${ARROW}</i>` : d < 0 ? `<i class="pc-m down" title="Nerf">${ARROW}</i>` : `<i class="pc-m same" title="Change"></i>`;
-  const line = l => `<li>${mark(l.d)}<span>${l.a != null ? `${esc(l.t)} <s>${esc(l.a)}</s><span class="pc-to">→</span><b class="${l.d > 0 ? "up" : l.d < 0 ? "down" : ""}">${esc(l.b)}</b>` : esc(l.t)}</span></li>`;
+  // "45 seconds" -> "45s" so old -> new values stay short and side by side
+  const short = v => String(v ?? "").replace(/(\d)\s*seconds?\b/gi, "$1s");
+  // How big a number change is, like "+9%": only plain numbers and seconds (a "%" value would read as points)
+  const num = v => { const m = String(v ?? "").trim().match(/^(-?\d+(?:\.\d+)?)\s*(?:s|sec|seconds?)?$/i); return m ? +m[1] : null; };
+  function delta(l) {
+    const a = num(l.a), b = num(l.b);
+    if (a == null || b == null || !a || a === b) return "";
+    const r = (b - a) / Math.abs(a) * 100, n = Math.abs(r) < 10 ? Math.round(r * 10) / 10 : Math.round(r);
+    return `<em class="pc-d">${n > 0 ? "+" : "−"}${Math.abs(n)}%</em>`;
+  }
+  const dir = d => d > 0 ? "up" : d < 0 ? "down" : "";
+  const line = l => `<li class="${dir(l.d)}">${mark(l.d)}<span>${l.a != null ? `<span class="pc-t">${esc(l.t)}</span> <span class="pc-val"><span class="pc-a">${esc(short(l.a))}</span><span class="pc-to">→</span><b class="${dir(l.d)}">${esc(short(l.b))}</b>${delta(l)}</span>` : esc(l.t)}</span></li>`;
 
   function entries(hd, list, opts = {}) {
     return list.map(e => {
@@ -27,7 +38,7 @@
       const ic = t?.icon ? `<img src="/img/talents/${t.icon}.webp" alt="" loading="lazy">` : e.g === "Base" && !e.name ? `<img src="/img/heroes/${opts.hero}.webp" alt="" loading="lazy">` : `<span class="pc-blank"></span>`;
       const lvl = e.lvl || (t?.lvl && e.g !== "Base" ? t.lvl : "");
       const key = e.key || (t && !t.lvl ? t.key : "");
-      const tags = (lvl ? `<span class="pc-tag">Lvl ${esc(lvl)}</span>` : key ? `<span class="pc-tag">${esc(key === "D" ? "Trait" : key)}</span>` : "") + (e.isNew ? `<span class="pc-tag new">New</span>` : "")
+      const tags = (lvl ? `<span class="pc-tag lv"><small>LV</small>${esc(lvl)}</span>` : key ? `<span class="pc-tag">${esc(key === "D" ? "Trait" : key)}</span>` : "") + (e.isNew ? `<span class="pc-tag new">New</span>` : "")
         + (opts.picked?.has(norm(e.name)) ? `<span class="pc-tag pc-mine" title="One of my builds takes this talent">In my build</span>` : "");
       return `<div class="pc-e"><span class="pc-ic">${ic}</span><div class="pc-b"><div class="pc-n">${esc(e.name || (e.g === "Base" ? "Base stats" : e.g || "Changes"))}${tags}</div><ul class="pc-l">${e.lines.map(line).join("")}</ul></div></div>`;
     }).join("");
