@@ -129,6 +129,35 @@ a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
 .c-maker .mk a:hover, .c-maker .mk a.lit { border-color: var(--brand); background: rgba(242, 106, 75, 0.08); }
 .c-maker .mk a:hover .arr, .c-maker .mk a.lit .arr { color: var(--brand); transform: translateX(3px); }
 a.c-builds:hover .pic img { transform: scale(1.05); }
+/* Home map (home-map.js): a small 3D island, one building per part of the site. Replaces the hero-art fan
+   when the browser can draw it; the fan stays as the fallback. */
+.hero.has-map { grid-template-columns: minmax(0, 1fr) 560px; }
+.map { display: none; position: relative; height: 470px; margin-right: -24px; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(closest-side at 50% 52%, rgba(255, 120, 90, 0.07), transparent); }
+.has-map .map { display: block; }
+.has-map .fan { display: none; }
+.map canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; opacity: 0; transition: opacity .6s; }
+.map-ready .map canvas { opacity: 1; }
+.map canvas.hot { cursor: pointer; }
+.map canvas.drag { cursor: grabbing; }
+.map-labels { position: absolute; inset: 0; pointer-events: none; }
+.map .pin { position: absolute; left: 0; top: 0; pointer-events: auto; padding: 2px 6px 14px; font-size: 12.5px; font-weight: 500; color: #bfb5ae; white-space: nowrap; transition: color .15s, opacity .2s; }
+.map .pin::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 1px; height: 10px; background: currentColor; opacity: .35; }
+.map .pin b { font-weight: inherit; }
+.map .pin.on, .map .pin:focus-visible { color: var(--text); outline: none; }
+.map .pin.on b { box-shadow: 0 2px 0 -1px var(--c); }
+.map-labels.dim .pin:not(.on) { opacity: .4; }
+.map-cap { position: absolute; left: 12px; right: 36px; bottom: 6px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 10px 14px; border-radius: 12px; background: rgba(26, 23, 22, 0.88); border: 1px solid var(--line);
+  font-size: 13.5px; color: var(--muted); pointer-events: none; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
+.map-cap.on { opacity: 1; transform: none; }
+.map-cap b { color: var(--text); font: 600 14px var(--display); box-shadow: 0 2px 0 -1px var(--c); }
+.map-cap small { flex-basis: 100%; font: 12px var(--mono); color: var(--accent); }
+.map-cap.touch { pointer-events: auto; padding-right: 92px; }
+.map-cap .btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 7px 12px; font-size: 13px; }
+.map-hint { position: absolute; right: 14px; top: 4px; font: 11.5px var(--mono); color: #6f6560; pointer-events: none; transition: opacity .3s; }
+.map-cap.on ~ .map-hint, .map-ready .map:hover .map-hint { opacity: 0; }
+@media (max-width: 960px) { .hero.has-map { grid-template-columns: 1fr; } .map { height: 420px; margin: 0 -12px; } }
+@media (max-width: 520px) { .map { height: 400px; } .map .pin { font-size: 11.5px; } }
 @media (max-width: 960px) { .hero { grid-template-columns: 1fr; } .fan { height: 330px; max-width: 470px; width: 100%; justify-self: center; } }
 @media (max-width: 720px) {
   .cards { grid-template-columns: 1fr; grid-template-areas: "tier" "builds" "maker" "overlay"; }
@@ -211,6 +240,20 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 .nx .days span.nxt { color: #1f0b05; background: var(--brand); border-color: var(--brand); font-weight: 700; }
 .nx a.more { margin-left: auto; color: var(--accent); font-weight: 500; font-size: 13px; white-space: nowrap; }
 .nx a.more:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Beside the home map the text column is narrower, so the card gets tighter: the whole card links to the
+   schedule with a small arrow, instead of the "Schedule ›" text, so it stays on one line. */
+@media (min-width: 961px) {
+  .has-map .nx { position: relative; gap: 8px 10px; padding: 9px 12px; transition: border-color .15s, background .15s; }
+  .has-map .nx:hover { border-color: #4a413c; background: var(--surface-2); }
+  .has-map .nx .days { gap: 2px; }
+  .has-map .nx .days span { width: 21px; }
+  .has-map .nx a.more { font-size: 0; padding: 0 2px; }
+  .has-map .nx a.more::after { content: "›"; font-size: 20px; line-height: 1; transition: transform .15s; display: inline-block; }
+  .has-map .nx:hover a.more::after { transform: translateX(3px); }
+  .has-map .nx a.more::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .has-map .nx a.cd { position: relative; z-index: 1; }
+}
+@media (min-width: 1200px) { .has-map .nx { flex-wrap: nowrap; } .has-map .nx > * { flex: none; } .has-map .nx strong { flex: 0 1 auto; } }
 </style>
 <script src="/nav.js" defer></script>
 </head>
@@ -240,7 +283,10 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
     <div class="stats" id="stats"></div>
     </div>
     <div class="fan" id="fan" aria-label="My S tier heroes"></div>
+    <div class="map" id="map" role="navigation" aria-label="Site map"><span class="map-hint">drag to turn</span></div>
   </header>
+  <script>/* Use the 3D map when the browser can draw it (home-map.js); otherwise the hero-art fan stays */
+  try { const c = document.createElement("canvas"); if ((c.getContext("webgl2") || c.getContext("webgl")) && !navigator.connection?.saveData) document.querySelector(".hero").classList.add("has-map"); } catch {}</script>
 
 
 
@@ -260,6 +306,11 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
   </footer>
 </div>
 
+<script>
+// Hands Home's data (tier list, builds, games) to the 3D map, whichever of the two loads first
+function sendHome(d) { window.HOME_DATA = { ...(window.HOME_DATA || {}), ...d }; dispatchEvent(new CustomEvent("homedata", { detail: d })); }
+</script>
+<script type="module" src="/home-map.js"></script>
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script src="/edge.js"></script>
@@ -309,7 +360,7 @@ Promise.all([
   // Middle card on top, the others fanned out behind it
   document.getElementById("fan").innerHTML = show.map((id, i) => {
     const o = i - mid;
-    return `<a href="/builds/#${id}" style="--o:${o};--x:${o * 60}px;--r:${o * 6}deg;--y:${Math.abs(o) * 16}px;--d:${Math.abs(o) * 80}ms;z-index:${9 - Math.abs(o) * 2}"><img src="/img/art/${id}.webp" alt=""><span>${name[id]}${wr(id) == null ? "" : `<small>${wr(id).toFixed(1)}% win rate</small>`}</span></a>`;
+    return `<a href="/builds/#${id}" style="--o:${o};--x:${o * 60}px;--r:${o * 6}deg;--y:${Math.abs(o) * 16}px;--d:${Math.abs(o) * 80}ms;z-index:${9 - Math.abs(o) * 2}"><img src="/img/art/${id}.webp" alt="" loading="lazy"><span>${name[id]}${wr(id) == null ? "" : `<small>${wr(id).toFixed(1)}% win rate</small>`}</span></a>`;
   }).join("") + (show.length ? `<div class="cap">My ${tl.tiers[0].name} tier right now · <a href="/tierlist/">see the full list</a></div>` : "");
   const patch = (tl.winrates?.label || "").split(".").slice(0, 2).join(".");
   // Pick the card by the mouse's position across the fan, not by what's under it,
@@ -366,6 +417,10 @@ Promise.all([
   const nBuilds = Object.values(builds).reduce((n, l) => n + (Array.isArray(l) ? l.length : 0), 0);
   const updated = tl.updated && new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" });
   const stats = [[heroes.length, "heroes", "/builds/"], nBuilds && [nBuilds, "builds", "/builds/"], updated && [updated, "tier list updated", "/tierlist/"], patch && [patch, "patch", "/patch-notes/"]].filter(Boolean);
+  sendHome({ heroes: heroes.length, builds: nBuilds, patch, tiers: (tl.tiers || []).map(t => {
+    const ids = rows.map(r => r[0]).filter(id => tl.overall?.[id] === t.id).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+    return { name: t.name, color: PALETTE[t.color % PALETTE.length], imgs: ids.map(tierImg), names: ids.map(id => tname[id]) };
+  }).filter(t => t.imgs.length) });
   const box = document.getElementById("stats");
   box.innerHTML = stats.map(([v, label, href]) => `<a class="stat" href="${href}"><b data-to="${v}">${typeof v === "number" ? 0 : v}</b><span>${label}</span></a>`).join("");
   // Count the numbers up
@@ -409,6 +464,7 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
     let n = 0;
     while (n < last.length && last[n].result === last[0].result) n++;
     const streak = n >= 2 ? `<span class="streak" style="--c:var(--${last[0].result === "win" ? "good" : "bad"})">${n} ${last[0].result === "win" ? "win" : "loss"} streak</span>` : "";
+    sendHome({ results: last.slice(0, 8).map(g => g.result === "win" ? "W" : "L").join("") });
     const box = document.getElementById("games");
     box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}<a class="g-all" href="/games/">All games</a></div></div>
       <div class="g-row">${last.map((g, i) => `<button class="g ${g.result}" type="button" data-i="${i}" aria-expanded="false" aria-controls="g-open" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
