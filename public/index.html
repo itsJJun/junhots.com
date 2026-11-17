@@ -383,11 +383,17 @@ Promise.all([
     pick(Math.max(0, Math.min(cards.length - 1, Math.round((e.clientX - (r.left + r.width / 2)) / step + mid))));
   });
   fan.addEventListener("pointerleave", () => pick(-1));
-  // Headline: "Jun plays Heroes" -> "Jun plays Jaina" -> ... through the fan's heroes and back to "Heroes",
-  // and the card of the named hero lifts a little. Stops while the mouse is on the fan, off for reduced motion.
+  // Headline: "Jun plays Heroes" -> "Jun plays Jaina" -> ... through every hero in a random order (with "Heroes"
+  // again after every 10 names). With the fan showing (no 3D map) it goes through the fan's heroes instead, and
+  // the named hero's card lifts a little. Stops while the mouse is on the fan, off for reduced motion.
   const word = document.querySelector("h1 em"), first = document.querySelector("h1 span"), base = word.textContent;
-  if (show.length && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const order = [-1, ...show.map((_, i) => i)];
+  if ((show.length || document.querySelector(".hero.has-map")) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let cyc = show;
+    if (document.querySelector(".hero.has-map")) {
+      cyc = heroes.map(h => h[0]).filter(id => name[id]);
+      for (let i = cyc.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cyc[i], cyc[j]] = [cyc[j], cyc[i]]; }
+    }
+    const order = cyc.flatMap((_, i) => i % 10 ? [i] : [-1, i]);
     let k = 0, hovering = false;
     fan.addEventListener("pointerenter", () => { hovering = true; cards.forEach(c => c.classList.remove("cued")); });
     fan.addEventListener("pointerleave", () => hovering = false);
@@ -395,15 +401,16 @@ Promise.all([
       if (hovering || document.hidden) return setTimeout(next, 1000);
       // Skip a name that's too long to stay on the first line (it would push the page down), e.g. on phones
       const fits = t => { const old = word.textContent; word.textContent = t; const ok = Math.abs(word.offsetTop - first.offsetTop) < word.offsetHeight / 2; word.textContent = old; return ok; };
-      do k = (k + 1) % order.length; while (order[k] >= 0 && !fits(name[show[order[k]]]));
+      do k = (k + 1) % order.length; while (order[k] >= 0 && !fits(name[cyc[order[k]]]));
       const i = order[k];
       word.classList.add("out");
       setTimeout(() => {
-        word.textContent = i < 0 ? base : name[show[i]];
+        word.textContent = i < 0 ? base : name[cyc[i]];
         word.classList.replace("out", "in");
         word.offsetWidth;   // let the browser place it below before it rises
         word.classList.remove("in");
-        cards.forEach((c, n) => { c.classList.toggle("cued", n === i); if (n === i) c.style.zIndex = ++topZ; });
+        const f = i < 0 ? -1 : show.indexOf(cyc[i]);
+        cards.forEach((c, n) => { c.classList.toggle("cued", n === f); if (n === f) c.style.zIndex = ++topZ; });
       }, 300);
       setTimeout(next, i < 0 ? 3200 : 2200);
     };
