@@ -232,6 +232,16 @@ a.card:hover::before, a.card:hover::after { opacity: 1; }
 .nx .lb.live { color: var(--text); } .nx .lb.live svg { color: #ff6b6b; }
 .nx strong { font: 600 15px var(--display); letter-spacing: -0.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
 .nx .cd { font: 500 13px var(--mono); color: var(--accent); }
+/* Live and in a game: hero portrait, map, game number and tonight's score (schedule.js) */
+.nx.ingame { border-color: #5b2a2a; background: linear-gradient(90deg, rgba(255,107,107,.08), var(--surface) 40%); }
+.nx .ig { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.nx .ig img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px var(--brand); flex: none; }
+.nx .ig .on { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.nx .rec { display: inline-flex; align-items: center; gap: 4px; font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
+.nx .rec .w { color: var(--good); font-weight: 500; } .nx .rec .l { color: var(--bad); font-weight: 500; }
+.nx .rec .d { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+.nx .rec .d.l { background: var(--bad); }
+.nx .rec b + .d, .nx .rec .d:first-of-type { margin-left: 4px; }
 .nx a.cd:hover { text-decoration: underline; text-underline-offset: 3px; }
 .nx .days { display: inline-flex; gap: 3px; }
 .nx .days span { width: 24px; height: 22px; display: grid; place-items: center; border-radius: 6px; font-size: 11px; color: #6f6560; border: 1px solid var(--line); }
@@ -387,6 +397,15 @@ Promise.all([
   // again after every 10 names). With the fan showing (no 3D map) it goes through the fan's heroes instead, and
   // the named hero's card lifts a little. Stops while the mouse is on the fan, off for reduced motion.
   const word = document.querySelector("h1 em"), first = document.querySelector("h1 span"), base = word.textContent;
+  // While I'm live in a game the headline stops on that hero: "Jun plays Whitemane live on Twitch" (schedule.js)
+  window.setHeadline = hero => {
+    window.headlineLocked = true;
+    cards.forEach(c => c.classList.remove("cued"));
+    if (word.textContent === hero) return;
+    word.classList.add("out");
+    setTimeout(() => { word.textContent = hero; word.classList.replace("out", "in"); word.offsetWidth; word.classList.remove("in"); }, 300);
+  };
+  if (window.pendingHeadline) window.setHeadline(window.pendingHeadline);
   if ((show.length || document.querySelector(".hero.has-map")) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     let cyc = show;
     if (document.querySelector(".hero.has-map")) {
@@ -398,6 +417,7 @@ Promise.all([
     fan.addEventListener("pointerenter", () => { hovering = true; cards.forEach(c => c.classList.remove("cued")); });
     fan.addEventListener("pointerleave", () => hovering = false);
     const next = () => {
+      if (window.headlineLocked) return;   // live in a game: the headline names that hero (setHeadline)
       if (hovering || document.hidden) return setTimeout(next, 1000);
       // Skip a name that's too long to stay on the first line (it would push the page down), e.g. on phones
       const fits = t => { const old = word.textContent; word.textContent = t; const ok = Math.abs(word.offsetTop - first.offsetTop) < word.offsetHeight / 2; word.textContent = old; return ok; };

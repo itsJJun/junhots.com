@@ -34,6 +34,34 @@
 .sum .aws img { width: 30px; height: 30px; margin-block: -3px; }
 .sum .aws b { font-size: 15px; color: var(--muted); }
 .sum .w { color: var(--good); } .sum .l { color: var(--bad); }
+/* By hero: games, win rate, average K/D/A, best map and when, per hero (follows the map filter; click a hero to filter) */
+.bh { margin-bottom: 14px; padding: 12px 18px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.bh-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.bh-h h2 { margin: 0; font: 600 17px var(--display); letter-spacing: -0.01em; }
+.bh .sort { display: flex; gap: 4px; align-items: center; font-size: 13px; color: var(--muted); }
+.bh .sort button { font: 500 13px var(--sans); color: var(--muted); padding: 3px 10px; border-radius: 7px; border: 1px solid var(--line); background: transparent; cursor: pointer; }
+.bh .sort button:hover { color: var(--text); }
+.bh .sort button[aria-pressed="true"] { color: var(--text); border-color: #4a413c; background: var(--surface-2); }
+.bt .hd, .bt .br { display: grid; grid-template-columns: minmax(130px, 1.6fr) .8fr minmax(120px, 1.4fr) 1.1fr minmax(120px, 1.6fr) .9fr; align-items: center; gap: 12px; padding: 7px 6px; }
+.bt .hd { font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.bt .br { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+.bt .br + .br { border-top: 1px solid #241f1d; border-radius: 0; }
+.bt .br:hover, .bt .br[aria-pressed="true"] { background: var(--surface-2); }
+.bt .hn { display: flex; align-items: center; gap: 10px; font-weight: 600; min-width: 0; }
+.bt .hn img { width: 32px; height: 32px; border-radius: 7px; flex: none; }
+.bt .hn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt .mono { font: 500 14px var(--mono); }
+.bt .mono small { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.bt .mu { color: var(--muted); font-size: 13px; }
+.bt .wr { display: flex; align-items: center; gap: 10px; }
+.bt .wr i { flex: 1; height: 6px; border-radius: 9px; background: linear-gradient(90deg, var(--c) var(--p), #2d2724 var(--p)); }
+.bt .wr b { font: 600 14px var(--mono); width: 40px; text-align: right; color: var(--c); }
+.bh .bmore { margin-top: 6px; padding: 4px 6px; border: 0; background: none; color: var(--accent); font: 500 14px var(--sans); cursor: pointer; }
+.bh .bmore:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px) {
+  .bt .hd, .bt .br { grid-template-columns: minmax(110px, 1.4fr) .9fr 1.2fr; }
+  .bt .hd span:nth-child(n+4), .bt .br > span:nth-child(n+4) { display: none; }
+}
 /* Filters: heroes I played (most first), map, result */
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
 /* Heroes get their own line and wrap; two rows show until "All N heroes" opens the rest */
@@ -113,6 +141,7 @@
   </header>
 
   <section class="sum" id="sum" aria-label="Summary"></section>
+  <section class="bh" id="byhero" aria-label="By hero" hidden></section>
   <div class="filters">
     <div class="heroes" id="heroes" role="group" aria-label="Hero"></div>
     <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
@@ -170,6 +199,50 @@ function drawSum(list) {
     aws.length ? `<div><small>Awards</small><span class="aws">${aws.map(([n, k]) => `<span title="${kit.esc(n)}: ${k} game${k > 1 ? "s" : ""}">${kit.awIcon(n) ? `<img src="${kit.awIcon(n)}" alt="${kit.esc(n)}">` : kit.esc(n)}<b>${k}</b></span>`).join("")}</span></div>` : "",
   ].join("");
 }
+
+// By hero: one row per hero for the games on the chosen map (all results), most played first.
+// Win rate sorts heroes with 3+ games first. Click a row to see only that hero's games.
+let heroSort = "games", heroAll = false;
+function drawByHero() {
+  const box = document.getElementById("byhero");
+  const list = GAMES.filter(g => !F.m || g.map === F.m), per = {};
+  for (const g of list) {
+    const s = per[g.hero] ||= { id: g.hero, n: 0, w: 0, k: 0, d: 0, a: 0, st: 0, maps: {}, last: 0 };
+    const win = g.result === "win";
+    s.n++; s.w += win; s.last = Math.max(s.last, g.at);
+    if (g.me) { s.k += g.me.k; s.d += g.me.d; s.a += g.me.a; s.st++; }
+    if (g.map) { const m = s.maps[g.map] ||= [0, 0]; m[0]++; m[1] += win; }
+  }
+  const rows = Object.values(per);
+  if (!rows.length) { box.hidden = true; return; }
+  const kda = s => s.st ? (s.k + s.a) / Math.max(1, s.d) : -1;
+  const by = { games: (a, b) => b.n - a.n || b.w - a.w, wr: (a, b) => (b.n >= 3) - (a.n >= 3) || b.w / b.n - a.w / a.n || b.n - a.n, kda: (a, b) => kda(b) - kda(a) || b.n - a.n };
+  rows.sort(by[heroSort]);
+  const one = v => (Math.round(v * 10) / 10).toFixed(1);
+  const bestMap = s => { let best = null;
+    for (const [m, [n, w]] of Object.entries(s.maps)) if (n >= 3 && (!best || w / n > best.w / best.n || (w / n === best.w / best.n && n > best.n))) best = { m, n, w };
+    return best ? `${kit.esc(best.m)} <span class="mu">${best.w}–${best.n - best.w}</span>` : '<span class="mu">–</span>'; };
+  const when = t => { const d = new Date(t); return Date.now() - t < 6 * 864e5 ? kit.ago(t) : d.toLocaleDateString("en", { month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" }); };
+  const SHOW = 8;
+  box.innerHTML = `<div class="bh-h"><h2>By hero${F.m ? ` <span class="mu" style="font:400 13px var(--sans)">on ${kit.esc(F.m)}</span>` : ""}</h2>
+    <div class="sort">Sort by ${[["games", "Games"], ["wr", "Win rate"], ["kda", "KDA"]].map(([k, l]) => `<button type="button" data-s="${k}" aria-pressed="${heroSort === k}">${l}</button>`).join("")}</div></div>
+    <div class="bt"><div class="hd" aria-hidden="true"><span>Hero</span><span>Games</span><span>Win rate</span><span>Avg K / D / A</span><span>Best map</span><span>Last played</span></div>
+    ${rows.slice(0, heroAll ? rows.length : SHOW).map(s => { const wr = Math.round(100 * s.w / s.n), c = `var(--${wr >= 50 ? "good" : "bad"})`;
+      return `<button class="br" type="button" data-h="${s.id}" aria-pressed="${F.h === s.id}" title="Show only ${kit.esc(kit.byId[s.id]?.name || s.id)} games">
+        <span class="hn"><img src="/img/heroes/${s.id}.webp" alt="" loading="lazy"><span>${kit.esc(kit.byId[s.id]?.name || s.id)}</span></span>
+        <span class="mono">${s.n}<small>${s.w}–${s.n - s.w}</small></span>
+        <span class="wr" style="--c:${c}"><i style="--p:${wr}%"></i><b>${wr}%</b></span>
+        <span class="mono">${s.st ? `${one(s.k / s.st)} / ${one(s.d / s.st)} / ${one(s.a / s.st)}` : '<span class="mu">–</span>'}</span>
+        <span>${bestMap(s)}</span><span class="mu">${when(s.last)}</span></button>`; }).join("")}</div>
+    ${rows.length > SHOW ? `<button class="bmore" type="button">${heroAll ? "Fewer heroes" : `Show all ${rows.length} heroes`}</button>` : ""}`;
+  box.hidden = false;
+}
+document.getElementById("byhero").addEventListener("click", e => {
+  const s = e.target.closest("[data-s]"), r = e.target.closest(".br");
+  if (s) { heroSort = s.dataset.s; drawByHero(); return; }
+  if (e.target.closest(".bmore")) { heroAll = !heroAll; drawByHero(); return; }
+  if (r) { F.h = F.h === r.dataset.h ? "" : r.dataset.h; shown = PAGE; draw(); fitHeroes(); }
+});
 
 function drawHeroes() {
   const count = {};
@@ -235,6 +308,7 @@ function row(g, i) {
 function draw() {
   const list = pick();
   drawSum(list);
+  drawByHero();
   document.querySelectorAll("#heroes .hf").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === F.h));
   document.querySelectorAll("#res button").forEach(b => b.setAttribute("aria-pressed", b.dataset.r === F.r));
   const box = document.getElementById("list");
