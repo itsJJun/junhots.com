@@ -1,4 +1,4 @@
-// Cloudflare settings: serve public/ as the website, and run src/worker.js for /api/* (Jun's builds editor, tier list, games), /builds/* (hero link previews) and /sitemap.xml.
+// Cloudflare settings: serve public/ as the website, and run src/worker.js for /api/* (Jun's builds editor, tier list, games, community tier list), /builds/* (hero link previews) and /sitemap.xml.
 {
   "name": "junhots",
   "main": "src/worker.js",
@@ -15,7 +15,9 @@
   "keep_vars": true,
   // Feedback form: at most 3 sends per visitor per minute, checked before anything touches storage (src/feedback.js)
   "ratelimits": [
-    { "name": "FEEDBACK_LIMIT", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
+    { "name": "FEEDBACK_LIMIT", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } },
+    // Community tier list (src/community.js): the tier list maker sends a visitor's list at most a few times a minute
+    { "name": "COMMUNITY_LIMIT", "namespace_id": "1002", "simple": { "limit": 6, "period": 60 } }
   ],
   // Once a day: refresh the Twitch login the schedule editor uses (src/schedule.js), so it never runs out
   "triggers": { "crons": ["17 9 * * *"] },

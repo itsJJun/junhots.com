@@ -23,7 +23,32 @@
 <link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/map-picker.css">
 <style>
-.hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+/* My list / Community / Compare: the community list is every visitor's tier list maker list, averaged (src/community.js) */
+.hintrow { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin: 0 0 12px; }
+.views { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+.views .tab { height: 26px; }
+.dis { margin: 0 0 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.dis[hidden] { display: none; }
+.dis-h { display: flex; justify-content: space-between; align-items: end; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.dis-h:last-child { margin-bottom: 0; }
+.dis-h h2 { margin: 0; font: 600 17px var(--display); letter-spacing: -0.01em; }
+.dis-h p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.dis-h p b { color: var(--text); font-weight: 600; }
+.dis-h a { color: var(--accent); font-size: 14px; white-space: nowrap; }
+.dis-h a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.dis-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+.dc { all: unset; cursor: pointer; display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.dc:hover { background: #2a2522; }
+.dc img { width: 44px; height: 44px; border-radius: 8px; flex: none; }
+.dc b { font-size: 14px; font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc small { display: block; color: var(--muted); font-size: 11px; }
+.vs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); margin: 2px 0; }
+.vs .ar2 { opacity: .6; }
+.tt { font: 700 13px var(--display); color: var(--c); padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--c) 16%, transparent); }
+.port .cbd { position: absolute; bottom: -4px; left: -4px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 5px; font: 700 10px/16px var(--display); text-align: center; color: #160d0a; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
+.detail .chat { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.detail .chat .tt { font-size: 12px; }
 .controls { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
 .tab:hover { color: var(--text); }
@@ -154,7 +179,9 @@
       <span id="map"></span>
     </div>
   </header>
-  <p class="hint">Click a hero to see counters, synergy and win rate.</p>
+  <div class="hintrow"><p class="hint">Click a hero to see counters, synergy and win rate.</p>
+    <div class="views" role="group" aria-label="Whose tier list"><button class="tab" data-view="mine" aria-pressed="true">My list</button><button class="tab" data-view="community" aria-pressed="false" title="Everyone's lists from the tier list maker">Community</button><button class="tab" data-view="compare" aria-pressed="false" title="My list with the community's tier on each hero">Compare</button></div></div>
+  <section class="dis" id="dis" hidden></section>
   <div class="moved" id="moved"></div>
   <div class="tiers" id="tiers"></div>
   <div class="combos" id="combos"></div>
@@ -204,6 +231,46 @@ function drawMoved() {
   box.innerHTML = when + list.map(id => { const m = moveOf(id);
     return `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}<span class="to">${m.from ? esc(tierName(m.from)) : "new"} ${arrow(m.up)} <b class="${m.up ? "up" : "down"}">${m.to ? esc(tierName(m.to)) : "out"}</b></span></button>`; }).join("");
 }
+// ---------- Community tier list: every visitor's list from the tier list maker, averaged (/api/community) ----------
+// Each list puts a hero between +2 (top tier) and -2 (bottom tier); the average lands on my nearest tier.
+let view = "mine", COMM = null;
+const MIN_LISTS = 5, MIN_VOTES = 3;
+const tierVal = i => TL.tiers.length < 2 ? 0 : 2 - 4 * i / (TL.tiers.length - 1);
+function commTier(id) {
+  const c = COMM?.heroes?.[id];
+  if (!c || c.n < MIN_VOTES || (COMM.lists || 0) < MIN_LISTS) return null;
+  let best = null, gap = 9;
+  TL.tiers.forEach((t, i) => { const d = Math.abs(tierVal(i) - c.avg); if (d < gap) { gap = d; best = t.id; } });
+  return best;
+}
+const ttag = id => { const t = TL.tiers.find(x => x.id === id); return t ? `<span class="tt" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</span>` : ""; };
+function drawDis() {
+  const box = document.getElementById("dis");
+  if (view === "mine") { box.hidden = true; return; }
+  box.hidden = false;
+  const lists = COMM?.lists || 0;
+  if (lists < MIN_LISTS) {
+    box.innerHTML = `<div class="dis-h"><div><h2>The community list starts at ${MIN_LISTS} tier lists</h2><p>${lists ? `<b>${lists}</b> so far. ` : ""}Every tier list made with the tier list maker counts, one per visitor.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
+    return;
+  }
+  const note = map !== "Overall" ? " · for all maps" : "";
+  if (view === "community") {
+    box.innerHTML = `<div class="dis-h"><div><h2>Community tier list</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note}. Heroes in fewer than ${MIN_VOTES} lists aren't placed.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
+    return;
+  }
+  const rows = HEROES.filter(h => (role === "All" || h.grole === role) && tierOf(h.id) && commTier(h.id) && commTier(h.id) !== tierOf(h.id))
+    .map(h => ({ h, gap: Math.abs(tierVal(tierIdx(tierOf(h.id))) - COMM.heroes[h.id].avg) }))
+    .sort((a, b) => b.gap - a.gap).slice(0, 6);
+  box.innerHTML = `<div class="dis-h"><div><h2>Where chat disagrees with me</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note} · biggest gaps first. The small tag on a hero is the community's tier.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>` +
+    (rows.length ? `<div class="dis-row">${rows.map(({ h }) => `<button class="dc" data-hero="${h.id}"><img src="${img(h.id)}" alt=""><div><b>${esc(h.name)}</b><div class="vs"><span>Me</span>${ttag(tierOf(h.id))}<span class="ar2">vs</span><span>Chat</span>${ttag(commTier(h.id))}</div><small>${COMM.heroes[h.id].n} lists</small></div></button>`).join("")}</div>` : `<p class="hint">We agree on every hero here.</p>`);
+}
+document.querySelectorAll(".views .tab").forEach(b => b.addEventListener("click", () => {
+  view = b.dataset.view;
+  document.querySelectorAll(".views .tab").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+fetch("/api/community").then(r => r.ok ? r.json() : null).then(c => { COMM = c; if (TL && view !== "mine") render(); }).catch(() => {});
+
 function tierOf(id) {
   const m = map !== "Overall" ? (TL.maps || {})[map] : null;
   if (m && id in m) return m[id] || null;   // "" = not ranked on this map
@@ -227,6 +294,7 @@ function renderDetail() {
     <div class="who"><img src="${img(selected)}" alt=""><div class="name">${esc(h.name)}</div>
       <span class="pill" style="--c:${t ? PALETTE[t.color] : "var(--line)"}">${t ? esc(t.name) + " tier" : "Not ranked"} · ${roleIcon(h.grole)} ${esc(h.grole)}</span>
       <div class="tagline">${tagsOf(TL, selected).map(x => `<span>${tagIcon(TL, x)}${esc(tagLabel(TL, x))}</span>`).join("")}</div>
+      ${commTier(selected) ? `<div class="chat">Community: ${ttag(commTier(selected))} · ${COMM.heroes[selected].n} lists</div>` : ""}
       <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}${(m => m ? `<div class="mvd ${m.up ? "up" : "down"}">${arrow(m.up)} ${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New on the list"} · ${fmtDay(m.at)}</div>` : "")(moveOf(selected))}</div></div>
     <div class="rel">
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
@@ -270,14 +338,17 @@ function drawCombos() {
 function closeDetail() { selected = null; anchor = null; render(); }
 function render() {
   const box = document.getElementById("tiers");
+  document.getElementById("moved").style.display = view === "community" ? "none" : "";   // "moved this week" is about my list
   box.innerHTML = TL.tiers.map(t => {
-    const list = HEROES.filter(h => tierOf(h.id) === t.id && (role === "All" || h.grole === role))
+    const shown = view === "community" ? commTier : tierOf;
+    const list = HEROES.filter(h => shown(h.id) === t.id && (role === "All" || h.grole === role))
       .sort((a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0));
     return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
-      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${combosOf(TL, h.id).length ? `<i class="cb" title="Power combo with ${esc(combosOf(TL, h.id).map(c => byId[c.a === h.id ? c.b : c.a]?.name).filter(Boolean).join(", "))}">${LINK_ICON}</i>` : ""}${(m => m && map === "Overall" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
+      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${combosOf(TL, h.id).length ? `<i class="cb" title="Power combo with ${esc(combosOf(TL, h.id).map(c => byId[c.a === h.id ? c.b : c.a]?.name).filter(Boolean).join(", "))}">${LINK_ICON}</i>` : ""}${(m => m && map === "Overall" && view !== "community" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}${(c => view === "compare" && c && c !== tierOf(h.id) ? (t => `<i class="cbd" style="--c:${PALETTE[t.color % PALETTE.length]}" title="Community: ${esc(t.name)} tier">${esc(t.name)}</i>`)(TL.tiers.find(x => x.id === c)) : "")(commTier(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
     }</div></div>`;
   }).join("");
   drawCombos();
+  drawDis();
   renderDetail();
 }
 document.addEventListener("click", e => {
@@ -300,6 +371,7 @@ document.addEventListener("click", e => {
 document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
 // /tierlist/#jaina opens Jaina's info (links from the search box)
 function showHash() {
+  if (["#community", "#compare"].includes(location.hash)) return document.querySelector(`.views .tab[data-view="${location.hash.slice(1)}"]`)?.click();
   const id = tierKey(location.hash.slice(1));
   if (!byId[id]) return;
   if (!tierOf(id)) { map = "Overall"; picker.set(map); }

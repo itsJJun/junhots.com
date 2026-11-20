@@ -93,6 +93,10 @@ input[type=search] { font: 400 14px var(--sans); color: var(--text); background:
 .label input { width: 100%; text-align: center; font: 700 22px/1 var(--sans); color: var(--c); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent); background: transparent; border: 0; padding: 2px; border-radius: 4px; }
 .label input:focus { background: rgba(255,255,255,0.06); outline: none; }
 .label .tools { display: flex; gap: 4px; }
+.cmnty { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin: -6px 0 16px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.cmnty input { accent-color: var(--brand); width: 15px; height: 15px; margin: 0; }
+.cmnty a { color: var(--accent); }
+.cmnty span { font-size: 12px; opacity: .8; }
 .label .tools button { height: 20px; padding: 0 6px; font-size: 11px; background: rgba(255,255,255,0.06); border: 0; color: var(--muted); }
 .label .tools button:hover { color: var(--text); }
 .swatches { position: absolute; top: calc(100% + 4px); left: 4px; z-index: 5; display: grid; grid-template-columns: repeat(4, 22px); gap: 6px; padding: 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
@@ -179,6 +183,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap
     <button id="savePic">Save as picture</button>
     <button class="primary" id="share">Copy share link</button>
   </div>
+  <label class="cmnty"><input type="checkbox" id="cmOn" checked> Add my list to the <a href="/tierlist/#community">community tier list</a> <span>(anonymous, once you've placed 10 heroes)</span></label>
 
   <div class="layout" id="layout">
     <div>
@@ -226,7 +231,32 @@ const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
-function changed() { if (isShared) { isShared = false; $("sharedBanner").hidden = true; } save(); render(); }
+function changed() { if (isShared) { isShared = false; $("sharedBanner").hidden = true; } save(); render(); toCommunity(); }
+
+// ---------- community tier list (src/community.js): my list, anonymous, averaged with everyone's ----------
+// Each placed hero is sent as where it sits from +2 (top tier) to -2 (bottom tier), a few seconds after the last change.
+const CM_OFF = "junhots-community-off", CM_SENT = "junhots-community-sent";
+function communityList() {
+  const n = state.tiers.length, h = {};
+  state.tiers.forEach((t, i) => { for (const id in state.overall) if (state.overall[id] === t.id && H[id]) h[id] = n < 2 ? 0 : Math.round((2 - 4 * i / (n - 1)) * 100) / 100; });
+  return h;
+}
+function toCommunity(now) {
+  clearTimeout(toCommunity.t);
+  if (isShared) return;
+  toCommunity.t = setTimeout(() => {
+    let off = false, sent = null;
+    try { off = localStorage.getItem(CM_OFF) === "1"; sent = localStorage.getItem(CM_SENT); } catch (e) {}
+    const h = off ? {} : communityList(), key = JSON.stringify(h), enough = Object.keys(h).length >= 10;
+    if (key === sent || (!enough && !sent)) return;   // nothing new, or never counted and still too short
+    fetch("/api/community", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ h }) })
+      .then(r => r.ok ? r.json() : null).then(a => {
+        if (!a) return;
+        try { if (a.counted) localStorage.setItem(CM_SENT, key); else localStorage.removeItem(CM_SENT); } catch (e) {}
+        if (a.counted && !sent) toast("Added to the community tier list");
+      }).catch(() => {});
+  }, now ? 0 : 4000);
+}
 
 // ---------- data rules (same file format as the overlay's tierlist.json) ----------
 // Cho and Gall are one hero in the draft, so they're one Cho'gall here (Cho's id); older lists' Gall moves onto it.
@@ -487,6 +517,9 @@ $("savePic").onclick = async () => {
     if (saved && JSON.stringify(state) === JSON.stringify(example())) state = blank();
   }
   render();
+  try { $("cmOn").checked = localStorage.getItem(CM_OFF) !== "1"; } catch (e) {}
+  $("cmOn").addEventListener("change", e => { try { localStorage.setItem(CM_OFF, e.target.checked ? "0" : "1"); } catch (err) {} toCommunity(true); });
+  toCommunity();   // a list made before the community list existed counts too
 })();
 // The example list earlier versions placed on a first visit (only used to spot it in saved data).
 function example() {

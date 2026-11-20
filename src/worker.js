@@ -17,6 +17,11 @@
 //   GET/PUT /api/patch-takes -> Jun's one-line take on a hero in a patch (PUT needs the password)
 //   POST /api/feedback -> everyone: send Jun a feedback message (the Feedback button in nav.js)
 //   GET/PATCH/DELETE /api/feedback -> Jun only (password): the inbox at /inbox/ (src/feedback.js)
+//   GET  /api/now      -> everyone: the game I'm in right now (hero, map, tonight's W/L), for Home's "Live now" line;
+//                         empty when there's none or it's over 45 minutes old
+//   POST /api/now      -> Jun only (password): the overlay sends it at each game's loading screen ({clear: true} clears it);
+//                         a game sent to POST /api/games clears it too
+//   GET/POST /api/community -> the community tier list from the tier list maker (src/community.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
@@ -25,12 +30,15 @@
 import { patchNotes, patchTakes } from "./patch-notes.js";
 import { feedback } from "./feedback.js";
 import { schedule, scheduleAdmin, keepTwitchAlive } from "./schedule.js";
+import { community } from "./community.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
 const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates", "tags", "combos"];
 const GAMES_KEY = "games";
+const NOW_KEY = "now";
+const NOW_FOR = 45 * 60e3;   // a game in progress counts as "now" this long
 const MAX_GAMES = 5000;
 const MAX_BATCH = 200;
 const SAME_GAME = 8 * 60e3;   // same hero within 8 minutes = the same game (sent live, then again by an import)
@@ -258,6 +266,29 @@ export default {
     if (url.pathname === "/api/patch-notes" && request.method === "GET") return patchNotes(request, env, ctx);
     if (url.pathname === "/api/patch-takes") return patchTakes(request, env, passwordOk);
     if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
+    if (url.pathname === "/api/community") return community(request, env);
+
+    if (url.pathname === "/api/now") {
+      if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
+      if (request.method === "GET") {
+        let now = null;
+        try { now = JSON.parse((await env.BUILDS.get(NOW_KEY)) || "null"); } catch {}
+        const fresh = now && Date.now() - now.at < NOW_FOR;
+        return new Response(JSON.stringify(fresh ? now : {}), { headers: { "content-type": "application/json", "cache-control": "public, max-age=30" } });
+      }
+      if (request.method === "POST") {
+        if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
+        let body;
+        try { body = JSON.parse(await request.text()); } catch { return json({ error: "bad json" }, 400); }
+        if (body?.clear || !/^[a-z]{2,20}$/.test(String(body?.hero || ""))) { await env.BUILDS.delete(NOW_KEY); return json({ ok: true, cleared: true }); }
+        const int = v => Math.max(0, Math.min(999, Math.floor(Number(v) || 0)));
+        const now = { hero: body.hero, map: String(body.map || "").slice(0, 40), wins: int(body.wins), losses: int(body.losses),
+          results: String(body.results || "").replace(/[^WL]/g, "").slice(-20), at: Date.now() };
+        await env.BUILDS.put(NOW_KEY, JSON.stringify(now), { expirationTtl: 3 * 3600 });
+        return json({ ok: true });
+      }
+      return json({ error: "method not allowed" }, 405);
+    }
 
     if (url.pathname === "/api/builds") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
@@ -319,6 +350,7 @@ export default {
         const list = dedupeGames([...before.filter(g => !ids.has(g.id)), ...incoming]);
         const added = Math.max(0, list.length - before.length);
         await env.BUILDS.put(GAMES_KEY, JSON.stringify(list.slice(0, MAX_GAMES)));
+        if (incoming.length === 1) await env.BUILDS.delete(NOW_KEY);   // the game that was "now" is over
         return json({ ok: true, added, games: Math.min(list.length, MAX_GAMES) });
       }
       return json({ error: "method not allowed" }, 405);

@@ -64,16 +64,29 @@
   const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
   const WAVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>';
   // Home: one line under the buttons
-  window.scheduleLine = el => load().then(d => {
+  // The game I'm in right now, with the hero's name (only asked while I'm live)
+  const nowPlaying = () => fetch("/api/now").then(r => r.ok ? r.json() : {}).then(n => !n?.hero ? null
+    : fetch("/data/heroes.json").then(r => r.json()).then(list => ({ ...n, name: n.hero === "chogall" ? "Cho" : (list.find(h => h[0] === n.hero) || [])[1] || n.hero }))).catch(() => null);
+  window.scheduleLine = el => load().then(async d => {
+    const now = d.live ? await nowPlaying() : null;
     const st = state(d);
     if (!d.ok && !d.live) return;
     if (!st.live && !st.next && !st.soon) return;
     let main;
     if (st.live) main = `<span class="lb live">${WAVE}${esc(T().schedule_live || "Live now")}</span><strong title="${esc(d.title)}">${esc(d.title || "On Twitch")}</strong>`;
+    // Live and in a game (the overlay tells /api/now at each loading screen): the hero, map and tonight's score instead of the title
+    if (st.live && now?.hero) {
+      const name = now.name || now.hero, games = now.wins + now.losses;
+      main = `<span class="lb live">${WAVE}${esc(T().schedule_live || "Live now")}</span><span class="ig"><img src="/img/heroes/${esc(now.hero)}.webp" alt=""><strong>${esc(name)}</strong>${now.map ? `<span class="on">on ${esc(now.map)}</span>` : ""}</span><span class="cd">Game ${games + 1}</span>${games ? `<span class="rec"><b class="w">${now.wins}</b>–<b class="l">${now.losses}</b> today${[...(now.results || "")].slice(-8).map(c => `<i class="d ${c === "W" ? "w" : "l"}"></i>`).join("")}</span>` : ""}`;
+      el.classList.add("ingame");
+      window.setHeadline ? window.setHeadline(name) : (window.pendingHeadline = name);
+    }
     else if (st.soon) main = `<span class="lb">${CLOCK}${esc(T().schedule_next || "Next stream")}</span><strong>Starting soon</strong><span class="cd">${time(st.soon.start)}</span>`;
     else if (d.away && d.away.from <= Date.now()) main = `<span class="lb">${CLOCK}Away till ${date(d.away.to - 12 * 36e5)}</span><strong>${dayName(st.next.start)} ${time(st.next.start)}</strong><span class="cd" data-until="${st.next.start}">${until(st.next.start)}</span>`;
     else main = `<span class="lb">${CLOCK}${esc(T().schedule_next || "Next stream")}</span><strong>${dayName(st.next.start)} ${time(st.next.start)}</strong><span class="cd" data-until="${st.next.start}">${until(st.next.start)}</span>`;
-    el.innerHTML = `${main}${d.ok ? chips(d) : ""}<a class="more" href="/schedule/">${esc(T().schedule_more || "Schedule")} ›</a>`;
+    el.innerHTML = now?.hero && st.live
+      ? `${main}<a class="more" href="https://www.twitch.tv/${esc(d.channel)}" target="_blank" rel="noopener">Watch ›</a>`
+      : `${main}${d.ok ? chips(d) : ""}<a class="more" href="/schedule/">${esc(T().schedule_more || "Schedule")} ›</a>`;
     el.hidden = false;
     setInterval(() => el.querySelectorAll("[data-until]").forEach(c => { c.textContent = until(+c.dataset.until); }), 30e3);
   });
