@@ -58,7 +58,31 @@
 .bt .wr b { font: 600 14px var(--mono); width: 40px; text-align: right; color: var(--c); }
 .bh .bmore { margin-top: 6px; padding: 4px 6px; border: 0; background: none; color: var(--accent); font: 500 14px var(--sans); cursor: pointer; }
 .bh .bmore:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Nemesis and best allies: the heroes I win least against / most with (follows the map and hero filters) */
+.nb { margin-bottom: 14px; padding: 14px 18px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.nb-h { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.nb-h h2 { margin: 0; font: 600 17px var(--display); letter-spacing: -0.01em; }
+.nb-h p { margin: 0; color: var(--muted); font-size: 13px; }
+.nb-h p b { color: var(--text); font-weight: 600; }
+.nb-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; }
+.nb h3 { margin: 0 0 6px; font: 500 13px var(--sans); color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.nb h3 i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.nr { display: grid; grid-template-columns: 30px minmax(90px, 1.3fr) 60px minmax(40px, 1fr) 46px; align-items: center; gap: 10px; padding: 6px 4px; }
+.nr + .nr { border-top: 1px solid #241f1d; }
+.nr img { width: 30px; height: 30px; border-radius: 7px; }
+.nr b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nr .rec { font: 500 13px var(--mono); color: var(--muted); }
+.nr .bar { position: relative; height: 6px; border-radius: 9px; background: #2d2724; }
+.nr .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9px; background: var(--c); }
+.nr .bar u { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: #8a7f78; border-radius: 2px; }
+.nr .pc { font: 600 14px var(--mono); color: var(--c); text-align: right; }
+.nb .none { color: var(--muted); font-size: 13px; padding: 6px 4px; }
+/* a game that's still in my Twitch VODs */
+.row .rv { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; vertical-align: -3px; border-radius: 5px; background: #2a2330; color: #a970ff; }
+.row .rv svg { width: 10px; height: 10px; }
 @media (max-width: 720px) {
+  .nb-cols { grid-template-columns: 1fr; }
+  .nr { grid-template-columns: 30px 1fr 52px 56px 40px; gap: 8px; }
   .bt .hd, .bt .br { grid-template-columns: minmax(110px, 1.4fr) .9fr 1.2fr; }
   .bt .hd span:nth-child(n+4), .bt .br > span:nth-child(n+4) { display: none; }
 }
@@ -142,6 +166,7 @@
 
   <section class="sum" id="sum" aria-label="Summary"></section>
   <section class="bh" id="byhero" aria-label="By hero" hidden></section>
+  <section class="nb" id="nemesis" aria-label="Nemesis and best allies" hidden></section>
   <div class="filters">
     <div class="heroes" id="heroes" role="group" aria-label="Hero"></div>
     <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
@@ -244,6 +269,31 @@ document.getElementById("byhero").addEventListener("click", e => {
   if (r) { F.h = F.h === r.dataset.h ? "" : r.dataset.h; shown = PAGE; draw(); fitHeroes(); }
 });
 
+// Nemesis and best allies: my win rate against / with each hero, from the games with both teams, for the chosen map
+// and hero (not the win/loss filter). A hero needs a few games to count: 12 over all my games, fewer when filtered.
+function drawNemesis() {
+  const box = document.getElementById("nemesis");
+  const list = GAMES.filter(g => g.enemy?.length === 5 && (!F.m || g.map === F.m) && (!F.h || g.hero === F.h));
+  if (list.length < 20) { box.hidden = true; return; }
+  const min = Math.max(4, Math.min(12, Math.round(list.length / 40)));
+  const base = list.filter(g => g.result === "win").length / list.length, vs = {}, w = {};
+  for (const g of list) {
+    const win = g.result === "win";
+    for (const e of g.enemy) { const s = vs[e] ||= [0, 0]; s[0]++; s[1] += win; }
+    for (const a of g.ally || []) if (a !== g.hero) { const s = w[a] ||= [0, 0]; s[0]++; s[1] += win; }
+  }
+  const top = (d, worst) => Object.entries(d).filter(([id, [n]]) => n >= min && kit.byId[id])
+    .map(([id, [n, wn]]) => [id, n, wn, wn / n]).filter(r => worst ? r[3] < base : r[3] > base)
+    .sort((a, b) => worst ? a[3] - b[3] || b[1] - a[1] : b[3] - a[3] || b[1] - a[1]).slice(0, 5);
+  const row = ([id, n, wn, r], c) => `<div class="nr" style="--c:var(--${c})"><img src="/img/heroes/${id}.webp" alt="" loading="lazy"><b>${kit.esc(kit.byId[id].name)}</b>
+    <span class="rec">${wn}–${n - wn}</span><span class="bar"><i style="width:${Math.round(r * 100)}%"></i><u style="left:${Math.round(base * 100)}%"></u></span><span class="pc">${Math.round(r * 100)}%</span></div>`;
+  const col = (title, c, rows) => `<div><h3 style="--c:var(--${c})"><i></i>${title}</h3>${rows.length ? rows.map(r => row(r, c)).join("") : '<div class="none">Not enough games yet</div>'}</div>`;
+  const who = F.h ? ` on ${kit.esc(kit.byId[F.h]?.name || F.h)}` : "";
+  box.innerHTML = `<div class="nb-h"><h2>Nemesis and best allies${who}</h2><p>Heroes in ${min}+ of these ${list.length} games · my usual win rate is <b>${Math.round(base * 100)}%</b> (grey line)</p></div>
+    <div class="nb-cols">${col("Toughest to play against", "bad", top(vs, true))}${col("Best teammates", "good", top(w, false))}</div>`;
+  box.hidden = false;
+}
+
 function drawHeroes() {
   const count = {};
   for (const g of GAMES) count[g.hero] = (count[g.hero] || 0) + 1;
@@ -291,12 +341,13 @@ function fitHeroes() {
 }
 addEventListener("resize", () => { if (kit) fitHeroes(); });
 
+const PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
 function row(g, i) {
   const b = kit.best(g), e = kit.edge(g), h = kit.byId[g.hero], aw = kit.award(g);
   const d = new Date(g.at), when = d.toLocaleDateString("en", { month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
   return `<button class="row ${g.result}" data-i="${i}" aria-expanded="false" style="--c:var(--${g.result === "win" ? "good" : "bad"})">
     <span class="bar"></span><img src="/img/heroes/${g.hero}.webp" alt="" loading="lazy">
-    <span class="who"><b>${kit.esc(h.name)} <span style="color:var(--c);font-size:13px;font-weight:500">${g.result === "win" ? "Win" : "Loss"}</span>${aw && kit.awIcon(aw) ? `<img class="aw" src="${kit.awIcon(aw)}" alt="${kit.esc(aw)}" title="${kit.esc(aw)}" loading="lazy">` : ""}</b><span>${kit.esc(g.map || "Map unknown")}</span></span>
+    <span class="who"><b>${kit.esc(h.name)} <span style="color:var(--c);font-size:13px;font-weight:500">${g.result === "win" ? "Win" : "Loss"}</span>${aw && kit.awIcon(aw) ? `<img class="aw" src="${kit.awIcon(aw)}" alt="${kit.esc(aw)}" title="${kit.esc(aw)}" loading="lazy">` : ""}${(v => v ? `<span class="rv" title="On Twitch, ${v.at} into the stream (open the game to watch)">${PLAY}</span>` : "")(kit.vod(g))}</b><span>${kit.esc(g.map || "Map unknown")}</span></span>
     <span class="hide">${g.me ? kit.kda(g.me) : '<span class="dim">–</span>'}</span>
     <span class="hide num">${b ? `<b>${kit.num(b[0])}</b> ${b[1]}` : ""}</span>
     <span class="hide ed" title="Draft edge (today's tier list)">${e != null ? `${e}%<i style="--w:${e}%"></i>` : '<span class="dim">–</span>'}</span>
@@ -309,6 +360,7 @@ function draw() {
   const list = pick();
   drawSum(list);
   drawByHero();
+  drawNemesis();
   document.querySelectorAll("#heroes .hf").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === F.h));
   document.querySelectorAll("#res button").forEach(b => b.setAttribute("aria-pressed", b.dataset.r === F.r));
   const box = document.getElementById("list");
@@ -350,6 +402,7 @@ Promise.all([fetch("/api/games").then(r => r.ok ? r.json() : Promise.reject()), 
   mapPicker(document.getElementById("map"), { value: F.m || "Overall", overall: "All maps", onChange: m => { F.m = m === "Overall" ? "" : m; shown = PAGE; draw(); } });
   drawHeroes();
   draw();
+  kit.loadVods().then(v => { if (v.length) draw(); });   // the ▶ on games Twitch still has
 }).catch(() => { document.getElementById("list").innerHTML = '<div class="empty">Games couldn\'t load. Refresh the page to try again.</div>'; });
 </script>
 </body>
