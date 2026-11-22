@@ -110,7 +110,8 @@ function expand(ev, from, to, out) {
 // ---------- Twitch login (device flow: no secret, no redirect page) ----------
 const form = o => new URLSearchParams(o);
 // readOnly: the public page only uses a login that's still fresh and never refreshes it itself. Refreshing happens
-// only from my editor and the daily cron, so two places can't use up the same one-time refresh token at once.
+// only from my editor and the crons (daily keep-alive, hourly VOD list in vods.js), so two places rarely use up the
+// same one-time refresh token at once.
 async function token(env, readOnly) {
   const a = JSON.parse((await env.BUILDS.get(K.auth)) || "null");
   if (!a) return null;
@@ -132,7 +133,7 @@ export async function keepTwitchAlive(env) {
   const a = env.BUILDS && JSON.parse((await env.BUILDS.get(K.auth)) || "null");
   if (a) await refresh(env, a);
 }
-async function helix(env, method, path, body, readOnly) {
+export async function helix(env, method, path, body, readOnly) {
   const a = await token(env, readOnly);
   if (!a) throw new Error("the Twitch login ran out. Press Disconnect Twitch, then Connect Twitch again");
   const r = await fetch("https://api.twitch.tv/helix/" + path, {

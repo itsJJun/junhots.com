@@ -20,7 +20,7 @@
     { "name": "COMMUNITY_LIMIT", "namespace_id": "1002", "simple": { "limit": 6, "period": 60 } }
   ],
   // Once a day: refresh the Twitch login the schedule editor uses (src/schedule.js), so it never runs out
-  "triggers": { "crons": ["17 9 * * *"] },
+  "triggers": { "crons": ["17 9 * * *", "41 * * * *"] },
   "kv_namespaces": [
     { "binding": "BUILDS", "id": "cb4d84ddab184520be1376c94f16a8d3" }
   ]

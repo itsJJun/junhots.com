@@ -19,6 +19,22 @@
       if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
     return "just now";
   };
+  // My Twitch VODs (past broadcasts, Twitch keeps them 60 days) from /api/vods, loaded once: [{ id, start, dur }]
+  let VODS = null, vodsP = null;
+  const loadVods = () => vodsP ||= fetch("/api/vods").then(r => r.ok ? r.json() : {}).then(d => VODS = d.vods || []).catch(() => VODS = []);
+  // When the game started: the overlay's game id starts with the loading screen's time; else end time minus the length
+  const startOf = g => { const m = /^(\d{9,11})-/.exec(g.id || ""); return m ? +m[1] * 1000 : g.at - ((g.len || 1200) + 90) * 1000; };
+  // The VOD that has this game, and where in it: { url, at } or null (no VOD yet, or Twitch deleted it)
+  const vod = g => vodAt(startOf(g));
+  const vodAt = t => {
+    if (!VODS?.length) return null;
+    const v = VODS.find((v, i) => t >= v.start && t < (i === 0 ? Math.max(v.start + v.dur * 1000, Date.now()) : v.start + v.dur * 1000));
+    if (!v) return null;
+    const s = Math.max(0, Math.round((t - v.start) / 1000) - 20), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
+    return { url: `https://www.twitch.tv/videos/${v.id}?t=${h}h${m}m${sec}s`, at: `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}` };
+  };
+  const TWITCH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.6 1 1.5 3.8v10h3.3v1.7h1.9l1.8-1.7h2.7L14.5 10V1zm10.7 8.4-2 2H8.4l-1.8 1.8v-1.8H4.2V2.2h9.1zM11.3 4.4h-1.1v3.4h1.1zm-3 0H7.2v3.4h1.1z"/></svg>';
+
   const talents = {};   // hero id -> promise of its talent tree, loaded the first time a card needs it
   const treeOf = id => talents[id] ||= fetch(`/data/heroes/${id}.json`).then(r => r.json()).then(d => d.talents).catch(() => null);
 
@@ -72,6 +88,7 @@
           </div>
           ${stats}
           ${/[1-9]/.test(code(g)) ? `<div class="gc-tal" data-hero="${g.hero}" data-code="${code(g)}"><span class="gc-ics">${TIERS.map(() => "<i></i>").join("")}</span><a class="gc-load" href="/builds/${g.hero}?b=${code(g)}">Load this build<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : ""}
+          <span class="gc-vod" data-start="${startOf(g)}" hidden></span>
         </div>
         ${teams}
         ${e != null ? `<p class="gc-note">Draft edge uses my tier list as it is today, not as it was on the day.</p>` : !g.me && !g.ally ? `<p class="gc-note">This game was sent before the overlay sent teams and stats.</p>` : ""}
@@ -80,6 +97,13 @@
 
     // Puts the talent icons into a card made by card()
     async function fill(el) {
+      const vb = el.querySelector(".gc-vod");
+      if (vb) loadVods().then(() => {   // "Watch this game" when Twitch still has the VOD
+        const v = vodAt(+vb.dataset.start);
+        if (!v) return;
+        vb.innerHTML = `<a class="gc-watch" href="${v.url}" target="_blank" rel="noopener">${TWITCH_ICON}Watch this game <small>${v.at} into the stream</small></a>`;
+        vb.hidden = false;
+      });
       const box = el.querySelector(".gc-tal");
       if (!box) return;
       const tree = await treeOf(box.dataset.hero);
@@ -90,6 +114,6 @@
       }).join("");
     }
 
-    return { byId, edge, best, award, awIcon, card, fill, kda, num, len, ago, esc };
+    return { byId, edge, best, award, awIcon, card, fill, kda, num, len, ago, esc, vod, loadVods, TWITCH_ICON };
   };
 })();

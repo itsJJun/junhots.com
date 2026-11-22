@@ -22,6 +22,7 @@
 //   POST /api/now      -> Jun only (password): the overlay sends it at each game's loading screen ({clear: true} clears it);
 //                         a game sent to POST /api/games clears it too
 //   GET/POST /api/community -> the community tier list from the tier list maker (src/community.js)
+//   GET  /api/vods     -> everyone: my Twitch VODs of the last 60 days, for "Watch this game" (src/vods.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
@@ -31,6 +32,7 @@ import { patchNotes, patchTakes } from "./patch-notes.js";
 import { feedback } from "./feedback.js";
 import { schedule, scheduleAdmin, keepTwitchAlive } from "./schedule.js";
 import { community } from "./community.js";
+import { refreshVods, vodList } from "./vods.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -267,6 +269,7 @@ export default {
     if (url.pathname === "/api/patch-takes") return patchTakes(request, env, passwordOk);
     if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
     if (url.pathname === "/api/community") return community(request, env);
+    if (url.pathname === "/api/vods" && request.method === "GET") return vodList(env);
 
     if (url.pathname === "/api/now") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
@@ -351,6 +354,7 @@ export default {
         const added = Math.max(0, list.length - before.length);
         await env.BUILDS.put(GAMES_KEY, JSON.stringify(list.slice(0, MAX_GAMES)));
         if (incoming.length === 1) await env.BUILDS.delete(NOW_KEY);   // the game that was "now" is over
+        if (incoming.length === 1) ctx.waitUntil(refreshVods(env, true).catch(() => {}));   // tonight's VOD for "Watch this game"
         return json({ ok: true, added, games: Math.min(list.length, MAX_GAMES) });
       }
       return json({ error: "method not allowed" }, 405);
@@ -373,7 +377,11 @@ export default {
     return env.ASSETS.fetch(request);
   },
   // Daily (wrangler.jsonc "triggers"): keep the Twitch login for the schedule editor fresh
+  // Daily: keep the Twitch login alive. Hourly: my VOD list for "Watch this game" (src/vods.js).
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(keepTwitchAlive(env));
+    ctx.waitUntil((async () => {
+      if (event.cron === "17 9 * * *") await keepTwitchAlive(env).catch(() => {});
+      await refreshVods(env, false).catch(() => {});
+    })());
   },
 };
