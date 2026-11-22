@@ -16,6 +16,12 @@ export async function refreshVods(env, readOnly) {
   const j = await helix(env, "GET", `videos?user_id=${TWITCH_ID}&type=archive&first=100`, null, readOnly);
   const vods = (j.data || []).map(v => ({ id: String(v.id), start: Date.parse(v.created_at), dur: seconds(v.duration) }))
     .filter(v => /^\d+$/.test(v.id) && v.start && Date.now() - v.start < KEEP).sort((a, b) => b.start - a.start);
+  // Twitch sometimes answers with an empty list for a moment: never let that wipe the VODs we already know
+  if (!vods.length) {
+    let old = null;
+    try { old = JSON.parse((await env.BUILDS.get(KEY)) || "null"); } catch {}
+    if (old?.vods?.some(v => Date.now() - v.start < KEEP)) return;
+  }
   await env.BUILDS.put(KEY, JSON.stringify({ vods, at: Date.now() }));
 }
 
