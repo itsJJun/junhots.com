@@ -1,1 +1,3976 @@
-{}
+{
+  "abathur": [
+    {
+      "name": "the 'ZERG'",
+      "picks": [
+        4,
+        4,
+        3,
+        1,
+        3,
+        4,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": "lane pushing, macro machine. Plus, you slap them.\nLvl 20: depends on whether you want to win the teamfight or push harder"
+    },
+    {
+      "name": "North Korea",
+      "picks": [
+        2,
+        3,
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "3",
+        "14",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13/16: depends if you want to macro vs better teamfight. i would only go this build if you don't need Calldown: Mule"
+    },
+    {
+      "name": "The Hat",
+      "picks": [
+        1,
+        1,
+        3,
+        2,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "1",
+        ""
+      ],
+      "good": [],
+      "with": [
+        "illidan",
+        "mephisto"
+      ],
+      "note": "you are illidan and samuro's pet"
+    }
+  ],
+  "ana": [
+    {
+      "name": "No Heal For You",
+      "picks": [
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "2",
+        "",
+        "2"
+      ],
+      "good": [
+        "whitemane",
+        "auriel",
+        "rehgar",
+        "alexstrasza",
+        "guldan"
+      ],
+      "with": [],
+      "note": "usually go this build vs heroes with burst heals OR if have burst comp"
+    },
+    {
+      "name": "night night",
+      "picks": [
+        2,
+        2,
+        2,
+        1,
+        3,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "3",
+        "3",
+        "2",
+        "2",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "general build\nLvl 4:  if they have a hard dive\nLvl 7:  if they have a lot of spell damage"
+    }
+  ],
+  "anduin": [
+    {
+      "name": "Normal everyday",
+      "picks": [
+        2,
+        3,
+        3,
+        2,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "genaric build for every match/draft"
+    },
+    {
+      "name": "Manduin",
+      "picks": [
+        2,
+        1,
+        2,
+        2,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "are you brave?"
+    }
+  ],
+  "auriel": [
+    {
+      "name": "Normal",
+      "picks": [
+        2,
+        3,
+        3,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "1",
+        "2",
+        "",
+        "14"
+      ],
+      "good": [],
+      "with": [],
+      "note": "for lvl13: depeding if you need blind"
+    }
+  ],
+  "brightwing": [
+    {
+      "name": "Point Donor",
+      "picks": [
+        3,
+        1,
+        1,
+        2,
+        3,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        "1"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Thank you for donating your hard earned points to enemy team!"
+    },
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        3,
+        3,
+        1,
+        3,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "2",
+        ""
+      ],
+      "good": [
+        "genji",
+        "illidan",
+        "maiev",
+        "sylvanas"
+      ],
+      "with": [],
+      "note": "Default Brightwing Build",
+      "rec": true
+    }
+  ],
+  "chen": [
+    {
+      "name": "vs AA heavy team",
+      "picks": [
+        1,
+        2,
+        3,
+        1,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "13",
+        "",
+        "",
+        "1",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Q at lvl 4/13 if they have lot of mobility, W at lv4 for spell heavy DPS"
+    }
+  ],
+  "alexstrasza": [
+    {
+      "name": "Can you land your E?",
+      "picks": [
+        3,
+        2,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "1",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "if you stack your E quest, good job, you got a free win!"
+    },
+    {
+      "name": "Stitches' best friend",
+      "picks": [
+        2,
+        2,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "1",
+        "2",
+        "",
+        "1",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [
+        "stitches",
+        "mephisto"
+      ],
+      "note": "good with any globe quest Hungry for More, Spite"
+    }
+  ],
+  "etc": [
+    {
+      "name": "KOREAN COW",
+      "picks": [
+        1,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "1",
+        "",
+        "",
+        "",
+        "3",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "offlane ETC"
+    },
+    {
+      "name": "Generic build",
+      "picks": [
+        3,
+        3,
+        2,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "2",
+        "2",
+        "1",
+        "",
+        "",
+        "",
+        "15"
+      ],
+      "good": [],
+      "with": [],
+      "note": "lvl 1: block party vs AA, Prog Rock vs rest"
+    }
+  ],
+  "deckard": [
+    {
+      "name": "Pick up the POTS",
+      "picks": [
+        3,
+        3,
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "23",
+        "2",
+        "",
+        "1",
+        "14"
+      ],
+      "good": [],
+      "with": [],
+      "note": "lvl 7: Emerald vs lot of heals, Kanai vs dive/burst"
+    }
+  ],
+  "guldan": [
+    {
+      "name": "EU Guldan",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Free Win",
+      "picks": [
+        3,
+        2,
+        1,
+        1,
+        1,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Stack your E, get the free win"
+    },
+    {
+      "name": "Suck them All",
+      "picks": [
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "2",
+        "3",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13/16: Harvest life & Darkness within if you really want to go full suck + enemy doesn't have any spell damage"
+    }
+  ],
+  "samuro": [
+    {
+      "name": "Catch Me If You Can",
+      "picks": [
+        3,
+        2,
+        1,
+        1,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "2",
+        "",
+        "13",
+        "24"
+      ],
+      "good": [
+        "chen"
+      ],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "lucio": [
+    {
+      "name": "Can't Touch Me",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "1",
+        "14"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 16: very good with tanky team, such as Diablo or Stitches + heavy frontline"
+    }
+  ],
+  "zarya": [
+    {
+      "name": "BWEEEEEEEEEEEEEEEEN",
+      "picks": [
+        3,
+        1,
+        3,
+        2,
+        4,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "kharazim": [
+    {
+      "name": "ONE PUNCH MAN",
+      "picks": [
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "3",
+        "1",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13: spell damage vs cc+aa damage\nLvl 16: damage vs support(cleanse)\nLvl 20: Are you a fisting legend?"
+    }
+  ],
+  "lili": [
+    {
+      "name": "Serpents",
+      "picks": [
+        2,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Full Heal",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "2",
+        "1",
+        "",
+        "3",
+        "",
+        "3"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "deathwing": [
+    {
+      "name": "What are these BUFFS",
+      "picks": [
+        1,
+        2,
+        2,
+        2,
+        3,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "2",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "ltmorales": [
+    {
+      "name": "Fire in the Hole",
+      "picks": [
+        3,
+        3,
+        2,
+        2,
+        1,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "23",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Healing Machine",
+      "picks": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        "12"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "malfurion": [
+    {
+      "name": "The Heals",
+      "picks": [
+        3,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "2",
+        "",
+        "",
+        "2",
+        "",
+        "12",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Generally better build vs dive since we have close to mount speed all the time\nLvl 1: Broccoli?"
+    },
+    {
+      "name": "Walking Fountain",
+      "picks": [
+        3,
+        3,
+        3,
+        1,
+        3,
+        2,
+        1
+      ],
+      "alt": [
+        "2",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Literally infinite Mana/Heal sustain\nLvl 1: Broccoli?"
+    }
+  ],
+  "lostvikings": [
+    {
+      "name": "The Vikings",
+      "picks": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Camp Stealer",
+      "picks": [
+        4,
+        4,
+        2,
+        2,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "I would only take this on Volskaya or Garden"
+    }
+  ],
+  "rehgar": [
+    {
+      "name": "Normal",
+      "picks": [
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13: Shield is good if they have more burst than sustain damage"
+    },
+    {
+      "name": "DON'T DO IT",
+      "picks": [
+        1,
+        2,
+        3,
+        1,
+        2,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "ARE YOU A POINT DONOR?"
+    },
+    {
+      "name": "PLEASE DON'T",
+      "picks": [
+        3,
+        2,
+        3,
+        1,
+        2,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "1",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "ARE YOU ALSO A POINT DONOR??"
+    }
+  ],
+  "tyrande": [
+    {
+      "name": "Normal",
+      "picks": [
+        2,
+        3,
+        1,
+        2,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Owl Sniper",
+      "picks": [
+        1,
+        3,
+        1,
+        2,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "I'm Not Healer",
+      "picks": [
+        3,
+        2,
+        3,
+        2,
+        3,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "stukov": [
+    {
+      "name": "Pool",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "1",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [
+        "johanna",
+        "maiev"
+      ],
+      "note": ""
+    },
+    {
+      "name": "More Healing",
+      "picks": [
+        3,
+        2,
+        3,
+        2,
+        2,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "infinite booger thrower",
+      "picks": [
+        1,
+        2,
+        1,
+        2,
+        3,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "liming": [
+    {
+      "name": "Normal",
+      "picks": [
+        2,
+        2,
+        3,
+        2,
+        1,
+        4,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "3",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13/16: If you think you can 1shot when out dying first"
+    }
+  ],
+  "uther": [
+    {
+      "name": "Normal",
+      "picks": [
+        2,
+        2,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "1"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "whitemane": [
+    {
+      "name": "Normal",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        1,
+        2,
+        1
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        "3",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 1: if you have hard time with mana"
+    },
+    {
+      "name": "AA",
+      "picks": [
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "If you don't need to cleanse and continuously in the fight, it is a pretty good build"
+    }
+  ],
+  "medivh": [
+    {
+      "name": "The Bird",
+      "picks": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "3",
+        "",
+        "13"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "artanis": [
+    {
+      "name": "Infinite Shields",
+      "picks": [
+        1,
+        2,
+        1,
+        1,
+        1,
+        2,
+        1
+      ],
+      "alt": [
+        "23",
+        "3",
+        "",
+        "2",
+        "",
+        "",
+        "3"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "falstad": [
+    {
+      "name": "AA",
+      "picks": [
+        3,
+        3,
+        1,
+        2,
+        3,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Point Donor",
+      "picks": [
+        2,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "If you don't value your points"
+    },
+    {
+      "name": "Q",
+      "picks": [
+        1,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "raynor": [
+    {
+      "name": "STACKS",
+      "picks": [
+        2,
+        3,
+        3,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "1",
+        "",
+        "1",
+        "",
+        "",
+        "13"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "I Steal Your Camps",
+      "picks": [
+        1,
+        1,
+        2,
+        1,
+        3,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "5"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "tychus": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "1"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 20: I personally like Q 20 alot"
+    }
+  ],
+  "johanna": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        1,
+        1,
+        2,
+        3,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "",
+        "",
+        "34"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "varian": [
+    {
+      "name": "Taunt/Tank",
+      "picks": [
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        5
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "2",
+        "2",
+        "4"
+      ],
+      "good": [
+        "zarya",
+        "johanna",
+        "fenix",
+        "artanis"
+      ],
+      "with": [],
+      "note": "Lvl 13: Shattering Thorw vs any shield heroes\nLvl 16: Armor banner vs Heavy Dive\nLvl 20: I've been really liking the Shout"
+    },
+    {
+      "name": "SMASH",
+      "picks": [
+        1,
+        2,
+        1,
+        1,
+        3,
+        3,
+        5
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "12",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 1/7: Q is still very good with smash"
+    }
+  ],
+  "stitches": [
+    {
+      "name": "Best Hooker HotS",
+      "picks": [
+        3,
+        3,
+        1,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "34"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 20: Gas Bag vs Log of CC, Hungry Hungry vs Heavy Dive, Master Hooker vs 'Master Hooker'"
+    }
+  ],
+  "dehaka": [
+    {
+      "name": "Unkillable Demon Dehaka",
+      "picks": [
+        1,
+        3,
+        3,
+        2,
+        1,
+        3,
+        2
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 1: if they have less than 2 spell damage, go Enhanced Agility"
+    },
+    {
+      "name": "F1 Race Car",
+      "picks": [
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "1",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": "standard offlane dehaka build",
+      "rec": true
+    }
+  ],
+  "tassadar": [
+    {
+      "name": "ZAP ZAP",
+      "picks": [
+        2,
+        2,
+        2,
+        1,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "2",
+        "",
+        "1"
+      ],
+      "good": [],
+      "with": [],
+      "note": "very good at poking\n\n\nLvl 13: Shadow Walk if they have a very good dive"
+    }
+  ],
+  "alarak": [
+    {
+      "name": "Easy Combo",
+      "picks": [
+        2,
+        3,
+        3,
+        2,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Offlane/AA",
+      "picks": [
+        1,
+        3,
+        3,
+        2,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "2",
+        "1",
+        "",
+        "",
+        "124"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Good on 1v1/offlane"
+    },
+    {
+      "name": "ZAP ZAP ZAP",
+      "picks": [
+        3,
+        2,
+        3,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "3",
+        "",
+        "3"
+      ],
+      "good": [],
+      "with": [],
+      "note": "very good scaling/poke damge"
+    }
+  ],
+  "anubarak": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "3",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Beetles",
+      "picks": [
+        2,
+        2,
+        3,
+        2,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "1",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "When I find myself in times of trouble, Mother Mary comes to me\nSpeaking words of wisdom, let it be\n\nLvl 4: Bed of Barbs is good on any stalling maps, especially on Altrac Pass"
+    }
+  ],
+  "arthas": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        1,
+        3,
+        1,
+        2,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "azmodan": [
+    {
+      "name": "NUKE",
+      "picks": [
+        1,
+        3,
+        3,
+        2,
+        3,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Team I need stacks"
+    },
+    {
+      "name": "AZMOGOCORE",
+      "picks": [
+        1,
+        1,
+        3,
+        1,
+        3,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "AZMO GO CORE"
+    }
+  ],
+  "blaze": [
+    {
+      "name": "Default / Offlane",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        3,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "12",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 7: suppressive fire vs a lot of spell damage Nanomachine coating vs AA",
+      "rec": true
+    }
+  ],
+  "cassia": [
+    {
+      "name": "AA",
+      "picks": [
+        3,
+        2,
+        3,
+        1,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Q Burst",
+      "picks": [
+        1,
+        1,
+        3,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "1",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 7/16: seraph's hymn & power strike combo is very fun build ve heavy melee AA hereos"
+    }
+  ],
+  "chogall": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        3,
+        2,
+        1,
+        3,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Superman",
+      "picks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "chromie": [
+    {
+      "name": "W",
+      "picks": [
+        2,
+        3,
+        2,
+        2,
+        3,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "2",
+        "",
+        "1",
+        "",
+        "",
+        "1"
+      ],
+      "good": [],
+      "with": [],
+      "note": "You need at least 40 stacks on your Deep breathing to match the previous W damage"
+    },
+    {
+      "name": "Q",
+      "picks": [
+        1,
+        3,
+        1,
+        2,
+        3,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "2",
+        "",
+        "1",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "dva": [
+    {
+      "name": "Matrix",
+      "picks": [
+        1,
+        2,
+        3,
+        1,
+        1,
+        2,
+        4
+      ],
+      "alt": [
+        "2",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "diablo": [
+    {
+      "name": "Ultimate Back Scratcher",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        3,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Unkillable Diablo (kinda of)",
+      "picks": [
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "1",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "1 shot on the wall",
+      "picks": [
+        2,
+        1,
+        3,
+        1,
+        1,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "fenix": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        1,
+        1,
+        4,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "gall": [
+    {
+      "name": "You like stuning balls?",
+      "picks": [
+        3,
+        1,
+        2,
+        2,
+        3,
+        1,
+        4
+      ],
+      "alt": [
+        "1",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "garrosh": [
+    {
+      "name": "Tank",
+      "picks": [
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 10/20: when you go Decimate, you want to go Deadly Calm"
+    },
+    {
+      "name": "Offlane",
+      "picks": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "1",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "when you have to bust out that offlane Garrosh"
+    }
+  ],
+  "gazlowe": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "iRobot",
+      "picks": [
+        2,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "AA brawling Gazlowe"
+    }
+  ],
+  "genji": [
+    {
+      "name": "E",
+      "picks": [
+        1,
+        2,
+        2,
+        2,
+        3,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Q",
+      "picks": [
+        2,
+        1,
+        3,
+        2,
+        1,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "greymane": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        1,
+        1,
+        2,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "more of a ranged playstyle"
+    },
+    {
+      "name": "Eat Booty",
+      "picks": [
+        3,
+        1,
+        3,
+        2,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "more of a melee playstyle"
+    }
+  ],
+  "hanzo": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Q Poke",
+      "picks": [
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "23",
+        ""
+      ],
+      "good": [
+        "sgthammer"
+      ],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "hogger": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        3,
+        3,
+        1,
+        2,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "2",
+        "1",
+        "2",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "illidan": [
+    {
+      "name": "Offlane",
+      "picks": [
+        3,
+        3,
+        3,
+        2,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "1",
+        "",
+        "",
+        "1",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 7/16: if rapid chase, then marked for death"
+    },
+    {
+      "name": "2018 Illidan",
+      "picks": [
+        2,
+        3,
+        3,
+        1,
+        2,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "I guess you are ARAMing"
+    }
+  ],
+  "imperius": [
+    {
+      "name": "Fabled",
+      "picks": [
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Offlane",
+      "picks": [
+        3,
+        1,
+        3,
+        1,
+        1,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "jaina": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "junkrat": [
+    {
+      "name": "Traps on the Floor",
+      "picks": [
+        3,
+        3,
+        3,
+        1,
+        3,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Q",
+      "picks": [
+        3,
+        1,
+        3,
+        1,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "kaelthas": [
+    {
+      "name": "no there is no other option on LV 1 (my ",
+      "picks": [
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "kelthuzad": [
+    {
+      "name": "Chain City",
+      "picks": [
+        3,
+        3,
+        2,
+        2,
+        3,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "kerrigan": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        1,
+        2,
+        2,
+        3,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "leoric": [
+    {
+      "name": "Damage Reduction / E",
+      "picks": [
+        1,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Defaul / AA",
+      "picks": [
+        1,
+        3,
+        2,
+        1,
+        3,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "lunara": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        3,
+        4,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "maiev": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        1,
+        1,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 1: naisha's memento take it for PvE"
+    }
+  ],
+  "malganis": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "3",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 13: very good with sustain healer such as Malfurion Lucio"
+    }
+  ],
+  "malthael": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        1,
+        2,
+        2,
+        4,
+        1,
+        4
+      ],
+      "alt": [
+        "23",
+        "2",
+        "",
+        "",
+        "3",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Give me Nano",
+      "picks": [
+        1,
+        2,
+        2,
+        1,
+        3,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "14",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [
+        "ana"
+      ],
+      "note": "with Nano boost you are able to spam W every second"
+    }
+  ],
+  "mei": [
+    {
+      "name": "Build a Snowman?",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        "3"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "mephisto": [
+    {
+      "name": "W build",
+      "picks": [
+        2,
+        3,
+        2,
+        2,
+        3,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Scales harder than Q Build"
+    },
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        3,
+        2,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Easier to use"
+    }
+  ],
+  "muradin": [
+    {
+      "name": "Tank",
+      "picks": [
+        3,
+        3,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "2",
+        "",
+        "",
+        "1",
+        "2",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "MLB",
+      "picks": [
+        3,
+        3,
+        2,
+        2,
+        3,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "1",
+        "",
+        ""
+      ],
+      "good": [
+        "stitches",
+        "sgthammer"
+      ],
+      "with": [],
+      "note": "Good on isolating the target, Temu LeeSin"
+    }
+  ],
+  "murky": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        1,
+        1,
+        2,
+        3,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "nazeebo": [
+    {
+      "name": "Spiderman",
+      "picks": [
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Very strong as long as you can land your Corpse Spiders"
+    },
+    {
+      "name": "Toad taste like chicken",
+      "picks": [
+        2,
+        2,
+        3,
+        1,
+        3,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "12",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "nova": [
+    {
+      "name": "Player Killer Hero Player",
+      "picks": [
+        1,
+        1,
+        3,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Sniper / Q",
+      "picks": [
+        2,
+        1,
+        1,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "3",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "orphea": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        3,
+        1,
+        2,
+        2,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Tenticles / Q",
+      "picks": [
+        1,
+        1,
+        3,
+        2,
+        1,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "1",
+        "1",
+        "",
+        "",
+        "3"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "probius": [
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        2,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Helm's Deep",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Cannon Rush",
+      "picks": [
+        3,
+        1,
+        3,
+        1,
+        3,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "qhira": [
+    {
+      "name": "Default",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "23"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "ragnaros": [
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "Very good vs 4+ Melee"
+    },
+    {
+      "name": "E build",
+      "picks": [
+        3,
+        2,
+        3,
+        1,
+        2,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    },
+    {
+      "name": "Meat Balls",
+      "picks": [
+        2,
+        1,
+        2,
+        1,
+        3,
+        2,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2"
+      ],
+      "good": [
+        "sgthammer"
+      ],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "rexxar": [
+    {
+      "name": "Q / AA",
+      "picks": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "W build",
+      "picks": [
+        1,
+        2,
+        3,
+        2,
+        2,
+        3,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "4"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "sgthammer": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "",
+        "12",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "sonya": [
+    {
+      "name": "Spin to Win",
+      "picks": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "2",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "1 shot Leap",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        3,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "sylvanas": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        2,
+        1,
+        3,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Double E",
+      "picks": [
+        2,
+        1,
+        3,
+        1,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "thebutcher": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Ranged Butcher",
+      "picks": [
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "thrall": [
+    {
+      "name": "AFK till stacked",
+      "picks": [
+        1,
+        3,
+        1,
+        2,
+        3,
+        2,
+        2
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    },
+    {
+      "name": "is that Samuro or Chen on enemy team??",
+      "picks": [
+        3,
+        2,
+        3,
+        2,
+        3,
+        3,
+        5
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "Not Trashlighting Anymore",
+      "picks": [
+        2,
+        2,
+        2,
+        2,
+        3,
+        2,
+        5
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "tracer": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        3,
+        1,
+        2,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "2"
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "tyrael": [
+    {
+      "name": "Default",
+      "picks": [
+        3,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "valeera": [
+    {
+      "name": "Default",
+      "picks": [
+        4,
+        1,
+        1,
+        1,
+        3,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "2",
+        "2",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "valla": [
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        3,
+        2,
+        1,
+        1,
+        3,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "W build",
+      "picks": [
+        2,
+        1,
+        2,
+        1,
+        3,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "AA build",
+      "picks": [
+        3,
+        2,
+        3,
+        2,
+        2,
+        3,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "xalatath": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "xul": [
+    {
+      "name": "Slash Slash / AA",
+      "picks": [
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "I would only take this vs No blind + 4/5 melee"
+    },
+    {
+      "name": "PvE Gawd",
+      "picks": [
+        3,
+        3,
+        2,
+        2,
+        1,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "",
+      "rec": true
+    }
+  ],
+  "yrel": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        1,
+        1,
+        3,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "3",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "zagara": [
+    {
+      "name": "Default",
+      "picks": [
+        2,
+        1,
+        3,
+        1,
+        1,
+        1,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "zeratul": [
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        4
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "W build",
+      "picks": [
+        3,
+        2,
+        2,
+        1,
+        1,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    },
+    {
+      "name": "is that Kure?",
+      "picks": [
+        2,
+        2,
+        1,
+        1,
+        2,
+        1,
+        3
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": ""
+    }
+  ],
+  "zuljin": [
+    {
+      "name": "You Want Axe?",
+      "picks": [
+        2,
+        3,
+        3,
+        1,
+        2,
+        3,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "2",
+        "",
+        "",
+        "2",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "Lvl 7/16: vs double ranged or blind, Arcanite Axes Wrong Place is good combo"
+    },
+    {
+      "name": "Q build",
+      "picks": [
+        1,
+        3,
+        1,
+        1,
+        2,
+        1,
+        1
+      ],
+      "alt": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "good": [],
+      "with": [],
+      "note": "not bad vs beefy frontline"
+    }
+  ]
+}
