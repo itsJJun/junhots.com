@@ -10,7 +10,7 @@
 //               + power combos: with both heroes of a combo on the team ("Auriel + Cho'gall → S"), each plays at least
 //                 at the combo's tier ("+" = one step past the top tier), and a low win rate stops counting against it
 //               - team comp: no healer, no tank, no ranged damage, doubled tanks/healers (only once the team is mostly picked)
-//   edge        = 100 / (1 + e^(-(your score - their score) / 4))
+//   edge        = 100 / (1 + e^(-(your score - their score) / 17))
 // An empty slot counts as a typical good pick (the average of the 20 best heroes on this map), so a team that has
 // picked more heroes doesn't look stronger just for that.
 //
@@ -19,7 +19,9 @@
 // The overlay's match banner uses the same model (tierlist.py EDGE_WEIGHTS): change a weight in both.
 // draftModel(tierlist, heroes) with heroes = [{ id, grole }]. map is a tier list map name or "Overall".
 window.draftModel = (TL, HEROES) => {
-  const W = { counter: 1, synergy: 0.6, tagCounter: 0.4, tagCounterMax: 1.2, tagSynergy: 0.25, wr: 0.35, shrink: 2000, noHealer: 2, noTank: 1.5, noRanged: 1, double: 0.75, spread: 4 };
+  // Team comp and spread tuned on Jun's 562 uploaded games (2026-11-25): comp holes mattered about twice as much, and the
+  // old spread (4) showed 80%+ for drafts that won about 65%. Spread 17 makes the % honest.
+  const W = { counter: 1, synergy: 0.6, tagCounter: 0.4, tagCounterMax: 1.2, tagSynergy: 0.25, wr: 0.35, shrink: 2000, noHealer: 4, noTank: 3, noRanged: 2, double: 1.5, spread: 17 };
   const roleOf = Object.fromEntries(HEROES.map(h => [h.id, h.grole]));
   const key = window.tierKey || (id => id);
   function tierId(id, map) {
