@@ -58,7 +58,7 @@
 .bt .wr b { font: 600 14px var(--mono); width: 40px; text-align: right; color: var(--c); }
 .bh .bmore { margin-top: 6px; padding: 4px 6px; border: 0; background: none; color: var(--accent); font: 500 14px var(--sans); cursor: pointer; }
 .bh .bmore:hover { text-decoration: underline; text-underline-offset: 3px; }
-/* Nemesis and best allies: the heroes I win least against / most with (follows the map and hero filters) */
+/* Worst matchups and best allies: the heroes I win least against / most with (follows the map and hero filters) */
 .nb { margin-bottom: 14px; padding: 14px 18px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .nb-h { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .nb-h h2 { margin: 0; font: 600 17px var(--display); letter-spacing: -0.01em; }
@@ -166,7 +166,7 @@
 
   <section class="sum" id="sum" aria-label="Summary"></section>
   <section class="bh" id="byhero" aria-label="By hero" hidden></section>
-  <section class="nb" id="nemesis" aria-label="Nemesis and best allies" hidden></section>
+  <section class="nb" id="nemesis" aria-label="Worst matchups and best allies" hidden></section>
   <div class="filters">
     <div class="heroes" id="heroes" role="group" aria-label="Hero"></div>
     <label class="hsearch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="hq" type="search" placeholder="Search hero" autocomplete="off" aria-label="Search hero"></label>
@@ -269,7 +269,7 @@ document.getElementById("byhero").addEventListener("click", e => {
   if (r) { F.h = F.h === r.dataset.h ? "" : r.dataset.h; shown = PAGE; draw(); fitHeroes(); }
 });
 
-// Nemesis and best allies: my win rate against / with each hero, from the games with both teams, for the chosen map
+// Worst matchups and best allies: my win rate against / with each hero, from the games with both teams, for the chosen map
 // and hero (not the win/loss filter). A hero needs a few games to count: 12 over all my games, fewer when filtered.
 function drawNemesis() {
   const box = document.getElementById("nemesis");
@@ -289,7 +289,7 @@ function drawNemesis() {
     <span class="rec">${wn}–${n - wn}</span><span class="bar"><i style="width:${Math.round(r * 100)}%"></i><u style="left:${Math.round(base * 100)}%"></u></span><span class="pc">${Math.round(r * 100)}%</span></div>`;
   const col = (title, c, rows) => `<div><h3 style="--c:var(--${c})"><i></i>${title}</h3>${rows.length ? rows.map(r => row(r, c)).join("") : '<div class="none">Not enough games yet</div>'}</div>`;
   const who = F.h ? ` on ${kit.esc(kit.byId[F.h]?.name || F.h)}` : "";
-  box.innerHTML = `<div class="nb-h"><h2>Nemesis and best allies${who}</h2><p>Heroes in ${min}+ of these ${list.length} games · my usual win rate is <b>${Math.round(base * 100)}%</b> (grey line)</p></div>
+  box.innerHTML = `<div class="nb-h"><h2>Worst matchups and best allies${who}</h2><p>Heroes in ${min}+ of these ${list.length} games · my usual win rate is <b>${Math.round(base * 100)}%</b> (grey line)</p></div>
     <div class="nb-cols">${col("Toughest to play against", "bad", top(vs, true))}${col("Best teammates", "good", top(w, false))}</div>`;
   box.hidden = false;
 }
