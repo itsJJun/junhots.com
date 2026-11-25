@@ -1,415 +1,1264 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Heroes of the Storm tier list · JunHotS</title>
-<meta name="description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero.">
-<meta property="og:title" content="Heroes of the Storm tier list · JunHotS">
-<meta property="og:description" content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero.">
-<meta property="og:url" content="https://junhots.com/tierlist/">
-<meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="JunHotS">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://junhots.com/tierlist/">
-<meta name="color-scheme" content="dark">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/site.css">
-<link rel="stylesheet" href="/map-picker.css">
-<style>
-.hint { margin: 0; font-size: 13px; color: var(--muted); }
-/* My list / Community / Compare: the community list is every visitor's tier list maker list, averaged (src/community.js) */
-.hintrow { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin: 0 0 12px; }
-.views { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
-.views .tab { height: 26px; }
-.dis { margin: 0 0 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-.dis[hidden] { display: none; }
-.dis-h { display: flex; justify-content: space-between; align-items: end; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 12px; }
-.dis-h:last-child { margin-bottom: 0; }
-.dis-h h2 { margin: 0; font: 600 17px var(--display); letter-spacing: -0.01em; }
-.dis-h p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
-.dis-h p b { color: var(--text); font-weight: 600; }
-.dis-h a { color: var(--accent); font-size: 14px; white-space: nowrap; }
-.dis-h a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.dis-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
-.dc { all: unset; cursor: pointer; display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
-.dc:hover { background: #2a2522; }
-.dc img { width: 44px; height: 44px; border-radius: 8px; flex: none; }
-.dc b { font-size: 14px; font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dc small { display: block; color: var(--muted); font-size: 11px; }
-.vs { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); margin: 2px 0; }
-.vs .ar2 { opacity: .6; }
-.tt { font: 700 13px var(--display); color: var(--c); padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--c) 16%, transparent); }
-.port .cbd { position: absolute; bottom: -4px; left: -4px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 5px; font: 700 10px/16px var(--display); text-align: center; color: #160d0a; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
-.detail .chat { margin-top: 4px; font-size: 13px; color: var(--muted); }
-.detail .chat .tt { font-size: 12px; }
-.controls { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
-.tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; }
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
-.tab[aria-pressed="true"] .ri { color: #1f0b05 !important; }
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        @view-transition {
+          navigation: auto;
+        }
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Heroes of the Storm tier list · JunHotS</title>
+    <meta
+      name="description"
+      content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero."
+    />
+    <meta property="og:title" content="Heroes of the Storm tier list · JunHotS" />
+    <meta
+      property="og:description"
+      content="Jun's Heroes of the Storm tier list with counters, synergy and win rates for every hero."
+    />
+    <meta property="og:url" content="https://junhots.com/tierlist/" />
+    <meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JunHotS" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://junhots.com/tierlist/" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/map-picker.css" />
+    <style>
+      .hint {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      /* My list / Community / Compare: the community list is every visitor's tier list maker list, averaged (src/community.js) */
+      .hintrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 16px;
+        flex-wrap: wrap;
+        margin: 0 0 12px;
+      }
+      .views {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--surface);
+      }
+      .views .tab {
+        height: 26px;
+      }
+      .dis {
+        margin: 0 0 14px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+      .dis[hidden] {
+        display: none;
+      }
+      .dis-h {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 8px 16px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .dis-h:last-child {
+        margin-bottom: 0;
+      }
+      .dis-h h2 {
+        margin: 0;
+        font: 600 17px var(--display);
+        letter-spacing: -0.01em;
+      }
+      .dis-h p {
+        margin: 2px 0 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .dis-h p b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .dis-h a {
+        color: var(--accent);
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      .dis-h a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .dis-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+        gap: 10px;
+      }
+      .dc {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px;
+        border-radius: 10px;
+        background: var(--surface-2);
+        min-width: 0;
+      }
+      .dc:hover {
+        background: #2a2522;
+      }
+      .dc img {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        flex: none;
+      }
+      .dc b {
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dc small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .vs {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--muted);
+        margin: 2px 0;
+      }
+      .vs .ar2 {
+        opacity: 0.6;
+      }
+      .tt {
+        font: 700 13px var(--display);
+        color: var(--c);
+        padding: 0 5px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--c) 16%, transparent);
+      }
+      .port .cbd {
+        position: absolute;
+        bottom: -4px;
+        left: -4px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 3px;
+        border-radius: 5px;
+        font: 700 10px/16px var(--display);
+        text-align: center;
+        color: #160d0a;
+        background: var(--c);
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      .detail .chat {
+        margin-top: 4px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .detail .chat .tt {
+        font-size: 12px;
+      }
+      .controls {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--surface);
+      }
+      .tab {
+        font: 500 13px/1 var(--sans);
+        color: var(--muted);
+        height: 30px;
+        padding: 0 12px;
+        border-radius: 6px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab[aria-pressed="true"] {
+        color: #1f0b05;
+        background: var(--brand);
+      }
+      .tab[aria-pressed="true"] .ri {
+        color: #1f0b05 !important;
+      }
 
-.tiers { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.row { display: grid; grid-template-columns: 56px 1fr; min-height: 76px; }
-.row + .row { border-top: 1px solid var(--line); }
-/* Tier letters: dark tile tinted with the tier color, glowing letter, thin color edge */
-.tier { display: grid; place-items: center; font: 700 22px/1 var(--sans); letter-spacing: -0.02em; color: var(--c); background: linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, var(--surface-2)), color-mix(in srgb, var(--c) 6%, var(--surface))); box-shadow: inset 3px 0 0 var(--c); border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line)); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent); }
-.heroes { display: flex; flex-wrap: wrap; gap: 8px; align-content: center; padding: 10px 12px; min-width: 0; background: var(--surface); }
-.hero-card { all: unset; cursor: pointer; width: 56px; text-align: center; border-radius: 6px; }
-.hero-card img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--surface-2); }
-.hero-card span { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hero-card .wr { font: 500 11px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
-.hero-card.sel img { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--text); }
-.hero-card:focus-visible { outline-offset: 3px; }
-.good { color: var(--good); } .bad { color: var(--bad); } .mid { color: var(--muted); }
-.empty { color: var(--muted); font-size: 13px; }
+      .tiers {
+        display: grid;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        min-height: 76px;
+      }
+      .row + .row {
+        border-top: 1px solid var(--line);
+      }
+      /* Tier letters: dark tile tinted with the tier color, glowing letter, thin color edge */
+      .tier {
+        display: grid;
+        place-items: center;
+        font: 700 22px/1 var(--sans);
+        letter-spacing: -0.02em;
+        color: var(--c);
+        background: linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--c) 16%, var(--surface-2)),
+          color-mix(in srgb, var(--c) 6%, var(--surface))
+        );
+        box-shadow: inset 3px 0 0 var(--c);
+        border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line));
+        text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent);
+      }
+      .heroes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-content: center;
+        padding: 10px 12px;
+        min-width: 0;
+        background: var(--surface);
+      }
+      .hero-card {
+        all: unset;
+        cursor: pointer;
+        width: 56px;
+        text-align: center;
+        border-radius: 6px;
+      }
+      .hero-card img {
+        display: block;
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 6px;
+        background: var(--surface-2);
+      }
+      .hero-card span {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        line-height: 1.2;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hero-card .wr {
+        font: 500 11px/1.2 var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .hero-card.sel img {
+        box-shadow:
+          0 0 0 2px var(--bg),
+          0 0 0 3px var(--text);
+      }
+      .hero-card:focus-visible {
+        outline-offset: 3px;
+      }
+      .good {
+        color: var(--good);
+      }
+      .bad {
+        color: var(--bad);
+      }
+      .mid {
+        color: var(--muted);
+      }
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+      }
 
-.detail { position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px)); display: grid; gap: 16px; padding: 16px 18px 18px; border: 1px solid #3d3531; border-radius: 12px; background: var(--surface); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); animation: pop .14s ease-out; }
-@keyframes pop { from { opacity: 0; transform: translateY(var(--dy, 4px)) scale(.98); } }
-.detail .x { all: unset; position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
-.detail .x:hover { color: var(--text); background: var(--surface-2); }
-.detail .arrow { position: absolute; left: var(--ax, 50%); width: 12px; height: 12px; background: var(--surface); border: 1px solid #3d3531; transform: translateX(-50%) rotate(45deg); }
-.detail[data-side="below"] .arrow { top: -7px; border-right: 0; border-bottom: 0; }
-.detail[data-side="above"] .arrow { bottom: -7px; border-left: 0; border-top: 0; }
-.scrim { position: fixed; inset: 0; z-index: 19; background: rgba(5, 6, 8, 0.6); }
-.detail .who { display: grid; grid-template-columns: 64px auto; gap: 2px 14px; align-content: start; }
-.detail .who img { grid-row: span 4; width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
-.detail .name { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
-.detail .tagline { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 12px; color: var(--muted); }
-.detail .tagline span { display: inline-flex; align-items: center; gap: 4px; }
-.detail .tagline .ti { width: 13px; height: 13px; }
-.chip.tagc { --t: var(--muted); gap: 6px; padding: 0 11px 0 8px; border-radius: 999px; cursor: default; font-weight: 600; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t) 35%, transparent); border-color: transparent;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--t) 22%, var(--surface-2)), var(--surface-2) 85%); }
-.chip.tagc .ti { width: 15px; height: 15px; }
-.pill { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
-.pill::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
-.stat { font-size: 13px; color: var(--muted); }
-.stat b { font: 500 13px var(--mono); }
-.rel { display: grid; gap: 14px; min-width: 0; padding-top: 14px; border-top: 1px solid var(--line); }
-.rel h3 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--muted) !important; }
-.rel > div:nth-child(1) h3::before, .rel > div:nth-child(2) h3::before, .rel > div:nth-child(3) h3::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
-.rel > div:nth-child(1) h3::before { background: var(--good); }
-.rel > div:nth-child(2) h3::before { background: var(--bad); }
-.rel > div:nth-child(3) h3::before { background: var(--accent); }
-.rel > div:nth-child(4) h3::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; vertical-align: 1px; background: var(--combo); border-radius: 1px; transform: rotate(45deg); box-shadow: 0 0 6px var(--combo); }
-.chip .ct { font: 600 12px var(--sans); color: var(--muted); }
-.chip .ct b { color: var(--c); }
-/* Power combos: a gold link badge on the portrait, and the pairs listed under the tiers */
-.port .cb { position: absolute; right: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; color: #1a1205; background: var(--combo); box-shadow: 0 0 0 2px var(--surface), 0 0 8px rgba(245, 192, 74, 0.55); }
-.port .cb .lk { width: 11px; height: 11px; }
-.combos { margin-top: 14px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--combo) 30%, var(--line)); border-radius: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--combo) 7%, var(--surface)), var(--surface) 60%); }
-.combos:empty { display: none; }
-.combos h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 10px; font: 600 14px var(--sans); color: var(--combo); }
-.combos h2 .lk { width: 15px; height: 15px; }
-.combos h2 small { font-size: 12px; font-weight: 400; color: var(--muted); }
-.combos .cl { display: flex; flex-wrap: wrap; gap: 8px; }
-.cmb { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 12px 5px 5px; box-sizing: border-box; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
-.cmb button { all: unset; cursor: pointer; position: relative; display: block; border-radius: 6px; }
-.cmb .ft { position: absolute; left: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 3px; box-sizing: border-box; display: grid; place-items: center; border-radius: 4px; font: 700 11px/1 var(--sans); color: var(--c); background: #12100f; box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, var(--line)); }
-.cmb img { display: block; width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }
-.cmb .lk { width: 13px; height: 13px; color: var(--combo); margin: 0 -3px; }
-.cmb .ps { display: flex; gap: 6px; }
-.cmb .nm { margin-left: 2px; min-width: 0; line-height: 1.3; }
-.cmb .nm i { font-style: normal; color: var(--muted); }
-.cmb .to { flex: none; white-space: nowrap; font: 700 16px var(--sans); color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
-.cmb .to::before { content: "→ "; font-weight: 400; font-size: 13px; color: var(--muted); text-shadow: none; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.go-builds { display: flex; gap: 8px; }
-.go-builds a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none; background: color-mix(in srgb, var(--brand) 16%, var(--surface-2)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent); transition: background .15s; }
-.go-builds a:hover { background: color-mix(in srgb, var(--brand) 28%, var(--surface-2)); }
-.go-builds svg { width: 14px; height: 14px; color: var(--accent); transition: transform .15s; }
-.go-builds a:hover svg { transform: translateX(3px); }
+      .detail {
+        position: absolute;
+        z-index: 20;
+        width: min(440px, calc(100vw - 32px));
+        display: grid;
+        gap: 16px;
+        padding: 16px 18px 18px;
+        border: 1px solid #3d3531;
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+        animation: pop 0.14s ease-out;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(var(--dy, 4px)) scale(0.98);
+        }
+      }
+      .detail .x {
+        all: unset;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 6px;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+      .detail .x:hover {
+        color: var(--text);
+        background: var(--surface-2);
+      }
+      .detail .arrow {
+        position: absolute;
+        left: var(--ax, 50%);
+        width: 12px;
+        height: 12px;
+        background: var(--surface);
+        border: 1px solid #3d3531;
+        transform: translateX(-50%) rotate(45deg);
+      }
+      .detail[data-side="below"] .arrow {
+        top: -7px;
+        border-right: 0;
+        border-bottom: 0;
+      }
+      .detail[data-side="above"] .arrow {
+        bottom: -7px;
+        border-left: 0;
+        border-top: 0;
+      }
+      .scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 19;
+        background: rgba(5, 6, 8, 0.6);
+      }
+      .detail .who {
+        display: grid;
+        grid-template-columns: 64px auto;
+        gap: 2px 14px;
+        align-content: start;
+      }
+      .detail .who img {
+        grid-row: span 4;
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .detail .name {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .detail .tagline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .detail .tagline span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .detail .tagline .ti {
+        width: 13px;
+        height: 13px;
+      }
+      .chip.tagc {
+        --t: var(--muted);
+        gap: 6px;
+        padding: 0 11px 0 8px;
+        border-radius: 999px;
+        cursor: default;
+        font-weight: 600;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t) 35%, transparent);
+        border-color: transparent;
+        background: linear-gradient(90deg, color-mix(in srgb, var(--t) 22%, var(--surface-2)), var(--surface-2) 85%);
+      }
+      .chip.tagc .ti {
+        width: 15px;
+        height: 15px;
+      }
+      .pill {
+        justify-self: start;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .pill::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        background: var(--c);
+      }
+      .stat {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .stat b {
+        font: 500 13px var(--mono);
+      }
+      .rel {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+      .rel h3 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted) !important;
+      }
+      .rel > div:nth-child(1) h3::before,
+      .rel > div:nth-child(2) h3::before,
+      .rel > div:nth-child(3) h3::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 7px;
+        vertical-align: 1px;
+      }
+      .rel > div:nth-child(1) h3::before {
+        background: var(--good);
+      }
+      .rel > div:nth-child(2) h3::before {
+        background: var(--bad);
+      }
+      .rel > div:nth-child(3) h3::before {
+        background: var(--accent);
+      }
+      .rel > div:nth-child(4) h3::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 7px;
+        vertical-align: 1px;
+        background: var(--combo);
+        border-radius: 1px;
+        transform: rotate(45deg);
+        box-shadow: 0 0 6px var(--combo);
+      }
+      .chip .ct {
+        font: 600 12px var(--sans);
+        color: var(--muted);
+      }
+      .chip .ct b {
+        color: var(--c);
+      }
+      /* Power combos: a gold link badge on the portrait, and the pairs listed under the tiers */
+      .port .cb {
+        position: absolute;
+        right: -5px;
+        top: -5px;
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #1a1205;
+        background: var(--combo);
+        box-shadow:
+          0 0 0 2px var(--surface),
+          0 0 8px rgba(245, 192, 74, 0.55);
+      }
+      .port .cb .lk {
+        width: 11px;
+        height: 11px;
+      }
+      .combos {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border: 1px solid color-mix(in srgb, var(--combo) 30%, var(--line));
+        border-radius: 10px;
+        background: linear-gradient(90deg, color-mix(in srgb, var(--combo) 7%, var(--surface)), var(--surface) 60%);
+      }
+      .combos:empty {
+        display: none;
+      }
+      .combos h2 {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        margin: 0 0 10px;
+        font: 600 14px var(--sans);
+        color: var(--combo);
+      }
+      .combos h2 .lk {
+        width: 15px;
+        height: 15px;
+      }
+      .combos h2 small {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+      .combos .cl {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .cmb {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 5px 12px 5px 5px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .cmb button {
+        all: unset;
+        cursor: pointer;
+        position: relative;
+        display: block;
+        border-radius: 6px;
+      }
+      .cmb .ft {
+        position: absolute;
+        left: -4px;
+        bottom: -4px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 3px;
+        box-sizing: border-box;
+        display: grid;
+        place-items: center;
+        border-radius: 4px;
+        font: 700 11px/1 var(--sans);
+        color: var(--c);
+        background: #12100f;
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, var(--line));
+      }
+      .cmb img {
+        display: block;
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        object-fit: cover;
+      }
+      .cmb .lk {
+        width: 13px;
+        height: 13px;
+        color: var(--combo);
+        margin: 0 -3px;
+      }
+      .cmb .ps {
+        display: flex;
+        gap: 6px;
+      }
+      .cmb .nm {
+        margin-left: 2px;
+        min-width: 0;
+        line-height: 1.3;
+      }
+      .cmb .nm i {
+        font-style: normal;
+        color: var(--muted);
+      }
+      .cmb .to {
+        flex: none;
+        white-space: nowrap;
+        font: 700 16px var(--sans);
+        color: var(--c);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent);
+      }
+      .cmb .to::before {
+        content: "→ ";
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--muted);
+        text-shadow: none;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .go-builds {
+        display: flex;
+        gap: 8px;
+      }
+      .go-builds a {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        text-decoration: none;
+        background: color-mix(in srgb, var(--brand) 16%, var(--surface-2));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent);
+        transition: background 0.15s;
+      }
+      .go-builds a:hover {
+        background: color-mix(in srgb, var(--brand) 28%, var(--surface-2));
+      }
+      .go-builds svg {
+        width: 14px;
+        height: 14px;
+        color: var(--accent);
+        transition: transform 0.15s;
+      }
+      .go-builds a:hover svg {
+        transform: translateX(3px);
+      }
 
-.chip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px 0 3px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; }
-.chip:hover { border-color: #4a413c; }
-.chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
-.none { color: var(--muted); font-size: 13px; }
-.updated { margin-top: 12px; font-size: 12px; color: var(--muted); }
-/* What moved: "Updated Oct 21" and the heroes that changed tier this week, plus a small arrow on their portraits */
-.moved { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: -2px 0 14px; font-size: 13px; color: var(--muted); }
-.moved:empty { display: none; }
-.moved .when { margin-right: 4px; }
-.moved .when b { color: var(--text); font-weight: 500; }
-.moved .when.since b:last-child { color: var(--accent); }
-.moved .chip { gap: 6px; padding-right: 9px; }
-.moved .chip .to { font: 500 12px var(--mono); color: var(--muted); }
-.moved .chip .to b { font-weight: 600; }
-.up { color: var(--good); } .down { color: var(--bad); }
-.port .mv { position: absolute; left: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
-.port .mv .ar { color: #12100f; }
-.hero-card .port { overflow: visible; }
-.port .mv svg, .chip .ar, .stat .ar { width: 9px; height: 9px; }
-.stat .mvd b { font: inherit; }
-@media (max-width: 640px) {
-  .detail { position: fixed; left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-height: 80vh; overflow-y: auto; border-radius: 14px 14px 0 0; padding-bottom: max(18px, env(safe-area-inset-bottom)); --dy: 24px; }
-  .detail .arrow { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .detail { animation: none; } }
+      .chip {
+        all: unset;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 28px;
+        padding: 0 10px 0 3px;
+        border-radius: 6px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .chip:hover {
+        border-color: #4a413c;
+      }
+      .chip img {
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+      .none {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .updated {
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      /* What moved: "Updated Oct 21" and the heroes that changed tier this week, plus a small arrow on their portraits */
+      .moved {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 8px;
+        margin: -2px 0 14px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .moved:empty {
+        display: none;
+      }
+      .moved .when {
+        margin-right: 4px;
+      }
+      .moved .when b {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .moved .when.since b:last-child {
+        color: var(--accent);
+      }
+      .moved .chip {
+        gap: 6px;
+        padding-right: 9px;
+      }
+      .moved .chip .to {
+        font: 500 12px var(--mono);
+        color: var(--muted);
+      }
+      .moved .chip .to b {
+        font-weight: 600;
+      }
+      .up {
+        color: var(--good);
+      }
+      .down {
+        color: var(--bad);
+      }
+      .port .mv {
+        position: absolute;
+        left: -5px;
+        top: -5px;
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--c);
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      .port .mv .ar {
+        color: #12100f;
+      }
+      .hero-card .port {
+        overflow: visible;
+      }
+      .port .mv svg,
+      .chip .ar,
+      .stat .ar {
+        width: 9px;
+        height: 9px;
+      }
+      .stat .mvd b {
+        font: inherit;
+      }
+      @media (max-width: 640px) {
+        .detail {
+          position: fixed;
+          left: 0 !important;
+          right: 0;
+          top: auto !important;
+          bottom: 0;
+          width: auto;
+          max-height: 80vh;
+          overflow-y: auto;
+          border-radius: 14px 14px 0 0;
+          padding-bottom: max(18px, env(safe-area-inset-bottom));
+          --dy: 24px;
+        }
+        .detail .arrow {
+          display: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .detail {
+          animation: none;
+        }
+      }
 
-@media (max-width: 520px) {
-  .row { grid-template-columns: 44px 1fr; }
-  .hero-card, .hero-card img { width: 48px; }
-  .hero-card img { height: 48px; }
-}
-</style>
-<script src="/nav.js" defer></script>
-</head>
-<body>
+      @media (max-width: 520px) {
+        .row {
+          grid-template-columns: 44px 1fr;
+        }
+        .hero-card,
+        .hero-card img {
+          width: 48px;
+        }
+        .hero-card img {
+          height: 48px;
+        }
+      }
+    </style>
+    <script src="/nav.js" defer></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="/">Jun<span>HotS</span></a>
+        <div class="tabs">
+          <a href="/">Home</a><a href="/tierlist/" aria-current="page">Tier list</a><a href="/builds/">Builds</a
+          ><a href="/draft/">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a
+          ><a href="/overlay/">Overlay</a>
+        </div>
+        <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"
+          ><span class="dot"></span>Twitch</a
+        >
+      </nav>
+      <script>
+        /* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */ {
+          const t = document.querySelector(".tabs"),
+            a = t && t.querySelector('[aria-current="page"]');
+          if (a) {
+            const i = document.createElement("span");
+            i.className = "tab-ind";
+            i.setAttribute("aria-hidden", "true");
+            i.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
+            t.append(i);
+          }
+        }
+      </script>
 
-<div class="wrap">
-  <nav>
-    <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/">Home</a><a href="/tierlist/" aria-current="page">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
-    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
-  </nav>
-  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
+      <header class="page-head">
+        <div>
+          <h1 data-edit="tierlist_title">Tier list</h1>
+          <p class="sub" data-edit="tierlist_text">My picks for ranked. Type !tierlist in chat to see it on stream.</p>
+        </div>
+        <div class="controls" role="group" aria-label="Filter">
+          <button class="tab" data-role="All" aria-pressed="true">All</button
+          ><span id="roletabs" style="display: contents"></span>
+          <span id="map"></span>
+        </div>
+      </header>
+      <div class="hintrow">
+        <p class="hint">Click a hero to see counters, synergy and win rate.</p>
+        <div class="views" role="group" aria-label="Whose tier list">
+          <button class="tab" data-view="mine" aria-pressed="true">My list</button
+          ><button
+            class="tab"
+            data-view="community"
+            aria-pressed="false"
+            title="Everyone's lists from the tier list maker"
+          >
+            Community</button
+          ><button
+            class="tab"
+            data-view="compare"
+            aria-pressed="false"
+            title="My list with the community's tier on each hero"
+          >
+            Compare
+          </button>
+        </div>
+      </div>
+      <section class="dis" id="dis" hidden></section>
+      <div class="moved" id="moved"></div>
+      <div class="tiers" id="tiers"></div>
+      <div class="combos" id="combos"></div>
+      <div class="updated" id="updated"></div>
 
-  <header class="page-head">
-    <div>
-      <h1 data-edit="tierlist_title">Tier list</h1>
-      <p class="sub" data-edit="tierlist_text">My picks for ranked. Type !tierlist in chat to see it on stream.</p>
+      <footer>
+        <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+        <span class="social"
+          ><a href="/updates/">Updates</a
+          ><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a
+          ><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a
+          ><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a
+          ><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span
+        >
+        <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+      </footer>
     </div>
-    <div class="controls" role="group" aria-label="Filter">
-      <button class="tab" data-role="All" aria-pressed="true">All</button><span id="roletabs" style="display:contents"></span>
-      <span id="map"></span>
-    </div>
-  </header>
-  <div class="hintrow"><p class="hint">Click a hero to see counters, synergy and win rate.</p>
-    <div class="views" role="group" aria-label="Whose tier list"><button class="tab" data-view="mine" aria-pressed="true">My list</button><button class="tab" data-view="community" aria-pressed="false" title="Everyone's lists from the tier list maker">Community</button><button class="tab" data-view="compare" aria-pressed="false" title="My list with the community's tier on each hero">Compare</button></div></div>
-  <section class="dis" id="dis" hidden></section>
-  <div class="moved" id="moved"></div>
-  <div class="tiers" id="tiers"></div>
-  <div class="combos" id="combos"></div>
-  <div class="updated" id="updated"></div>
 
-  <footer>
-    <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
-    <span class="social"><a href="/updates/">Updates</a><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
-    <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
-  </footer>
-</div>
+    <script src="/text.js"></script>
+    <script src="/site.js"></script>
+    <script src="/map-picker.js"></script>
 
-<script src="/text.js"></script>
-<script src="/site.js"></script>
-<script src="/map-picker.js"></script>
+    <div class="scrim" id="scrim" hidden></div>
+    <div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
+    <script>
+      // Tier list: the overlay's own tierlist.json, uploaded when Jun saves it (site.js loadTierlist).
+      const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
+      let HEROES = [],
+        byId = {},
+        TL = null,
+        role = "All",
+        map = "Overall",
+        selected = null;
+      const img = tierImg;
+      const esc = (s) =>
+        String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const wrOf = (id) => TL.winrates?.rates?.[id]?.wr;
+      const wrClass = (v) => (v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid");
+      const wrText = (v) => (v == null ? "" : v.toFixed(1) + "%");
+      const beats = (id) => (TL.counters || {})[id] || [];
+      const beatenBy = (id) => Object.keys(TL.counters || {}).filter((a) => TL.counters[a].includes(id));
+      const goodWith = (id) => {
+        const s = TL.synergy || {};
+        return [...new Set([...(s[id] || []), ...Object.keys(s).filter((a) => s[a].includes(id))])];
+      };
+      // Heroes that changed tier in the last 7 days (the server keeps them in "changes", see src/worker.js)
+      const WEEK = 7 * 864e5;
+      const tierIdx = (id) => TL.tiers.findIndex((t) => t.id === id);
+      const tierName = (id) => TL.tiers.find((t) => t.id === id)?.name ?? "";
+      // Back since my last save: show what moved since the visitor's last look (the server keeps 2 weeks of changes),
+      // instead of "this week". The visit is remembered here, and nav.js shows a dot on the Tier list tab when there's news.
+      let SEEN = 0;
+      try {
+        SEEN = +localStorage.getItem("junhots_tl_seen") || 0;
+      } catch {}
+      const sinceVisit = () => SEEN && TL.updated > SEEN;
+      function moveOf(id) {
+        const c = TL.changes?.[id];
+        if (!c || (sinceVisit() ? c.at <= SEEN : Date.now() - c.at > WEEK)) return null;
+        const a = tierIdx(c.from),
+          b = tierIdx(c.to);
+        return { ...c, up: b >= 0 && (a < 0 || b < a) };
+      }
+      const arrow = (up) =>
+        `<svg class="ar ${up ? "up" : "down"}" viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
+      const fmtDay = (t) => new Date(t).toLocaleDateString("en", { month: "short", day: "numeric" });
+      function drawMoved() {
+        const box = document.getElementById("moved");
+        const list = Object.keys(TL.changes || {})
+          .filter((id) => byId[id] && moveOf(id))
+          .sort((a, b) => TL.changes[b].at - TL.changes[a].at);
+        const since = sinceVisit() && list.length;
+        const when = TL.updated
+          ? `<span class="when${since ? " since" : ""}">Updated <b>${fmtDay(TL.updated)}</b>${since ? " · <b>new since your last visit:</b>" : list.length ? " · moved this week:" : ""}</span>`
+          : "";
+        try {
+          if (TL.updated) localStorage.setItem("junhots_tl_seen", TL.updated);
+        } catch {}
+        box.innerHTML =
+          when +
+          list
+            .map((id) => {
+              const m = moveOf(id);
+              return `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}<span class="to">${m.from ? esc(tierName(m.from)) : "new"} ${arrow(m.up)} <b class="${m.up ? "up" : "down"}">${m.to ? esc(tierName(m.to)) : "out"}</b></span></button>`;
+            })
+            .join("");
+      }
+      // ---------- Community tier list: every visitor's list from the tier list maker, averaged (/api/community) ----------
+      // Each list puts a hero between +2 (top tier) and -2 (bottom tier); the average lands on my nearest tier.
+      let view = "mine",
+        COMM = null;
+      const MIN_LISTS = 5,
+        MIN_VOTES = 3;
+      const tierVal = (i) => (TL.tiers.length < 2 ? 0 : 2 - (4 * i) / (TL.tiers.length - 1));
+      function commTier(id) {
+        const c = COMM?.heroes?.[id];
+        if (!c || c.n < MIN_VOTES || (COMM.lists || 0) < MIN_LISTS) return null;
+        let best = null,
+          gap = 9;
+        TL.tiers.forEach((t, i) => {
+          const d = Math.abs(tierVal(i) - c.avg);
+          if (d < gap) {
+            gap = d;
+            best = t.id;
+          }
+        });
+        return best;
+      }
+      const ttag = (id) => {
+        const t = TL.tiers.find((x) => x.id === id);
+        return t ? `<span class="tt" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</span>` : "";
+      };
+      function drawDis() {
+        const box = document.getElementById("dis");
+        if (view === "mine") {
+          box.hidden = true;
+          return;
+        }
+        box.hidden = false;
+        const lists = COMM?.lists || 0;
+        if (lists < MIN_LISTS) {
+          box.innerHTML = `<div class="dis-h"><div><h2>The community list starts at ${MIN_LISTS} tier lists</h2><p>${lists ? `<b>${lists}</b> so far. ` : ""}Every tier list made with the tier list maker counts, one per visitor.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
+          return;
+        }
+        const note = map !== "Overall" ? " · for all maps" : "";
+        if (view === "community") {
+          box.innerHTML = `<div class="dis-h"><div><h2>Community tier list</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note}. Heroes in fewer than ${MIN_VOTES} lists aren't placed.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
+          return;
+        }
+        const rows = HEROES.filter(
+          (h) =>
+            (role === "All" || h.grole === role) && tierOf(h.id) && commTier(h.id) && commTier(h.id) !== tierOf(h.id),
+        )
+          .map((h) => ({ h, gap: Math.abs(tierVal(tierIdx(tierOf(h.id))) - COMM.heroes[h.id].avg) }))
+          .sort((a, b) => b.gap - a.gap)
+          .slice(0, 6);
+        box.innerHTML =
+          `<div class="dis-h"><div><h2>Where chat disagrees with me</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note} · biggest gaps first. The small tag on a hero is the community's tier.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>` +
+          (rows.length
+            ? `<div class="dis-row">${rows.map(({ h }) => `<button class="dc" data-hero="${h.id}"><img src="${img(h.id)}" alt=""><div><b>${esc(h.name)}</b><div class="vs"><span>Me</span>${ttag(tierOf(h.id))}<span class="ar2">vs</span><span>Chat</span>${ttag(commTier(h.id))}</div><small>${COMM.heroes[h.id].n} lists</small></div></button>`).join("")}</div>`
+            : `<p class="hint">We agree on every hero here.</p>`);
+      }
+      document.querySelectorAll(".views .tab").forEach((b) =>
+        b.addEventListener("click", () => {
+          view = b.dataset.view;
+          document.querySelectorAll(".views .tab").forEach((x) => x.setAttribute("aria-pressed", x === b));
+          render();
+        }),
+      );
+      fetch("/api/community")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((c) => {
+          COMM = c;
+          if (TL && view !== "mine") render();
+        })
+        .catch(() => {});
 
-<div class="scrim" id="scrim" hidden></div>
-<div class="detail" id="detail" role="dialog" aria-label="Hero info" hidden></div>
-<script>
-// Tier list: the overlay's own tierlist.json, uploaded when Jun saves it (site.js loadTierlist).
-const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
-let HEROES = [], byId = {}, TL = null, role = "All", map = "Overall", selected = null;
-const img = tierImg;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const wrOf = id => TL.winrates?.rates?.[id]?.wr;
-const wrClass = v => v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid";
-const wrText = v => v == null ? "" : v.toFixed(1) + "%";
-const beats = id => (TL.counters || {})[id] || [];
-const beatenBy = id => Object.keys(TL.counters || {}).filter(a => TL.counters[a].includes(id));
-const goodWith = id => { const s = TL.synergy || {}; return [...new Set([...(s[id] || []), ...Object.keys(s).filter(a => s[a].includes(id))])]; };
-// Heroes that changed tier in the last 7 days (the server keeps them in "changes", see src/worker.js)
-const WEEK = 7 * 864e5;
-const tierIdx = id => TL.tiers.findIndex(t => t.id === id);
-const tierName = id => TL.tiers.find(t => t.id === id)?.name ?? "";
-// Back since my last save: show what moved since the visitor's last look (the server keeps 2 weeks of changes),
-// instead of "this week". The visit is remembered here, and nav.js shows a dot on the Tier list tab when there's news.
-let SEEN = 0; try { SEEN = +localStorage.getItem("junhots_tl_seen") || 0; } catch {}
-const sinceVisit = () => SEEN && TL.updated > SEEN;
-function moveOf(id) {
-  const c = TL.changes?.[id];
-  if (!c || (sinceVisit() ? c.at <= SEEN : Date.now() - c.at > WEEK)) return null;
-  const a = tierIdx(c.from), b = tierIdx(c.to);
-  return { ...c, up: b >= 0 && (a < 0 || b < a) };
-}
-const arrow = up => `<svg class="ar ${up ? "up" : "down"}" viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
-const fmtDay = t => new Date(t).toLocaleDateString("en", { month: "short", day: "numeric" });
-function drawMoved() {
-  const box = document.getElementById("moved");
-  const list = Object.keys(TL.changes || {}).filter(id => byId[id] && moveOf(id)).sort((a, b) => TL.changes[b].at - TL.changes[a].at);
-  const since = sinceVisit() && list.length;
-  const when = TL.updated ? `<span class="when${since ? " since" : ""}">Updated <b>${fmtDay(TL.updated)}</b>${since ? " · <b>new since your last visit:</b>" : list.length ? " · moved this week:" : ""}</span>` : "";
-  try { if (TL.updated) localStorage.setItem("junhots_tl_seen", TL.updated); } catch {}
-  box.innerHTML = when + list.map(id => { const m = moveOf(id);
-    return `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}<span class="to">${m.from ? esc(tierName(m.from)) : "new"} ${arrow(m.up)} <b class="${m.up ? "up" : "down"}">${m.to ? esc(tierName(m.to)) : "out"}</b></span></button>`; }).join("");
-}
-// ---------- Community tier list: every visitor's list from the tier list maker, averaged (/api/community) ----------
-// Each list puts a hero between +2 (top tier) and -2 (bottom tier); the average lands on my nearest tier.
-let view = "mine", COMM = null;
-const MIN_LISTS = 5, MIN_VOTES = 3;
-const tierVal = i => TL.tiers.length < 2 ? 0 : 2 - 4 * i / (TL.tiers.length - 1);
-function commTier(id) {
-  const c = COMM?.heroes?.[id];
-  if (!c || c.n < MIN_VOTES || (COMM.lists || 0) < MIN_LISTS) return null;
-  let best = null, gap = 9;
-  TL.tiers.forEach((t, i) => { const d = Math.abs(tierVal(i) - c.avg); if (d < gap) { gap = d; best = t.id; } });
-  return best;
-}
-const ttag = id => { const t = TL.tiers.find(x => x.id === id); return t ? `<span class="tt" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</span>` : ""; };
-function drawDis() {
-  const box = document.getElementById("dis");
-  if (view === "mine") { box.hidden = true; return; }
-  box.hidden = false;
-  const lists = COMM?.lists || 0;
-  if (lists < MIN_LISTS) {
-    box.innerHTML = `<div class="dis-h"><div><h2>The community list starts at ${MIN_LISTS} tier lists</h2><p>${lists ? `<b>${lists}</b> so far. ` : ""}Every tier list made with the tier list maker counts, one per visitor.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
-    return;
-  }
-  const note = map !== "Overall" ? " · for all maps" : "";
-  if (view === "community") {
-    box.innerHTML = `<div class="dis-h"><div><h2>Community tier list</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note}. Heroes in fewer than ${MIN_VOTES} lists aren't placed.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>`;
-    return;
-  }
-  const rows = HEROES.filter(h => (role === "All" || h.grole === role) && tierOf(h.id) && commTier(h.id) && commTier(h.id) !== tierOf(h.id))
-    .map(h => ({ h, gap: Math.abs(tierVal(tierIdx(tierOf(h.id))) - COMM.heroes[h.id].avg) }))
-    .sort((a, b) => b.gap - a.gap).slice(0, 6);
-  box.innerHTML = `<div class="dis-h"><div><h2>Where chat disagrees with me</h2><p>From <b>${lists.toLocaleString("en")}</b> tier lists made with the tier list maker${note} · biggest gaps first. The small tag on a hero is the community's tier.</p></div><a href="/tierlist-maker/">Make yours <span class="arr">→</span></a></div>` +
-    (rows.length ? `<div class="dis-row">${rows.map(({ h }) => `<button class="dc" data-hero="${h.id}"><img src="${img(h.id)}" alt=""><div><b>${esc(h.name)}</b><div class="vs"><span>Me</span>${ttag(tierOf(h.id))}<span class="ar2">vs</span><span>Chat</span>${ttag(commTier(h.id))}</div><small>${COMM.heroes[h.id].n} lists</small></div></button>`).join("")}</div>` : `<p class="hint">We agree on every hero here.</p>`);
-}
-document.querySelectorAll(".views .tab").forEach(b => b.addEventListener("click", () => {
-  view = b.dataset.view;
-  document.querySelectorAll(".views .tab").forEach(x => x.setAttribute("aria-pressed", x === b));
-  render();
-}));
-fetch("/api/community").then(r => r.ok ? r.json() : null).then(c => { COMM = c; if (TL && view !== "mine") render(); }).catch(() => {});
-
-function tierOf(id) {
-  const m = map !== "Overall" ? (TL.maps || {})[map] : null;
-  if (m && id in m) return m[id] || null;   // "" = not ranked on this map
-  return TL.overall[id] || null;
-}
-function chips(ids) {
-  const list = ids.filter(id => byId[id]), tags = ids.filter(isTag);   // heroes, then style tags ("Dive")
-  return list.length || tags.length ? `<div class="chips">${list.map(id => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}${tags.map(t => `<span class="chip tagc" style="--t:${tagColor(TL, t)}" title="${esc(tagLabel(TL, t))}: ${esc(heroesWithTag(TL, t, HEROES.map(h => h.id)).map(h => byId[h].name).join(", "))}">${tagIcon(TL, t)}${esc(tagLabel(TL, t))}</span>`).join("")}</div>` : '<span class="none">None</span>';
-}
-// Link to the hero's Builds page. Cho'gall is one tier list entry but two heroes on Builds.
-const GO = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const buildLinks = id => `<div class="go-builds">${(id === "chogall" ? [["chogall", "Cho"], ["gall", "Gall"]] : [[id, byId[id].name]])
-  .map(([b, n]) => `<a href="/builds/${b}">${esc(n)} builds${GO}</a>`).join("")}</div>`;
-let anchor = null;   // the hero card the popup points at
-const phone = () => matchMedia("(max-width: 640px)").matches;
-function renderDetail() {
-  const box = document.getElementById("detail"), scrim = document.getElementById("scrim");
-  if (!selected) { box.hidden = true; scrim.hidden = true; return; }
-  const h = byId[selected], tid = tierOf(selected), t = TL.tiers.find(x => x.id === tid), wr = wrOf(selected);
-  box.innerHTML = `<span class="arrow"></span><button class="x" aria-label="Close">×</button>
+      function tierOf(id) {
+        const m = map !== "Overall" ? (TL.maps || {})[map] : null;
+        if (m && id in m) return m[id] || null; // "" = not ranked on this map
+        return TL.overall[id] || null;
+      }
+      function chips(ids) {
+        const list = ids.filter((id) => byId[id]),
+          tags = ids.filter(isTag); // heroes, then style tags ("Dive")
+        return list.length || tags.length
+          ? `<div class="chips">${list.map((id) => `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}</button>`).join("")}${tags
+              .map(
+                (t) =>
+                  `<span class="chip tagc" style="--t:${tagColor(TL, t)}" title="${esc(tagLabel(TL, t))}: ${esc(
+                    heroesWithTag(
+                      TL,
+                      t,
+                      HEROES.map((h) => h.id),
+                    )
+                      .map((h) => byId[h].name)
+                      .join(", "),
+                  )}">${tagIcon(TL, t)}${esc(tagLabel(TL, t))}</span>`,
+              )
+              .join("")}</div>`
+          : '<span class="none">None</span>';
+      }
+      // Link to the hero's Builds page. Cho'gall is one tier list entry but two heroes on Builds.
+      const GO =
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const buildLinks = (id) =>
+        `<div class="go-builds">${(id === "chogall"
+          ? [
+              ["chogall", "Cho"],
+              ["gall", "Gall"],
+            ]
+          : [[id, byId[id].name]]
+        )
+          .map(([b, n]) => `<a href="/builds/${b}">${esc(n)} builds${GO}</a>`)
+          .join("")}</div>`;
+      let anchor = null; // the hero card the popup points at
+      const phone = () => matchMedia("(max-width: 640px)").matches;
+      function renderDetail() {
+        const box = document.getElementById("detail"),
+          scrim = document.getElementById("scrim");
+        if (!selected) {
+          box.hidden = true;
+          scrim.hidden = true;
+          return;
+        }
+        const h = byId[selected],
+          tid = tierOf(selected),
+          t = TL.tiers.find((x) => x.id === tid),
+          wr = wrOf(selected);
+        box.innerHTML = `<span class="arrow"></span><button class="x" aria-label="Close">×</button>
     <div class="who"><img src="${img(selected)}" alt=""><div class="name">${esc(h.name)}</div>
       <span class="pill" style="--c:${t ? PALETTE[t.color] : "var(--line)"}">${t ? esc(t.name) + " tier" : "Not ranked"} · ${roleIcon(h.grole)} ${esc(h.grole)}</span>
-      <div class="tagline">${tagsOf(TL, selected).map(x => `<span>${tagIcon(TL, x)}${esc(tagLabel(TL, x))}</span>`).join("")}</div>
+      <div class="tagline">${tagsOf(TL, selected)
+        .map((x) => `<span>${tagIcon(TL, x)}${esc(tagLabel(TL, x))}</span>`)
+        .join("")}</div>
       ${commTier(selected) ? `<div class="chat">Community: ${ttag(commTier(selected))} · ${COMM.heroes[selected].n} lists</div>` : ""}
-      <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}${(m => m ? `<div class="mvd ${m.up ? "up" : "down"}">${arrow(m.up)} ${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New on the list"} · ${fmtDay(m.at)}</div>` : "")(moveOf(selected))}</div></div>
+      <div class="stat">${wr == null ? "" : `Win rate <b class="${wrClass(wr)}">${wrText(wr)}</b>`}${((m) => (m ? `<div class="mvd ${m.up ? "up" : "down"}">${arrow(m.up)} ${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New on the list"} · ${fmtDay(m.at)}</div>` : ""))(moveOf(selected))}</div></div>
     <div class="rel">
       <div><h3>Strong against</h3>${chips(beats(selected))}</div>
       <div><h3>Weak against</h3>${chips(beatenBy(selected))}</div>
       <div><h3>Good with</h3>${chips(goodWith(selected))}</div>
-      ${combosOf(TL, selected).length ? `<div><h3>Power combo</h3><div class="chips">${combosOf(TL, selected).map(c => { const p = c.a === selected ? c.b : c.a, t = comboTier(TL, c.tier);
-        return byId[p] ? `<button class="chip" data-hero="${p}"><img src="${img(p)}" alt="">${esc(byId[p].name)} <span class="ct">both play as <b style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></span></button>` : ""; }).join("")}</div></div>` : ""}
+      ${
+        combosOf(TL, selected).length
+          ? `<div><h3>Power combo</h3><div class="chips">${combosOf(TL, selected)
+              .map((c) => {
+                const p = c.a === selected ? c.b : c.a,
+                  t = comboTier(TL, c.tier);
+                return byId[p]
+                  ? `<button class="chip" data-hero="${p}"><img src="${img(p)}" alt="">${esc(byId[p].name)} <span class="ct">both play as <b style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></span></button>`
+                  : "";
+              })
+              .join("")}</div></div>`
+          : ""
+      }
     </div>
     ${buildLinks(selected)}`;
-  box.hidden = false;
-  scrim.hidden = !phone();
-  place();
-}
-// Desktop: sit just below the clicked hero (above it if there's no room), arrow pointing at it.
-// Phones: a sheet from the bottom of the screen (CSS).
-function place() {
-  const box = document.getElementById("detail");
-  if (box.hidden || phone()) return;
-  const a = anchor && anchor.isConnected ? anchor : document.querySelector(`.hero-card[data-hero="${selected}"]`);
-  if (!a) return;
-  const r = a.getBoundingClientRect(), w = box.offsetWidth, hgt = box.offsetHeight, gap = 12;
-  const left = Math.max(16, Math.min(r.left + r.width / 2 - w / 2, document.documentElement.clientWidth - w - 16));
-  const below = r.bottom + gap + hgt <= innerHeight || r.top - gap - hgt < 0;
-  box.dataset.side = below ? "below" : "above";
-  box.style.setProperty("--dy", below ? "-4px" : "4px");
-  box.style.setProperty("--ax", `${r.left + r.width / 2 - left}px`);
-  box.style.left = `${left + scrollX}px`;
-  box.style.top = `${(below ? r.bottom + gap : r.top - gap - hgt) + scrollY}px`;
-}
-// "Power combos" under the tiers: the two heroes, their names and the tier both play at together
-function drawCombos() {
-  // a role tab shows the combos with a hero of that role
-  const list = combosOf(TL).filter(c => byId[c.a] && byId[c.b] && (role === "All" || byId[c.a].grole === role || byId[c.b].grole === role));
-  // one card per shared hero: "Stitches + Anduin or Medivh"
-  document.getElementById("combos").innerHTML = list.length ? `<h2>${LINK_ICON}Power combos <small>Much stronger together: on the same team, both play as the tier on the right.</small></h2><div class="cl">${comboGroups(TL, list).map(g => { const t = comboTier(TL, g.tier);
-    const face = id => { const own = TL.tiers.find(x => x.id === tierOf(id));
-      return `<button data-hero="${id}" title="${esc(byId[id].name)}${own ? ` · ${esc(own.name)} tier alone` : ""}"><img src="${img(id)}" alt="">${own ? `<span class="ft" style="--c:${PALETTE[own.color % PALETTE.length]}">${esc(own.name)}</span>` : ""}</button>`; };
-    const names = g.partners.map(p => esc(byId[p].name)), or = names.length > 1 ? names.slice(0, -1).join(", ") + " <i>or</i> " + names.at(-1) : names[0];
-    return `<div class="cmb">${face(g.hub)}${LINK_ICON}<span class="ps">${g.partners.map(face).join("")}</span><span class="nm">${esc(byId[g.hub].name)} + ${or}</span><b class="to" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></div>`; }).join("")}</div>` : "";
-}
-function closeDetail() { selected = null; anchor = null; render(); }
-function render() {
-  const box = document.getElementById("tiers");
-  document.getElementById("moved").style.display = view === "community" ? "none" : "";   // "moved this week" is about my list
-  box.innerHTML = TL.tiers.map(t => {
-    const shown = view === "community" ? commTier : tierOf;
-    const list = HEROES.filter(h => shown(h.id) === t.id && (role === "All" || h.grole === role))
-      .sort((a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0));
-    return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
-      list.length ? list.map(h => `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${combosOf(TL, h.id).length ? `<i class="cb" title="Power combo with ${esc(combosOf(TL, h.id).map(c => byId[c.a === h.id ? c.b : c.a]?.name).filter(Boolean).join(", "))}">${LINK_ICON}</i>` : ""}${(m => m && map === "Overall" && view !== "community" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : "")(moveOf(h.id))}${(c => view === "compare" && c && c !== tierOf(h.id) ? (t => `<i class="cbd" style="--c:${PALETTE[t.color % PALETTE.length]}" title="Community: ${esc(t.name)} tier">${esc(t.name)}</i>`)(TL.tiers.find(x => x.id === c)) : "")(commTier(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`).join("") : '<span class="empty">None</span>'
-    }</div></div>`;
-  }).join("");
-  drawCombos();
-  drawDis();
-  renderDetail();
-}
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-hero]");
-  if (b) {
-    const id = b.dataset.hero;
-    if (b.classList.contains("hero-card") && id === selected) return closeDetail();   // click the same hero again to close
-    selected = id;
-    if (b.classList.contains("hero-card")) anchor = null;   // re-found after render
-    render();
-    anchor = document.querySelector(`.hero-card[data-hero="${id}"]`) || anchor;
-    if (!b.classList.contains("hero-card") && anchor) {   // a chip (or a combo picture) opens that hero in place and scrolls its card into view
-      anchor.scrollIntoView({ block: "center", behavior: phone() ? "auto" : "smooth" });
-    }
-    place();
-    return;
-  }
-  if (e.target.closest(".x") || (selected && !e.target.closest("#detail"))) closeDetail();
-});
-document.addEventListener("keydown", e => { if (e.key === "Escape" && selected) closeDetail(); });
-// /tierlist/#jaina opens Jaina's info (links from the search box)
-function showHash() {
-  if (["#community", "#compare"].includes(location.hash)) return document.querySelector(`.views .tab[data-view="${location.hash.slice(1)}"]`)?.click();
-  const id = tierKey(location.hash.slice(1));
-  if (!byId[id]) return;
-  if (!tierOf(id)) { map = "Overall"; picker.set(map); }
-  if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
-  selected = id;
-  render();
-  anchor = document.querySelector(`.hero-card[data-hero="${id}"]`);
-  anchor?.scrollIntoView({ block: "center" });
-  place();
-}
-addEventListener("hashchange", () => TL && showHash());
-addEventListener("resize", place);
-addEventListener("scroll", () => { if (!phone()) place(); }, { passive: true });
-document.getElementById("roletabs").innerHTML = ROLES.map(r => `<button class="tab rtab" data-role="${r}" aria-pressed="false" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("");
-document.querySelectorAll("button.tab[data-role]").forEach(b => b.addEventListener("click", () => {
-  role = b.dataset.role;
-  document.querySelectorAll("button.tab[data-role]").forEach(x => x.setAttribute("aria-pressed", x === b));
-  render();
-}));
-const picker = mapPicker(document.getElementById("map"), { onChange: m => { map = m; render(); } });
+        box.hidden = false;
+        scrim.hidden = !phone();
+        place();
+      }
+      // Desktop: sit just below the clicked hero (above it if there's no room), arrow pointing at it.
+      // Phones: a sheet from the bottom of the screen (CSS).
+      function place() {
+        const box = document.getElementById("detail");
+        if (box.hidden || phone()) return;
+        const a = anchor && anchor.isConnected ? anchor : document.querySelector(`.hero-card[data-hero="${selected}"]`);
+        if (!a) return;
+        const r = a.getBoundingClientRect(),
+          w = box.offsetWidth,
+          hgt = box.offsetHeight,
+          gap = 12;
+        const left = Math.max(
+          16,
+          Math.min(r.left + r.width / 2 - w / 2, document.documentElement.clientWidth - w - 16),
+        );
+        const below = r.bottom + gap + hgt <= innerHeight || r.top - gap - hgt < 0;
+        box.dataset.side = below ? "below" : "above";
+        box.style.setProperty("--dy", below ? "-4px" : "4px");
+        box.style.setProperty("--ax", `${r.left + r.width / 2 - left}px`);
+        box.style.left = `${left + scrollX}px`;
+        box.style.top = `${(below ? r.bottom + gap : r.top - gap - hgt) + scrollY}px`;
+      }
+      // "Power combos" under the tiers: the two heroes, their names and the tier both play at together
+      function drawCombos() {
+        // a role tab shows the combos with a hero of that role
+        const list = combosOf(TL).filter(
+          (c) => byId[c.a] && byId[c.b] && (role === "All" || byId[c.a].grole === role || byId[c.b].grole === role),
+        );
+        // one card per shared hero: "Stitches + Anduin or Medivh"
+        document.getElementById("combos").innerHTML = list.length
+          ? `<h2>${LINK_ICON}Power combos <small>Much stronger together: on the same team, both play as the tier on the right.</small></h2><div class="cl">${comboGroups(
+              TL,
+              list,
+            )
+              .map((g) => {
+                const t = comboTier(TL, g.tier);
+                const face = (id) => {
+                  const own = TL.tiers.find((x) => x.id === tierOf(id));
+                  return `<button data-hero="${id}" title="${esc(byId[id].name)}${own ? ` · ${esc(own.name)} tier alone` : ""}"><img src="${img(id)}" alt="">${own ? `<span class="ft" style="--c:${PALETTE[own.color % PALETTE.length]}">${esc(own.name)}</span>` : ""}</button>`;
+                };
+                const names = g.partners.map((p) => esc(byId[p].name)),
+                  or = names.length > 1 ? names.slice(0, -1).join(", ") + " <i>or</i> " + names.at(-1) : names[0];
+                return `<div class="cmb">${face(g.hub)}${LINK_ICON}<span class="ps">${g.partners.map(face).join("")}</span><span class="nm">${esc(byId[g.hub].name)} + ${or}</span><b class="to" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</b></div>`;
+              })
+              .join("")}</div>`
+          : "";
+      }
+      function closeDetail() {
+        selected = null;
+        anchor = null;
+        render();
+      }
+      function render() {
+        const box = document.getElementById("tiers");
+        document.getElementById("moved").style.display = view === "community" ? "none" : ""; // "moved this week" is about my list
+        box.innerHTML = TL.tiers
+          .map((t) => {
+            const shown = view === "community" ? commTier : tierOf;
+            const list = HEROES.filter((h) => shown(h.id) === t.id && (role === "All" || h.grole === role)).sort(
+              (a, b) => (wrOf(b.id) ?? 0) - (wrOf(a.id) ?? 0),
+            );
+            return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${esc(t.name)}</div><div class="heroes">${
+              list.length
+                ? list
+                    .map(
+                      (h) =>
+                        `<button class="hero-card${h.id === selected ? " sel" : ""}" data-hero="${h.id}"><span class="port"><img src="${img(h.id)}" alt="" loading="lazy">${roleIcon(h.grole, "rb")}${
+                          combosOf(TL, h.id).length
+                            ? `<i class="cb" title="Power combo with ${esc(
+                                combosOf(TL, h.id)
+                                  .map((c) => byId[c.a === h.id ? c.b : c.a]?.name)
+                                  .filter(Boolean)
+                                  .join(", "),
+                              )}">${LINK_ICON}</i>`
+                            : ""
+                        }${((m) => (m && map === "Overall" && view !== "community" ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})" title="${m.from ? `Moved ${m.up ? "up" : "down"} from ${esc(tierName(m.from))}` : "New"} on ${fmtDay(m.at)}">${arrow(m.up)}</i>` : ""))(moveOf(h.id))}${((c) => (view === "compare" && c && c !== tierOf(h.id) ? ((t) => `<i class="cbd" style="--c:${PALETTE[t.color % PALETTE.length]}" title="Community: ${esc(t.name)} tier">${esc(t.name)}</i>`)(TL.tiers.find((x) => x.id === c)) : ""))(commTier(h.id))}</span><span>${esc(h.name)}</span><div class="wr ${wrClass(wrOf(h.id))}">${wrText(wrOf(h.id))}</div></button>`,
+                    )
+                    .join("")
+                : '<span class="empty">None</span>'
+            }</div></div>`;
+          })
+          .join("");
+        drawCombos();
+        drawDis();
+        renderDetail();
+      }
+      document.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-hero]");
+        if (b) {
+          const id = b.dataset.hero;
+          if (b.classList.contains("hero-card") && id === selected) return closeDetail(); // click the same hero again to close
+          selected = id;
+          if (b.classList.contains("hero-card")) anchor = null; // re-found after render
+          render();
+          anchor = document.querySelector(`.hero-card[data-hero="${id}"]`) || anchor;
+          if (!b.classList.contains("hero-card") && anchor) {
+            // a chip (or a combo picture) opens that hero in place and scrolls its card into view
+            anchor.scrollIntoView({ block: "center", behavior: phone() ? "auto" : "smooth" });
+          }
+          place();
+          return;
+        }
+        if (e.target.closest(".x") || (selected && !e.target.closest("#detail"))) closeDetail();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && selected) closeDetail();
+      });
+      // /tierlist/#jaina opens Jaina's info (links from the search box)
+      function showHash() {
+        if (["#community", "#compare"].includes(location.hash))
+          return document.querySelector(`.views .tab[data-view="${location.hash.slice(1)}"]`)?.click();
+        const id = tierKey(location.hash.slice(1));
+        if (!byId[id]) return;
+        if (!tierOf(id)) {
+          map = "Overall";
+          picker.set(map);
+        }
+        if (role !== "All" && byId[id].grole !== role) document.querySelector('button.tab[data-role="All"]')?.click();
+        selected = id;
+        render();
+        anchor = document.querySelector(`.hero-card[data-hero="${id}"]`);
+        anchor?.scrollIntoView({ block: "center" });
+        place();
+      }
+      addEventListener("hashchange", () => TL && showHash());
+      addEventListener("resize", place);
+      addEventListener(
+        "scroll",
+        () => {
+          if (!phone()) place();
+        },
+        { passive: true },
+      );
+      document.getElementById("roletabs").innerHTML = ROLES.map(
+        (r) =>
+          `<button class="tab rtab" data-role="${r}" aria-pressed="false" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`,
+      ).join("");
+      document.querySelectorAll("button.tab[data-role]").forEach((b) =>
+        b.addEventListener("click", () => {
+          role = b.dataset.role;
+          document.querySelectorAll("button.tab[data-role]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+          render();
+        }),
+      );
+      const picker = mapPicker(document.getElementById("map"), {
+        onChange: (m) => {
+          map = m;
+          render();
+        },
+      });
 
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
-  HEROES = tierRows(heroes).map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
-  HEROES.forEach(h => byId[h.id] = h);
-  TL = tl;
-  drawMoved();
-  const label = TL.winrates?.label;
-  document.getElementById("updated").textContent = label ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}` : "";
-  render();
-  showHash();
-}).catch(() => { document.getElementById("tiers").innerHTML = '<div class="row"><div class="heroes"><span class="empty">The tier list couldn\'t load. Refresh the page to try again.</span></div></div>'; });
-</script>
-</body>
+      Promise.all([fetch("/data/heroes.json").then((r) => r.json()), loadTierlist()])
+        .then(([heroes, tl]) => {
+          HEROES = tierRows(heroes).map(([id, name, r, g]) => ({ id, name, role: r, grole: g }));
+          HEROES.forEach((h) => (byId[h.id] = h));
+          TL = tl;
+          drawMoved();
+          const label = TL.winrates?.label;
+          document.getElementById("updated").textContent = label
+            ? `Win rates from Heroes Profile · patch ${label.split(".").slice(0, 3).join(".")}`
+            : "";
+          render();
+          showHash();
+        })
+        .catch(() => {
+          document.getElementById("tiers").innerHTML =
+            '<div class="row"><div class="heroes"><span class="empty">The tier list couldn\'t load. Refresh the page to try again.</span></div></div>';
+        });
+    </script>
+  </body>
 </html>
