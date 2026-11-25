@@ -21,9 +21,22 @@
 window.draftModel = (TL, HEROES) => {
   // Team comp and spread tuned on Jun's 562 uploaded games (2026-11-25): comp holes mattered about twice as much, and the
   // old spread (4) showed 80%+ for drafts that won about 65%. Spread 17 makes the % honest.
-  const W = { counter: 1, synergy: 0.6, tagCounter: 0.4, tagCounterMax: 1.2, tagSynergy: 0.25, wr: 0.35, shrink: 2000, noHealer: 4, noTank: 3, noRanged: 2, double: 1.5, spread: 17 };
-  const roleOf = Object.fromEntries(HEROES.map(h => [h.id, h.grole]));
-  const key = window.tierKey || (id => id);
+  const W = {
+    counter: 1,
+    synergy: 0.6,
+    tagCounter: 0.4,
+    tagCounterMax: 1.2,
+    tagSynergy: 0.25,
+    wr: 0.35,
+    shrink: 2000,
+    noHealer: 4,
+    noTank: 3,
+    noRanged: 2,
+    double: 1.5,
+    spread: 17,
+  };
+  const roleOf = Object.fromEntries(HEROES.map((h) => [h.id, h.grole]));
+  const key = window.tierKey || ((id) => id);
   function tierId(id, map) {
     id = key(id);
     const m = map && map !== "Overall" ? (TL.maps || {})[map] : null;
@@ -31,43 +44,77 @@ window.draftModel = (TL, HEROES) => {
     return TL.overall[id] || "";
   }
   function tierVal(t) {
-    const ids = TL.tiers.map(x => x.id), i = ids.indexOf(t);
+    const ids = TL.tiers.map((x) => x.id),
+      i = ids.indexOf(t);
     if (i < 0) return 0;
-    return ids.length === 1 ? 2 : 2 - 4 * i / (ids.length - 1);
+    return ids.length === 1 ? 2 : 2 - (4 * i) / (ids.length - 1);
   }
-  const wrOf = id => TL.winrates?.rates?.[key(id)]?.wr;
+  const wrOf = (id) => TL.winrates?.rates?.[key(id)]?.wr;
   function wrVal(id) {
     const r = TL.winrates?.rates?.[key(id)];
     if (!r) return 0;
-    const n = r.games || 0, adj = (r.wr * n + 50 * W.shrink) / (n + W.shrink);
+    const n = r.games || 0,
+      adj = (r.wr * n + 50 * W.shrink) / (n + W.shrink);
     return (adj - 50) * W.wr * (n ? 1 : 0.5);
   }
   const beats = (a, b) => (TL.counters?.[key(a)] || []).includes(key(b));
-  const goodWith = (a, b) => { a = key(a); b = key(b); return a !== b && ((TL.synergy?.[a] || []).includes(b) || (TL.synergy?.[b] || []).includes(a)); };
-  const once = ids => [...new Set(ids.map(key))];
+  const goodWith = (a, b) => {
+    a = key(a);
+    b = key(b);
+    return a !== b && ((TL.synergy?.[a] || []).includes(b) || (TL.synergy?.[b] || []).includes(a));
+  };
+  const once = (ids) => [...new Set(ids.map(key))];
   // Style tags: the tag a beats b by ("tag:dive"), or null. a good against one of b's tags, or b bad against one of a's.
-  const tagsOf = id => (TL.tags?.[key(id)] || []).map(t => "tag:" + t);
-  const beatsByTag = (a, b) => { a = key(a); b = key(b); const c = TL.counters || {};
-    return tagsOf(b).find(t => (c[a] || []).includes(t)) || tagsOf(a).find(t => (c[t] || []).includes(b)) || null; };
-  const withByTag = (a, b) => { a = key(a); b = key(b); const s = TL.synergy || {};
-    return a === b ? null : tagsOf(b).find(t => (s[a] || []).includes(t)) || tagsOf(a).find(t => (s[b] || []).includes(t)) || null; };
+  const tagsOf = (id) => (TL.tags?.[key(id)] || []).map((t) => "tag:" + t);
+  const beatsByTag = (a, b) => {
+    a = key(a);
+    b = key(b);
+    const c = TL.counters || {};
+    return tagsOf(b).find((t) => (c[a] || []).includes(t)) || tagsOf(a).find((t) => (c[t] || []).includes(b)) || null;
+  };
+  const withByTag = (a, b) => {
+    a = key(a);
+    b = key(b);
+    const s = TL.synergy || {};
+    return a === b
+      ? null
+      : tagsOf(b).find((t) => (s[a] || []).includes(t)) || tagsOf(a).find((t) => (s[b] || []).includes(t)) || null;
+  };
 
   // Power combos: TL.combos = [{ a, b, tier }]. The ones a team has both heroes of, and what each hero gains from them.
-  const comboVal = t => t === "+" ? (TL.tiers.length ? tierVal(TL.tiers[0].id) + 1 : null) : TL.tiers.some(x => x.id === t) ? tierVal(t) : null;
-  const combosOf = team => { const ks = new Set(team.map(key));
-    return (TL.combos || []).filter(c => c.a !== c.b && ks.has(c.a) && ks.has(c.b) && comboVal(c.tier) != null); };
+  const comboVal = (t) =>
+    t === "+"
+      ? TL.tiers.length
+        ? tierVal(TL.tiers[0].id) + 1
+        : null
+      : TL.tiers.some((x) => x.id === t)
+        ? tierVal(t)
+        : null;
+  const combosOf = (team) => {
+    const ks = new Set(team.map(key));
+    return (TL.combos || []).filter((c) => c.a !== c.b && ks.has(c.a) && ks.has(c.b) && comboVal(c.tier) != null);
+  };
   function comboLift(id, team, map) {
     const k = key(id);
     let best = null;
-    for (const c of combosOf(team)) if ((c.a === k || c.b === k) && (!best || comboVal(c.tier) > comboVal(best.tier))) best = c;
+    for (const c of combosOf(team))
+      if ((c.a === k || c.b === k) && (!best || comboVal(c.tier) > comboVal(best.tier))) best = c;
     if (!best) return null;
     const tier = Math.max(0, comboVal(best.tier) - tierVal(tierId(id, map)));
-    return { combo: best, partner: best.a === k ? best.b : best.a, tier, wr: Math.max(0, -wrVal(id)), v: tier + Math.max(0, -wrVal(id)) };
+    return {
+      combo: best,
+      partner: best.a === k ? best.b : best.a,
+      tier,
+      wr: Math.max(0, -wrVal(id)),
+      v: tier + Math.max(0, -wrVal(id)),
+    };
   }
 
   function comp(team) {
-    const n = team.length, roles = team.map(id => roleOf[id]), count = r => roles.filter(x => x === r).length;
-    const ramp = Math.max(0, (n - 2) / 3);   // 0 with 2 heroes or fewer, full at 5
+    const n = team.length,
+      roles = team.map((id) => roleOf[id]),
+      count = (r) => roles.filter((x) => x === r).length;
+    const ramp = Math.max(0, (n - 2) / 3); // 0 with 2 heroes or fewer, full at 5
     let v = 0;
     if (!count("Healer")) v -= W.noHealer * ramp;
     if (!count("Tank")) v -= W.noTank * ramp;
@@ -75,78 +122,154 @@ window.draftModel = (TL, HEROES) => {
     v -= W.double * (Math.max(0, count("Healer") - 1) + Math.max(0, count("Tank") - 1));
     return v;
   }
-  const BASE = {};   // what an empty slot is worth, per map
+  const BASE = {}; // what an empty slot is worth, per map
   function base(map) {
     if (BASE[map]) return BASE[map];
-    const vals = HEROES.map(h => [tierVal(tierId(h.id, map)), wrVal(h.id)]).sort((x, y) => (y[0] + y[1]) - (x[0] + x[1])).slice(0, 20);
-    return BASE[map] = { tiers: vals.reduce((a, v) => a + v[0], 0) / vals.length, wr: vals.reduce((a, v) => a + v[1], 0) / vals.length };
+    const vals = HEROES.map((h) => [tierVal(tierId(h.id, map)), wrVal(h.id)])
+      .sort((x, y) => y[0] + y[1] - (x[0] + x[1]))
+      .slice(0, 20);
+    return (BASE[map] = {
+      tiers: vals.reduce((a, v) => a + v[0], 0) / vals.length,
+      wr: vals.reduce((a, v) => a + v[1], 0) / vals.length,
+    });
   }
   function teamScore(team, opp, map) {
-    const b = base(map), open = 5 - team.length;
+    const b = base(map),
+      open = 5 - team.length;
     const parts = { tiers: open * b.tiers, wr: open * b.wr, counters: 0, synergy: 0, combo: 0, comp: comp(team) };
     for (const h of team) {
       parts.tiers += tierVal(tierId(h, map));
       parts.wr += wrVal(h);
       parts.combo += comboLift(h, team, map)?.v || 0;
     }
-    const mine = once(team), theirs = once(opp);
+    const mine = once(team),
+      theirs = once(opp);
     for (const h of mine) {
-      const exact = theirs.filter(e => beats(h, e)), byTag = theirs.filter(e => !exact.includes(e) && beatsByTag(h, e));
+      const exact = theirs.filter((e) => beats(h, e)),
+        byTag = theirs.filter((e) => !exact.includes(e) && beatsByTag(h, e));
       parts.counters += W.counter * exact.length + Math.min(W.tagCounterMax, W.tagCounter * byTag.length);
     }
-    for (let i = 0; i < mine.length; i++) for (let k = i + 1; k < mine.length; k++) {
-      if (goodWith(mine[i], mine[k])) parts.synergy += W.synergy;
-      else if (withByTag(mine[i], mine[k])) parts.synergy += W.tagSynergy;
-    }
+    for (let i = 0; i < mine.length; i++)
+      for (let k = i + 1; k < mine.length; k++) {
+        if (goodWith(mine[i], mine[k])) parts.synergy += W.synergy;
+        else if (withByTag(mine[i], mine[k])) parts.synergy += W.tagSynergy;
+      }
     parts.total = parts.tiers + parts.wr + parts.counters + parts.synergy + parts.combo + parts.comp;
     return parts;
   }
   function edge(ally, enemy, map = "Overall") {
-    const a = teamScore(ally, enemy, map), e = teamScore(enemy, ally, map), d = a.total - e.total;
+    const a = teamScore(ally, enemy, map),
+      e = teamScore(enemy, ally, map),
+      d = a.total - e.total;
     const pct = 100 / (1 + Math.exp(-d / W.spread));
     return { pct, a, e };
   }
   // The matchups behind an edge, biggest first: [{ v (+ helps your team, − theirs), text }]
-  const tierName = t => t === "+" ? (TL.tiers[0]?.name || "") + "+" : TL.tiers.find(x => x.id === t)?.name || t;
+  const tierName = (t) => (t === "+" ? (TL.tiers[0]?.name || "") + "+" : TL.tiers.find((x) => x.id === t)?.name || t);
   function explain(ally, enemy, map = "Overall") {
-    const name = id => HEROES.find(h => h.id === id)?.name || id, tagName = t => TL.tagNames?.[t.slice(4)] || t.slice(4);
+    const name = (id) => HEROES.find((h) => h.id === id)?.name || id,
+      tagName = (t) => TL.tagNames?.[t.slice(4)] || t.slice(4);
     const out = [];
-    for (const [team, opp, sign, own, other] of [[ally, enemy, 1, "", "their"], [enemy, ally, -1, "Their ", "your"]]) {
-      const mine = once(team), theirs = once(opp), groups = {};
+    for (const [team, opp, sign, own, other] of [
+      [ally, enemy, 1, "", "their"],
+      [enemy, ally, -1, "Their ", "your"],
+    ]) {
+      const mine = once(team),
+        theirs = once(opp),
+        groups = {};
       for (const h of mine) {
-        const exact = theirs.filter(e => beats(h, e));
-        exact.forEach(e => out.push({ v: sign * W.counter, text: `${own}${name(h)} counters ${other} ${name(e)}` }));
+        const exact = theirs.filter((e) => beats(h, e));
+        exact.forEach((e) => out.push({ v: sign * W.counter, text: `${own}${name(h)} counters ${other} ${name(e)}` }));
         // "Uther is good vs their Dive (Genji, Tracer)" or "Their Lunara is weak vs your Dive (Genji)"
         let left = W.tagCounterMax;
-        theirs.filter(e => !exact.includes(e)).forEach(e => {
-          const t = beatsByTag(h, e);
-          if (!t) return;
-          const v = Math.min(left, W.tagCounter);   // past the cap the hero still shows, it just adds nothing
-          left -= v;
-          const good = (TL.counters?.[key(h)] || []).includes(t), k = good ? `g ${h} ${t}` : `w ${e} ${t}`;
-          const g = groups[k] ||= { v: 0, list: [], text: good ? n => `${own}${name(h)} is good vs ${other} ${tagName(t)} (${n})`
-            : n => `${own ? "Your" : "Their"} ${name(e)} is weak vs ${own ? "their" : "your"} ${tagName(t)} (${n})` };
-          g.v += sign * v; g.list.push(name(good ? e : h));
-        });
+        theirs
+          .filter((e) => !exact.includes(e))
+          .forEach((e) => {
+            const t = beatsByTag(h, e);
+            if (!t) return;
+            const v = Math.min(left, W.tagCounter); // past the cap the hero still shows, it just adds nothing
+            left -= v;
+            const good = (TL.counters?.[key(h)] || []).includes(t),
+              k = good ? `g ${h} ${t}` : `w ${e} ${t}`;
+            const g = (groups[k] ||= {
+              v: 0,
+              list: [],
+              text: good
+                ? (n) => `${own}${name(h)} is good vs ${other} ${tagName(t)} (${n})`
+                : (n) =>
+                    `${own ? "Your" : "Their"} ${name(e)} is weak vs ${own ? "their" : "your"} ${tagName(t)} (${n})`,
+            });
+            g.v += sign * v;
+            g.list.push(name(good ? e : h));
+          });
       }
       for (const g of Object.values(groups)) out.push({ v: g.v, text: g.text(g.list.join(", ")) });
-      for (let i = 0; i < mine.length; i++) for (let k = i + 1; k < mine.length; k++) {
-        const a = mine[i], b = mine[k];
-        if (goodWith(a, b)) out.push({ v: sign * W.synergy, text: `${own}${name(a)} + ${name(b)} work well together` });
-        else if (withByTag(a, b)) out.push({ v: sign * W.tagSynergy, text: `${own}${name(a)} + ${name(b)} work well together (${tagName(withByTag(a, b))})` });
-      }
+      for (let i = 0; i < mine.length; i++)
+        for (let k = i + 1; k < mine.length; k++) {
+          const a = mine[i],
+            b = mine[k];
+          if (goodWith(a, b))
+            out.push({ v: sign * W.synergy, text: `${own}${name(a)} + ${name(b)} work well together` });
+          else if (withByTag(a, b))
+            out.push({
+              v: sign * W.tagSynergy,
+              text: `${own}${name(a)} + ${name(b)} work well together (${tagName(withByTag(a, b))})`,
+            });
+        }
       // "Auriel + Cho'gall power combo (Cho'gall plays as S)"
-      const cname = k => k === "chogall" ? "Cho'gall" : name(k);
+      const cname = (k) => (k === "chogall" ? "Cho'gall" : name(k));
       for (const c of combosOf(team)) {
-        const lifts = once(team).map(k => [k, team.filter(h => key(h) === k).map(h => comboLift(h, team, map)).filter(l => l && l.combo === c)]).filter(([, ls]) => ls.length);
-        const v = lifts.reduce((s, [, ls]) => s + ls.reduce((t, l) => t + l.v, 0), 0), up = lifts.filter(([, ls]) => ls.some(l => l.tier > 0)).map(([k]) => cname(k));
-        if (v > 0.05) out.push({ v: sign * v, combo: true, text: `${own}${cname(c.a)} + ${cname(c.b)} power combo${up.length ? ` (${up.length > 1 ? "both play" : up[0] + " plays"} as ${tierName(c.tier)})` : ""}` });
+        const lifts = once(team)
+          .map((k) => [
+            k,
+            team
+              .filter((h) => key(h) === k)
+              .map((h) => comboLift(h, team, map))
+              .filter((l) => l && l.combo === c),
+          ])
+          .filter(([, ls]) => ls.length);
+        const v = lifts.reduce((s, [, ls]) => s + ls.reduce((t, l) => t + l.v, 0), 0),
+          up = lifts.filter(([, ls]) => ls.some((l) => l.tier > 0)).map(([k]) => cname(k));
+        if (v > 0.05)
+          out.push({
+            v: sign * v,
+            combo: true,
+            text: `${own}${cname(c.a)} + ${cname(c.b)} power combo${up.length ? ` (${up.length > 1 ? "both play" : up[0] + " plays"} as ${tierName(c.tier)})` : ""}`,
+          });
       }
       const c = comp(team);
-      if (c <= -1) out.push({ v: sign * c, text: `${own ? "Their" : "Your"} team comp has a hole (${["Healer", "Tank"].filter(r => !team.some(id => roleOf[id] === r)).map(r => "no " + r.toLowerCase()).join(", ") || "doubled roles"})` });
+      if (c <= -1)
+        out.push({
+          v: sign * c,
+          text: `${own ? "Their" : "Your"} team comp has a hole (${
+            ["Healer", "Tank"]
+              .filter((r) => !team.some((id) => roleOf[id] === r))
+              .map((r) => "no " + r.toLowerCase())
+              .join(", ") || "doubled roles"
+          })`,
+        });
     }
     return out.sort((x, y) => Math.abs(y.v) - Math.abs(x.v));
   }
-  const shown = pct => Math.round(Math.max(10, Math.min(90, pct)));   // never claim more than 90%
-  return { W, tierId, tierVal, wrOf, wrVal, beats, goodWith, beatsByTag, withByTag, comboVal, combosOf, comboLift, tierName, comp, teamScore, edge, explain, shown };
+  const shown = (pct) => Math.round(Math.max(10, Math.min(90, pct))); // never claim more than 90%
+  return {
+    W,
+    tierId,
+    tierVal,
+    wrOf,
+    wrVal,
+    beats,
+    goodWith,
+    beatsByTag,
+    withByTag,
+    comboVal,
+    combosOf,
+    comboLift,
+    tierName,
+    comp,
+    teamScore,
+    edge,
+    explain,
+    shown,
+  };
 };

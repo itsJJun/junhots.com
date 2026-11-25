@@ -1,567 +1,1970 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>JunHotS · Heroes of the Storm tier list, overlay and builds</title>
-<meta name="description" content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay.">
-<meta property="og:title" content="JunHotS · Heroes of the Storm tier list, overlay and builds">
-<meta property="og:description" content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay.">
-<meta property="og:url" content="https://junhots.com/">
-<meta property="og:image" content="https://junhots.com/img/og/_home.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="JunHotS">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://junhots.com/">
-<meta name="color-scheme" content="dark">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/site.css">
-<link rel="stylesheet" href="/games.css">
-<script>
-// Old links like junhots.com/#tierlist go to the new pages.
-({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash] && location.replace(({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash]);
-</script>
-<style>
-.hero { padding-block: 64px 48px; display: grid; grid-template-columns: minmax(0, 1fr) 470px; gap: 24px 40px; align-items: center; }
-.hero-txt { display: grid; gap: 18px; justify-items: start; }
-.eyebrow { font-size: 13px; color: var(--muted); }
-h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; font-weight: 600; letter-spacing: -0.035em; text-wrap: balance; max-width: 16ch; }
-h1 em { font-style: normal; color: var(--brand); }
-/* The coral word takes turns with the S tier heroes in the fan: it slides up and out, the next name rises in */
-h1 em { display: inline-block; transition: transform .45s cubic-bezier(.22, 1, .36, 1), opacity .35s, filter .35s; }
-h1 em.out { transform: translateY(-0.35em); opacity: 0; filter: blur(6px); transition-timing-function: cubic-bezier(.5, 0, .75, 0); transition-duration: .3s; }
-h1 em.in { transform: translateY(0.35em); opacity: 0; filter: blur(6px); transition: none; }
-.fan > a.cued { transform: translateX(var(--x)) rotate(calc(var(--r) * .4)) translateY(calc(var(--y) - 18px)) scale(1.04); border-color: var(--brand); }
-.lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
-.cta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
-/* One main ask: Twitch is the big button; YouTube, X and Discord sit quietly beside it (they still fill coral on hover) */
-.cta .btn.live { height: 46px; padding: 0 22px; font-size: 15px; }
-.cta .btn.hb { height: 38px; padding: 0 12px; background: transparent; border-color: transparent; color: var(--muted); }
-.cta .btn.hb:hover, .cta .btn.hb:focus-visible { color: var(--text); }
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        @view-transition {
+          navigation: auto;
+        }
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>JunHotS · Heroes of the Storm tier list, overlay and builds</title>
+    <meta
+      name="description"
+      content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay."
+    />
+    <meta property="og:title" content="JunHotS · Heroes of the Storm tier list, overlay and builds" />
+    <meta
+      property="og:description"
+      content="Jun plays Heroes of the Storm live on Twitch. Tier list with counters, synergy and win rates, a tier list maker and a stream overlay."
+    />
+    <meta property="og:url" content="https://junhots.com/" />
+    <meta property="og:image" content="https://junhots.com/img/og/_home.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JunHotS" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://junhots.com/" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/games.css" />
+    <script>
+      // Old links like junhots.com/#tierlist go to the new pages.
+      ({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" })[location.hash] &&
+        location.replace({ "#tierlist": "/tierlist/", "#overlay": "/overlay/" }[location.hash]);
+    </script>
+    <style>
+      .hero {
+        padding-block: 64px 48px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 470px;
+        gap: 24px 40px;
+        align-items: center;
+      }
+      .hero-txt {
+        display: grid;
+        gap: 18px;
+        justify-items: start;
+      }
+      .eyebrow {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(36px, 6vw, 56px);
+        line-height: 1.05;
+        font-weight: 600;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+        max-width: 16ch;
+      }
+      h1 em {
+        font-style: normal;
+        color: var(--brand);
+      }
+      /* The coral word takes turns with the S tier heroes in the fan: it slides up and out, the next name rises in */
+      h1 em {
+        display: inline-block;
+        transition:
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 0.35s,
+          filter 0.35s;
+      }
+      h1 em.out {
+        transform: translateY(-0.35em);
+        opacity: 0;
+        filter: blur(6px);
+        transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+        transition-duration: 0.3s;
+      }
+      h1 em.in {
+        transform: translateY(0.35em);
+        opacity: 0;
+        filter: blur(6px);
+        transition: none;
+      }
+      .fan > a.cued {
+        transform: translateX(var(--x)) rotate(calc(var(--r) * 0.4)) translateY(calc(var(--y) - 18px)) scale(1.04);
+        border-color: var(--brand);
+      }
+      .lead {
+        margin: 0;
+        max-width: 56ch;
+        color: var(--muted);
+        font-size: 17px;
+      }
+      .cta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 6px;
+      }
+      /* One main ask: Twitch is the big button; YouTube, X and Discord sit quietly beside it (they still fill coral on hover) */
+      .cta .btn.live {
+        height: 46px;
+        padding: 0 22px;
+        font-size: 15px;
+      }
+      .cta .btn.hb {
+        height: 38px;
+        padding: 0 12px;
+        background: transparent;
+        border-color: transparent;
+        color: var(--muted);
+      }
+      .cta .btn.hb:hover,
+      .cta .btn.hb:focus-visible {
+        color: var(--text);
+      }
 
-/* Numbers under the buttons; they count up when the page opens */
-.stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
-.stats:empty { display: none; }
-.stat { display: grid; gap: 2px; }
-.stat b { font: 600 26px/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-.stat span { font-size: 12px; color: var(--muted); }
-.stat { color: inherit; text-decoration: none; }
-.stat b, .stat span { transition: color .15s; }
-.stat:hover b { color: var(--accent); }
-.stat:hover span { color: var(--text); }
+      /* Numbers under the buttons; they count up when the page opens */
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 28px;
+        margin-top: 14px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .stats:empty {
+        display: none;
+      }
+      .stat {
+        display: grid;
+        gap: 2px;
+      }
+      .stat b {
+        font: 600 26px/1 var(--display);
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .stat {
+        color: inherit;
+        text-decoration: none;
+      }
+      .stat b,
+      .stat span {
+        transition: color 0.15s;
+      }
+      .stat:hover b {
+        color: var(--accent);
+      }
+      .stat:hover span {
+        color: var(--text);
+      }
 
-/* Fan of hero art: Jun's S tier, straight from the tier list */
-.fan { position: relative; height: 380px; }
-.fan > a { position: absolute; left: 50%; bottom: 56px; width: 168px; aspect-ratio: 414 / 600; margin-left: -84px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-  transform-origin: 50% 100%; transform: translateX(var(--x)) rotate(var(--r)) translateY(var(--y)) scale(1); transition: transform .3s cubic-bezier(.3, .7, .3, 1), border-color .2s; animation: fan-in .7s cubic-bezier(.3, .7, .3, 1) backwards; animation-delay: var(--d); }
-.fan > a img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; }
-.fan > a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 8, 7, 0.85), transparent 45%); }
-.fan > a span { position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 10px; font: 600 14px/1.2 var(--display); color: #fff; }
-.fan > a span small { display: block; font: 500 11px var(--mono); color: var(--good); margin-top: 3px; }
-/* The card under the mouse (picked by its slot, see the script) straightens, grows and comes to the front; the others dim and lean away */
-.fan > a.on { transform: translateX(var(--x)) rotate(0deg) translateY(-26px) scale(1.08); border-color: var(--brand); box-shadow: 0 26px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--brand); }
-/* "backwards" above (not "both") so the entrance animation lets go of the cards and these transitions can run.
+      /* Fan of hero art: Jun's S tier, straight from the tier list */
+      .fan {
+        position: relative;
+        height: 380px;
+      }
+      .fan > a {
+        position: absolute;
+        left: 50%;
+        bottom: 56px;
+        width: 168px;
+        aspect-ratio: 414 / 600;
+        margin-left: -84px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+        transform-origin: 50% 100%;
+        transform: translateX(var(--x)) rotate(var(--r)) translateY(var(--y)) scale(1);
+        transition:
+          transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1),
+          border-color 0.2s;
+        animation: fan-in 0.7s cubic-bezier(0.3, 0.7, 0.3, 1) backwards;
+        animation-delay: var(--d);
+      }
+      .fan > a img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 12%;
+        display: block;
+      }
+      .fan > a::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(10, 8, 7, 0.85), transparent 45%);
+      }
+      .fan > a span {
+        position: absolute;
+        z-index: 1;
+        left: 12px;
+        right: 12px;
+        bottom: 10px;
+        font: 600 14px/1.2 var(--display);
+        color: #fff;
+      }
+      .fan > a span small {
+        display: block;
+        font: 500 11px var(--mono);
+        color: var(--good);
+        margin-top: 3px;
+      }
+      /* The card under the mouse (picked by its slot, see the script) straightens, grows and comes to the front; the others dim and lean away */
+      .fan > a.on {
+        transform: translateX(var(--x)) rotate(0deg) translateY(-26px) scale(1.08);
+        border-color: var(--brand);
+        box-shadow:
+          0 26px 60px rgba(0, 0, 0, 0.7),
+          0 0 0 1px var(--brand);
+      }
+      /* "backwards" above (not "both") so the entrance animation lets go of the cards and these transitions can run.
    Every state uses the same transform list (ending in scale) so the browser slides between them cleanly. */
-.fan > a { filter: brightness(1); transition: transform .45s cubic-bezier(.22, 1, .36, 1), border-color .25s, filter .35s, box-shadow .35s; }
-.fan.picking > a:not(.on) { filter: brightness(.55) saturate(.8); transform: translateX(calc(var(--x) * 1.12)) rotate(calc(var(--r) * 1.3)) translateY(var(--y)) scale(1); }
-@keyframes fan-in { from { transform: translateY(30px); opacity: 0; } }
-.fan .cap { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 12px; color: var(--muted); }
-.fan .cap a { all: unset; cursor: pointer; color: var(--brand); }
-.fan .cap a:hover { text-decoration: underline; }
+      .fan > a {
+        filter: brightness(1);
+        transition:
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          border-color 0.25s,
+          filter 0.35s,
+          box-shadow 0.35s;
+      }
+      .fan.picking > a:not(.on) {
+        filter: brightness(0.55) saturate(0.8);
+        transform: translateX(calc(var(--x) * 1.12)) rotate(calc(var(--r) * 1.3)) translateY(var(--y)) scale(1);
+      }
+      @keyframes fan-in {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+      }
+      .fan .cap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        text-align: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .fan .cap a {
+        all: unset;
+        cursor: pointer;
+        color: var(--brand);
+      }
+      .fan .cap a:hover {
+        text-decoration: underline;
+      }
 
-/* Bento: one big Tier list card, Builds and Maker beside it, Overlay across the bottom */
-.cards { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); grid-template-areas: "tier builds" "tier maker" "overlay overlay"; gap: 16px; }
-.card { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; transition: border-color .15s, transform .15s; }
-.c-tier { grid-area: tier; } .c-builds { grid-area: builds; } .c-maker { grid-area: maker; } .c-overlay { grid-area: overlay; flex-direction: row; }
-a.card:hover { border-color: #4a413c; transform: translateY(-2px); }
-.card .pic { flex: 1; min-height: 0; overflow: hidden; background: var(--bg); border-bottom: 1px solid var(--line); }
-.card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
-.c-overlay .pic { flex: none; width: 58%; aspect-ratio: 840 / 345; border-bottom: 0; border-right: 1px solid var(--line); }
-.c-overlay .pic img { object-position: left center; }
-.c-overlay .txt { flex: 1; align-self: center; }
-.card .txt { padding: 16px 18px 18px; }
-.c-tier .txt { padding: 20px 22px 22px; }
-.c-tier b { font-size: 22px !important; }
-.card b { font-family: var(--display); display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-.card b .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
-a.card:hover b .arr { color: var(--text); transform: translateX(3px); }
-.card p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
-/* Tier list card: Jun's live tier list, same tiles as /tierlist/ (fills in from loadTierlist; the old picture stays if it can't load) */
-.c-tier .pic { position: relative; min-height: 320px; background: var(--surface); }
-.c-tier .mini { position: absolute; inset: 0; }
-.c-tier .pic::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: linear-gradient(transparent, var(--surface)); pointer-events: none; }
-.mini .row { display: grid; grid-template-columns: 52px 1fr; min-height: 76px; }
-.mini .row + .row { border-top: 1px solid var(--line); }
-.mini .tier { display: grid; place-items: center; font: 700 22px/1 var(--sans); letter-spacing: -0.02em; color: var(--c); background: linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, var(--surface-2)), color-mix(in srgb, var(--c) 6%, var(--surface))); box-shadow: inset 3px 0 0 var(--c); border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line)); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent); }
-.mini .heroes { display: flex; flex-wrap: wrap; gap: 10px 8px; align-content: center; padding: 10px 12px; min-width: 0; }
-.mini .h { width: 56px; text-align: center; }
-.mini .h img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--surface-2); }
-.mini .h > span:not(.port) { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mini .wr { font: 500 11px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
-.mini .good { color: var(--good); } .mini .bad { color: var(--bad); } .mini .mid { color: var(--muted); }
-.mini .port .mv { position: absolute; left: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--surface); }
-.mini .port .mv svg { width: 9px; height: 9px; color: #12100f; }
-.mini .port .cb { position: absolute; right: -5px; top: -5px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; color: #1a1205; background: var(--combo); box-shadow: 0 0 0 2px var(--surface), 0 0 8px rgba(245, 192, 74, 0.55); }
-.mini .port .cb .lk { width: 11px; height: 11px; }
-.c-tier .meta .cmbs { display: inline-flex; align-items: center; gap: 4px; color: var(--combo); }
-.c-tier .meta .cmbs .lk { width: 13px; height: 13px; }
-.c-tier .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; font-size: 13px; color: var(--muted); }
-.c-tier .meta:empty { display: none; }
-.c-tier .meta strong { color: var(--text); font-weight: 500; }
-.c-tier .meta .mvs { display: inline-flex; gap: 6px; }
-.c-tier .meta .mvs span { position: relative; }
-.c-tier .meta .mvs img { display: block; width: 24px; height: 24px; border-radius: 5px; object-fit: cover; }
-.c-tier .meta .mvs svg { position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; padding: 2px; border-radius: 50%; background: var(--c); color: #12100f; box-shadow: 0 0 0 2px var(--surface); }
-@media (max-width: 520px) { .mini .row { grid-template-columns: 44px 1fr; } .mini .h, .mini .h img { width: 48px; } .mini .h img { height: 48px; } }
-/* Builds card: three hero art slices */
-.c-builds .pic, .c-maker .pic { flex: none; height: 150px; }
-.c-builds .pic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--line); }
-.c-builds .pic img { min-height: 0; object-position: center 15%; transition: transform .4s; }
-/* Make your own card: half tier list maker, half build maker, each half its own link */
-.c-maker .pic { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--line); }
-.c-maker .pic a { display: block; min-height: 0; overflow: hidden; background: var(--bg); }
-.c-maker .pic img { transition: transform .4s, filter .25s; }
-.c-maker .pic a:hover img { transform: scale(1.04); }
-.c-maker .mk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.c-maker .mk a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px; font-weight: 500; color: var(--text); transition: border-color .15s, background .15s; }
-.c-maker .mk a .arr { margin-left: auto; color: var(--muted); transition: transform .15s, color .15s; }
-.c-maker .mk a:hover, .c-maker .mk a.lit { border-color: var(--brand); background: rgba(242, 106, 75, 0.08); }
-.c-maker .mk a:hover .arr, .c-maker .mk a.lit .arr { color: var(--brand); transform: translateX(3px); }
-a.c-builds:hover .pic img { transform: scale(1.05); }
-/* Home map (home-map.js): a small 3D island, one building per part of the site. Replaces the hero-art fan
+      /* Bento: one big Tier list card, Builds and Maker beside it, Overlay across the bottom */
+      .cards {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        grid-template-areas: "tier builds" "tier maker" "overlay overlay";
+        gap: 16px;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        overflow: hidden;
+        transition:
+          border-color 0.15s,
+          transform 0.15s;
+      }
+      .c-tier {
+        grid-area: tier;
+      }
+      .c-builds {
+        grid-area: builds;
+      }
+      .c-maker {
+        grid-area: maker;
+      }
+      .c-overlay {
+        grid-area: overlay;
+        flex-direction: row;
+      }
+      a.card:hover {
+        border-color: #4a413c;
+        transform: translateY(-2px);
+      }
+      .card .pic {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+      }
+      .card .pic img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top left;
+      }
+      .c-overlay .pic {
+        flex: none;
+        width: 58%;
+        aspect-ratio: 840 / 345;
+        border-bottom: 0;
+        border-right: 1px solid var(--line);
+      }
+      .c-overlay .pic img {
+        object-position: left center;
+      }
+      .c-overlay .txt {
+        flex: 1;
+        align-self: center;
+      }
+      .card .txt {
+        padding: 16px 18px 18px;
+      }
+      .c-tier .txt {
+        padding: 20px 22px 22px;
+      }
+      .c-tier b {
+        font-size: 22px !important;
+      }
+      .card b {
+        font-family: var(--display);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .card b .arr {
+        margin-left: auto;
+        color: var(--muted);
+        transition:
+          transform 0.15s,
+          color 0.15s;
+      }
+      a.card:hover b .arr {
+        color: var(--text);
+        transform: translateX(3px);
+      }
+      .card p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      /* Tier list card: Jun's live tier list, same tiles as /tierlist/ (fills in from loadTierlist; the old picture stays if it can't load) */
+      .c-tier .pic {
+        position: relative;
+        min-height: 320px;
+        background: var(--surface);
+      }
+      .c-tier .mini {
+        position: absolute;
+        inset: 0;
+      }
+      .c-tier .pic::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 56px;
+        background: linear-gradient(transparent, var(--surface));
+        pointer-events: none;
+      }
+      .mini .row {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        min-height: 76px;
+      }
+      .mini .row + .row {
+        border-top: 1px solid var(--line);
+      }
+      .mini .tier {
+        display: grid;
+        place-items: center;
+        font: 700 22px/1 var(--sans);
+        letter-spacing: -0.02em;
+        color: var(--c);
+        background: linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--c) 16%, var(--surface-2)),
+          color-mix(in srgb, var(--c) 6%, var(--surface))
+        );
+        box-shadow: inset 3px 0 0 var(--c);
+        border-right: 1px solid color-mix(in srgb, var(--c) 22%, var(--line));
+        text-shadow: 0 0 18px color-mix(in srgb, var(--c) 70%, transparent);
+      }
+      .mini .heroes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 8px;
+        align-content: center;
+        padding: 10px 12px;
+        min-width: 0;
+      }
+      .mini .h {
+        width: 56px;
+        text-align: center;
+      }
+      .mini .h img {
+        display: block;
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 6px;
+        background: var(--surface-2);
+      }
+      .mini .h > span:not(.port) {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mini .wr {
+        font: 500 11px/1.2 var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .mini .good {
+        color: var(--good);
+      }
+      .mini .bad {
+        color: var(--bad);
+      }
+      .mini .mid {
+        color: var(--muted);
+      }
+      .mini .port .mv {
+        position: absolute;
+        left: -5px;
+        top: -5px;
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--c);
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      .mini .port .mv svg {
+        width: 9px;
+        height: 9px;
+        color: #12100f;
+      }
+      .mini .port .cb {
+        position: absolute;
+        right: -5px;
+        top: -5px;
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #1a1205;
+        background: var(--combo);
+        box-shadow:
+          0 0 0 2px var(--surface),
+          0 0 8px rgba(245, 192, 74, 0.55);
+      }
+      .mini .port .cb .lk {
+        width: 11px;
+        height: 11px;
+      }
+      .c-tier .meta .cmbs {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--combo);
+      }
+      .c-tier .meta .cmbs .lk {
+        width: 13px;
+        height: 13px;
+      }
+      .c-tier .meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .c-tier .meta:empty {
+        display: none;
+      }
+      .c-tier .meta strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .c-tier .meta .mvs {
+        display: inline-flex;
+        gap: 6px;
+      }
+      .c-tier .meta .mvs span {
+        position: relative;
+      }
+      .c-tier .meta .mvs img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        border-radius: 5px;
+        object-fit: cover;
+      }
+      .c-tier .meta .mvs svg {
+        position: absolute;
+        right: -4px;
+        bottom: -4px;
+        width: 12px;
+        height: 12px;
+        padding: 2px;
+        border-radius: 50%;
+        background: var(--c);
+        color: #12100f;
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      @media (max-width: 520px) {
+        .mini .row {
+          grid-template-columns: 44px 1fr;
+        }
+        .mini .h,
+        .mini .h img {
+          width: 48px;
+        }
+        .mini .h img {
+          height: 48px;
+        }
+      }
+      /* Builds card: three hero art slices */
+      .c-builds .pic,
+      .c-maker .pic {
+        flex: none;
+        height: 150px;
+      }
+      .c-builds .pic {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        background: var(--line);
+      }
+      .c-builds .pic img {
+        min-height: 0;
+        object-position: center 15%;
+        transition: transform 0.4s;
+      }
+      /* Make your own card: half tier list maker, half build maker, each half its own link */
+      .c-maker .pic {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        background: var(--line);
+      }
+      .c-maker .pic a {
+        display: block;
+        min-height: 0;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .c-maker .pic img {
+        transition:
+          transform 0.4s,
+          filter 0.25s;
+      }
+      .c-maker .pic a:hover img {
+        transform: scale(1.04);
+      }
+      .c-maker .mk {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .c-maker .mk a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .c-maker .mk a .arr {
+        margin-left: auto;
+        color: var(--muted);
+        transition:
+          transform 0.15s,
+          color 0.15s;
+      }
+      .c-maker .mk a:hover,
+      .c-maker .mk a.lit {
+        border-color: var(--brand);
+        background: rgba(242, 106, 75, 0.08);
+      }
+      .c-maker .mk a:hover .arr,
+      .c-maker .mk a.lit .arr {
+        color: var(--brand);
+        transform: translateX(3px);
+      }
+      a.c-builds:hover .pic img {
+        transform: scale(1.05);
+      }
+      /* Home map (home-map.js): a small 3D island, one building per part of the site. Replaces the hero-art fan
    when the browser can draw it; the fan stays as the fallback. */
-.hero.has-map { grid-template-columns: minmax(0, 1fr) 560px; }
-.map { display: none; position: relative; height: 470px; margin-right: -24px; touch-action: pan-y; user-select: none; -webkit-user-select: none;
-  background: radial-gradient(closest-side at 50% 52%, rgba(255, 120, 90, 0.07), transparent); }
-.has-map .map { display: block; }
-.has-map .fan { display: none; }
-.map canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; opacity: 0; transition: opacity .6s; }
-.map-ready .map canvas { opacity: 1; }
-.map canvas.hot { cursor: pointer; }
-.map canvas.drag { cursor: grabbing; }
-.map-labels { position: absolute; inset: 0; pointer-events: none; }
-.map .pin { position: absolute; left: 0; top: 0; pointer-events: auto; padding: 2px 6px 14px; font-size: 12.5px; font-weight: 500; color: #bfb5ae; white-space: nowrap; transition: color .15s, opacity .2s; }
-.map .pin::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 1px; height: 10px; background: currentColor; opacity: .35; }
-.map .pin b { font-weight: inherit; }
-.map .pin.on, .map .pin:focus-visible { color: var(--text); outline: none; }
-.map .pin.on b { box-shadow: 0 2px 0 -1px var(--c); }
-.map-labels.dim .pin:not(.on) { opacity: .4; }
-.map-cap { position: absolute; left: 12px; right: 36px; bottom: 6px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 10px 14px; border-radius: 12px; background: rgba(26, 23, 22, 0.88); border: 1px solid var(--line);
-  font-size: 13.5px; color: var(--muted); pointer-events: none; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
-.map-cap.on { opacity: 1; transform: none; }
-.map-cap b { color: var(--text); font: 600 14px var(--display); box-shadow: 0 2px 0 -1px var(--c); }
-.map-cap small { flex-basis: 100%; font: 12px var(--mono); color: var(--accent); }
-.map-cap.touch { pointer-events: auto; padding-right: 92px; }
-.map-cap .btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 7px 12px; font-size: 13px; }
-.map-hint { position: absolute; right: 14px; top: 4px; font: 11.5px var(--mono); color: #6f6560; pointer-events: none; transition: opacity .3s; }
-.map-cap.on ~ .map-hint, .map-ready .map:hover .map-hint { opacity: 0; }
-@media (max-width: 960px) { .hero.has-map { grid-template-columns: 1fr; } .map { height: 420px; margin: 0 -12px; } }
-@media (max-width: 520px) { .map { height: 400px; } .map .pin { font-size: 11.5px; } }
-@media (max-width: 960px) { .hero { grid-template-columns: 1fr; } .fan { height: 330px; max-width: 470px; width: 100%; justify-self: center; } }
-@media (max-width: 720px) {
-  .cards { grid-template-columns: 1fr; grid-template-areas: "tier" "builds" "maker" "overlay"; }
-  .c-overlay { flex-direction: column; } .c-overlay .pic { width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
-  .hero { padding-block: 40px 32px; }
-  .fan { height: 260px; } .fan > a { width: 118px; margin-left: -59px; bottom: 60px; --x: calc(var(--o) * 46px) !important; }
-  .fan > a span { font-size: 12px; left: 9px; bottom: 8px; } .fan > a span small { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .fan > a { animation: none; transition: none; } }
-/* Soft light that follows the mouse over a card (and lights up its border) */
-.card { position: relative; }
-.card::before, .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; }
-.card::before { z-index: 1; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.13), transparent 60%); }
-.card::after { z-index: 2; padding: 1px; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 106, 75, 0.75), transparent 70%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-a.card:hover::before, a.card:hover::after { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .card, .card b .arr, .c-builds .pic img, .c-maker .pic img { transition: none; } }
-/* The Twitch and YouTube buttons tell what's new themselves: "Live now" / a NEW tag,
+      .hero.has-map {
+        grid-template-columns: minmax(0, 1fr) 560px;
+      }
+      .map {
+        display: none;
+        position: relative;
+        height: 470px;
+        margin-right: -24px;
+        touch-action: pan-y;
+        user-select: none;
+        -webkit-user-select: none;
+        background: radial-gradient(closest-side at 50% 52%, rgba(255, 120, 90, 0.07), transparent);
+      }
+      .has-map .map {
+        display: block;
+      }
+      .has-map .fan {
+        display: none;
+      }
+      .map canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: grab;
+        opacity: 0;
+        transition: opacity 0.6s;
+      }
+      .map-ready .map canvas {
+        opacity: 1;
+      }
+      .map canvas.hot {
+        cursor: pointer;
+      }
+      .map canvas.drag {
+        cursor: grabbing;
+      }
+      .map-labels {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .map .pin {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: auto;
+        padding: 2px 6px 14px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #bfb5ae;
+        white-space: nowrap;
+        transition:
+          color 0.15s,
+          opacity 0.2s;
+      }
+      .map .pin::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 2px;
+        width: 1px;
+        height: 10px;
+        background: currentColor;
+        opacity: 0.35;
+      }
+      .map .pin b {
+        font-weight: inherit;
+      }
+      .map .pin.on,
+      .map .pin:focus-visible {
+        color: var(--text);
+        outline: none;
+      }
+      .map .pin.on b {
+        box-shadow: 0 2px 0 -1px var(--c);
+      }
+      .map-labels.dim .pin:not(.on) {
+        opacity: 0.4;
+      }
+      .map-cap {
+        position: absolute;
+        left: 12px;
+        right: 36px;
+        bottom: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(26, 23, 22, 0.88);
+        border: 1px solid var(--line);
+        font-size: 13.5px;
+        color: var(--muted);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .map-cap.on {
+        opacity: 1;
+        transform: none;
+      }
+      .map-cap b {
+        color: var(--text);
+        font: 600 14px var(--display);
+        box-shadow: 0 2px 0 -1px var(--c);
+      }
+      .map-cap small {
+        flex-basis: 100%;
+        font: 12px var(--mono);
+        color: var(--accent);
+      }
+      .map-cap.touch {
+        pointer-events: auto;
+        padding-right: 92px;
+      }
+      .map-cap .btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+      .map-hint {
+        position: absolute;
+        right: 14px;
+        top: 4px;
+        font: 11.5px var(--mono);
+        color: #6f6560;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .map-cap.on ~ .map-hint,
+      .map-ready .map:hover .map-hint {
+        opacity: 0;
+      }
+      @media (max-width: 960px) {
+        .hero.has-map {
+          grid-template-columns: 1fr;
+        }
+        .map {
+          height: 420px;
+          margin: 0 -12px;
+        }
+      }
+      @media (max-width: 520px) {
+        .map {
+          height: 400px;
+        }
+        .map .pin {
+          font-size: 11.5px;
+        }
+      }
+      @media (max-width: 960px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .fan {
+          height: 330px;
+          max-width: 470px;
+          width: 100%;
+          justify-self: center;
+        }
+      }
+      @media (max-width: 720px) {
+        .cards {
+          grid-template-columns: 1fr;
+          grid-template-areas: "tier" "builds" "maker" "overlay";
+        }
+        .c-overlay {
+          flex-direction: column;
+        }
+        .c-overlay .pic {
+          width: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        .hero {
+          padding-block: 40px 32px;
+        }
+        .fan {
+          height: 260px;
+        }
+        .fan > a {
+          width: 118px;
+          margin-left: -59px;
+          bottom: 60px;
+          --x: calc(var(--o) * 46px) !important;
+        }
+        .fan > a span {
+          font-size: 12px;
+          left: 9px;
+          bottom: 8px;
+        }
+        .fan > a span small {
+          display: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .fan > a {
+          animation: none;
+          transition: none;
+        }
+      }
+      /* Soft light that follows the mouse over a card (and lights up its border) */
+      .card {
+        position: relative;
+      }
+      .card::before,
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+      .card::before {
+        z-index: 1;
+        background: radial-gradient(
+          360px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(242, 106, 75, 0.13),
+          transparent 60%
+        );
+      }
+      .card::after {
+        z-index: 2;
+        padding: 1px;
+        background: radial-gradient(
+          260px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(242, 106, 75, 0.75),
+          transparent 70%
+        );
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+          linear-gradient(#000 0 0) content-box exclude,
+          linear-gradient(#000 0 0);
+      }
+      a.card:hover::before,
+      a.card:hover::after {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .card,
+        .card b .arr,
+        .c-builds .pic img,
+        .c-maker .pic img {
+          transition: none;
+        }
+      }
+      /* The Twitch and YouTube buttons tell what's new themselves: "Live now" / a NEW tag,
    and on hover a small peek of the stream or the latest video drops down under the button. */
-.pk { position: relative; display: inline-flex; }
-.peek { position: absolute; z-index: 40; top: 100%; left: 0; padding-top: 10px; width: 300px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .2s, transform .2s, visibility 0s .2s; }
-.pk:hover .peek, .pk:focus-within .peek { opacity: 1; visibility: visible; transform: none; transition: opacity .2s, transform .2s; }
-.peek a { display: block; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6); transition: border-color .15s; }
-.peek a:hover { border-color: var(--brand); }
-.peek .pic { position: relative; display: block; aspect-ratio: 16 / 9; background: #000; }
-.peek .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.peek .t { display: grid; gap: 2px; padding: 10px 12px 11px; }
-.peek .t small { font-size: 12px; color: var(--muted); }
-.peek .t b { font: 600 13px/1.35 var(--display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.badge { position: absolute; left: 8px; top: 8px; display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border-radius: 5px; background: #e91916; color: #fff; font: 700 11px/1.5 var(--sans); letter-spacing: .05em; }
-.badge .dot { width: 6px; height: 6px; background: #fff; }
-.new { padding: 0 6px; border-radius: 5px; background: var(--brand); color: #1f0b05; font: 700 10px/1.6 var(--sans); letter-spacing: .06em; }
-/* Offline: the red recording dot rests as a grey dot, so it only "records" when I'm really live */
-.dot.off { background: #8a807a; animation: none; }
-.btn.live .dot.off { background: rgba(255, 255, 255, 0.55); }
-.nav-live.on { color: var(--text); }
-@media (hover: none) { .peek { display: none; } }
-/* My recent games: the last 10 the overlay sent, newest on the left. Hidden until there are any. */
-.games { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px 28px; margin-bottom: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.games h2 { margin: 0; font: 600 17px/1.2 var(--display); letter-spacing: -0.01em; }
-.g-rec { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); }
-.g-rec b { font: 600 13px var(--mono); }
-.g-rec .w { color: var(--good); } .g-rec .l { color: var(--bad); }
-.g-rec .streak { padding: 1px 8px; border-radius: 999px; font-size: 12px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
-.g-row { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px; }
-.g { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; border-radius: 9px; }
-.g img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px 9px 3px 3px; background: var(--surface-2); transition: transform .15s; }
-.g::after { content: ""; display: block; height: 3px; margin-top: 3px; border-radius: 3px; background: var(--c); }
-.g.loss img { filter: saturate(.55) brightness(.8); }
-.g:hover img, .g:focus-visible img, .g[aria-expanded="true"] img { transform: translateY(-2px); filter: none; }
-.g-row:has([aria-expanded="true"]) .g:not([aria-expanded="true"]) img { opacity: .4; }
-.g[aria-expanded="true"]::after { height: 4px; margin-top: 2px; }
-.g-all { color: var(--accent); font-weight: 500; }
-.g-all:hover { text-decoration: underline; text-underline-offset: 3px; }
-/* The open game: slides down under the row */
-.g-open { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; margin-top: -14px; transition: grid-template-rows .32s cubic-bezier(.22, 1, .36, 1), margin-top .32s cubic-bezier(.22, 1, .36, 1); }
-.g-open > div { min-height: 0; overflow: hidden; }
-.g-open.on { grid-template-rows: 1fr; margin-top: 0; }
-.g .tip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); width: max-content; max-width: 220px; padding: 7px 10px; border-radius: 8px; border: 1px solid #3d3531; background: var(--surface); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55); font-size: 12px; line-height: 1.4; color: var(--muted); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s, transform .15s, visibility 0s .15s; }
-.g .tip b { display: block; color: var(--text); font-weight: 600; font-size: 13px; }
-.g .tip i { font-style: normal; font-weight: 600; color: var(--c); }
-.g:hover .tip, .g:focus-visible .tip { opacity: 1; visibility: visible; transform: translateX(-50%); transition: opacity .15s, transform .15s; }
-.g-row .g:first-child .tip { left: 0; transform: translateY(4px); } .g-row .g:first-child:hover .tip { transform: none; }
-.g-row .g:last-child .tip { left: auto; right: 0; transform: translateY(4px); } .g-row .g:last-child:hover .tip { transform: none; }
-@media (max-width: 720px) { .games { grid-template-columns: 1fr; } .g-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-@media (prefers-reduced-motion: reduce) { .g img, .g .tip, .g-open { transition: none; } }
-/* Next stream: one line under the buttons, from my Twitch schedule (schedule.js). Hidden if there's nothing to show. */
-.nx { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 4px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 14px; max-width: 100%; }
-.nx[hidden] { display: none; }
-.nx .lb { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
-.nx .lb svg { width: 15px; height: 15px; flex: none; color: var(--accent); }
-.nx .lb.live { color: var(--text); } .nx .lb.live svg { color: #ff6b6b; }
-.nx strong { font: 600 15px var(--display); letter-spacing: -0.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
-.nx .cd { font: 500 13px var(--mono); color: var(--accent); }
-/* Live and in a game: hero portrait, map, game number and tonight's score (schedule.js) */
-.nx.ingame { border-color: #5b2a2a; background: linear-gradient(90deg, rgba(255,107,107,.08), var(--surface) 40%); }
-.nx .ig { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-.nx .ig img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px var(--brand); flex: none; }
-.nx .ig .on { color: var(--muted); font-size: 13px; white-space: nowrap; }
-.nx .rec { display: inline-flex; align-items: center; gap: 4px; font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
-.nx .rec .w { color: var(--good); font-weight: 500; } .nx .rec .l { color: var(--bad); font-weight: 500; }
-.nx .rec .d { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
-.nx .rec .d.l { background: var(--bad); }
-.nx .rec b + .d, .nx .rec .d:first-of-type { margin-left: 4px; }
-.nx a.cd:hover { text-decoration: underline; text-underline-offset: 3px; }
-.nx .days { display: inline-flex; gap: 3px; }
-.nx .days span { width: 24px; height: 22px; display: grid; place-items: center; border-radius: 6px; font-size: 11px; color: #6f6560; border: 1px solid var(--line); }
-.nx .days span.on { color: var(--text); border-color: #4a413c; background: var(--surface-2); }
-.nx .days span.cx { text-decoration: line-through; }
-.nx .days span.nxt { color: #1f0b05; background: var(--brand); border-color: var(--brand); font-weight: 700; }
-.nx a.more { margin-left: auto; color: var(--accent); font-weight: 500; font-size: 13px; white-space: nowrap; }
-.nx a.more:hover { text-decoration: underline; text-underline-offset: 3px; }
-/* Beside the home map the text column is narrower, so the card gets tighter: the whole card links to the
+      .pk {
+        position: relative;
+        display: inline-flex;
+      }
+      .peek {
+        position: absolute;
+        z-index: 40;
+        top: 100%;
+        left: 0;
+        padding-top: 10px;
+        width: 300px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-4px);
+        transition:
+          opacity 0.2s,
+          transform 0.2s,
+          visibility 0s 0.2s;
+      }
+      .pk:hover .peek,
+      .pk:focus-within .peek {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .peek a {
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+        transition: border-color 0.15s;
+      }
+      .peek a:hover {
+        border-color: var(--brand);
+      }
+      .peek .pic {
+        position: relative;
+        display: block;
+        aspect-ratio: 16 / 9;
+        background: #000;
+      }
+      .peek .pic img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .peek .t {
+        display: grid;
+        gap: 2px;
+        padding: 10px 12px 11px;
+      }
+      .peek .t small {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .peek .t b {
+        font: 600 13px/1.35 var(--display);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .badge {
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 1px 7px;
+        border-radius: 5px;
+        background: #e91916;
+        color: #fff;
+        font: 700 11px/1.5 var(--sans);
+        letter-spacing: 0.05em;
+      }
+      .badge .dot {
+        width: 6px;
+        height: 6px;
+        background: #fff;
+      }
+      .new {
+        padding: 0 6px;
+        border-radius: 5px;
+        background: var(--brand);
+        color: #1f0b05;
+        font: 700 10px/1.6 var(--sans);
+        letter-spacing: 0.06em;
+      }
+      /* Offline: the red recording dot rests as a grey dot, so it only "records" when I'm really live */
+      .dot.off {
+        background: #8a807a;
+        animation: none;
+      }
+      .btn.live .dot.off {
+        background: rgba(255, 255, 255, 0.55);
+      }
+      .nav-live.on {
+        color: var(--text);
+      }
+      @media (hover: none) {
+        .peek {
+          display: none;
+        }
+      }
+      /* My recent games: the last 10 the overlay sent, newest on the left. Hidden until there are any. */
+      .games {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 14px 28px;
+        margin-bottom: 16px;
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+      .games h2 {
+        margin: 0;
+        font: 600 17px/1.2 var(--display);
+        letter-spacing: -0.01em;
+      }
+      .g-rec {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .g-rec b {
+        font: 600 13px var(--mono);
+      }
+      .g-rec .w {
+        color: var(--good);
+      }
+      .g-rec .l {
+        color: var(--bad);
+      }
+      .g-rec .streak {
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+        color: var(--c);
+        background: color-mix(in srgb, var(--c) 10%, transparent);
+      }
+      .g-row {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .g {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        border-radius: 9px;
+      }
+      .g img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 9px 9px 3px 3px;
+        background: var(--surface-2);
+        transition: transform 0.15s;
+      }
+      .g::after {
+        content: "";
+        display: block;
+        height: 3px;
+        margin-top: 3px;
+        border-radius: 3px;
+        background: var(--c);
+      }
+      .g.loss img {
+        filter: saturate(0.55) brightness(0.8);
+      }
+      .g:hover img,
+      .g:focus-visible img,
+      .g[aria-expanded="true"] img {
+        transform: translateY(-2px);
+        filter: none;
+      }
+      .g-row:has([aria-expanded="true"]) .g:not([aria-expanded="true"]) img {
+        opacity: 0.4;
+      }
+      .g[aria-expanded="true"]::after {
+        height: 4px;
+        margin-top: 2px;
+      }
+      .g-all {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .g-all:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      /* The open game: slides down under the row */
+      .g-open {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-rows: 0fr;
+        margin-top: -14px;
+        transition:
+          grid-template-rows 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+          margin-top 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .g-open > div {
+        min-height: 0;
+        overflow: hidden;
+      }
+      .g-open.on {
+        grid-template-rows: 1fr;
+        margin-top: 0;
+      }
+      .g .tip {
+        position: absolute;
+        z-index: 30;
+        left: 50%;
+        bottom: calc(100% + 8px);
+        transform: translateX(-50%) translateY(4px);
+        width: max-content;
+        max-width: 220px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid #3d3531;
+        background: var(--surface);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--muted);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.15s,
+          transform 0.15s,
+          visibility 0s 0.15s;
+      }
+      .g .tip b {
+        display: block;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .g .tip i {
+        font-style: normal;
+        font-weight: 600;
+        color: var(--c);
+      }
+      .g:hover .tip,
+      .g:focus-visible .tip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%);
+        transition:
+          opacity 0.15s,
+          transform 0.15s;
+      }
+      .g-row .g:first-child .tip {
+        left: 0;
+        transform: translateY(4px);
+      }
+      .g-row .g:first-child:hover .tip {
+        transform: none;
+      }
+      .g-row .g:last-child .tip {
+        left: auto;
+        right: 0;
+        transform: translateY(4px);
+      }
+      .g-row .g:last-child:hover .tip {
+        transform: none;
+      }
+      @media (max-width: 720px) {
+        .games {
+          grid-template-columns: 1fr;
+        }
+        .g-row {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .g img,
+        .g .tip,
+        .g-open {
+          transition: none;
+        }
+      }
+      /* Next stream: one line under the buttons, from my Twitch schedule (schedule.js). Hidden if there's nothing to show. */
+      .nx {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        margin-top: 4px;
+        padding: 9px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        font-size: 14px;
+        max-width: 100%;
+      }
+      .nx[hidden] {
+        display: none;
+      }
+      .nx .lb {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .nx .lb svg {
+        width: 15px;
+        height: 15px;
+        flex: none;
+        color: var(--accent);
+      }
+      .nx .lb.live {
+        color: var(--text);
+      }
+      .nx .lb.live svg {
+        color: #ff6b6b;
+      }
+      .nx strong {
+        font: 600 15px var(--display);
+        letter-spacing: -0.01em;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 22ch;
+      }
+      .nx .cd {
+        font: 500 13px var(--mono);
+        color: var(--accent);
+      }
+      /* Live and in a game: hero portrait, map, game number and tonight's score (schedule.js) */
+      .nx.ingame {
+        border-color: #5b2a2a;
+        background: linear-gradient(90deg, rgba(255, 107, 107, 0.08), var(--surface) 40%);
+      }
+      .nx .ig {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .nx .ig img {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 0 1.5px var(--brand);
+        flex: none;
+      }
+      .nx .ig .on {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .nx .rec {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font: 500 13px var(--mono);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .nx .rec .w {
+        color: var(--good);
+        font-weight: 500;
+      }
+      .nx .rec .l {
+        color: var(--bad);
+        font-weight: 500;
+      }
+      .nx .rec .d {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--good);
+      }
+      .nx .rec .d.l {
+        background: var(--bad);
+      }
+      .nx .rec b + .d,
+      .nx .rec .d:first-of-type {
+        margin-left: 4px;
+      }
+      .nx a.cd:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .nx .days {
+        display: inline-flex;
+        gap: 3px;
+      }
+      .nx .days span {
+        width: 24px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border-radius: 6px;
+        font-size: 11px;
+        color: #6f6560;
+        border: 1px solid var(--line);
+      }
+      .nx .days span.on {
+        color: var(--text);
+        border-color: #4a413c;
+        background: var(--surface-2);
+      }
+      .nx .days span.cx {
+        text-decoration: line-through;
+      }
+      .nx .days span.nxt {
+        color: #1f0b05;
+        background: var(--brand);
+        border-color: var(--brand);
+        font-weight: 700;
+      }
+      .nx a.more {
+        margin-left: auto;
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .nx a.more:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      /* Beside the home map the text column is narrower, so the card gets tighter: the whole card links to the
    schedule with a small arrow, instead of the "Schedule ›" text, so it stays on one line. */
-@media (min-width: 961px) {
-  .has-map .nx { position: relative; gap: 8px 10px; padding: 9px 12px; transition: border-color .15s, background .15s; }
-  .has-map .nx:hover { border-color: #4a413c; background: var(--surface-2); }
-  .has-map .nx .days { gap: 2px; }
-  .has-map .nx .days span { width: 21px; }
-  .has-map .nx a.more { font-size: 0; padding: 0 2px; }
-  .has-map .nx a.more::after { content: "›"; font-size: 20px; line-height: 1; transition: transform .15s; display: inline-block; }
-  .has-map .nx:hover a.more::after { transform: translateX(3px); }
-  .has-map .nx a.more::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-  .has-map .nx a.cd { position: relative; z-index: 1; }
-}
-@media (min-width: 1200px) { .has-map .nx { flex-wrap: nowrap; } .has-map .nx > * { flex: none; } .has-map .nx strong { flex: 0 1 auto; } }
-</style>
-<script src="/nav.js" defer></script>
-</head>
-<body>
+      @media (min-width: 961px) {
+        .has-map .nx {
+          position: relative;
+          gap: 8px 10px;
+          padding: 9px 12px;
+          transition:
+            border-color 0.15s,
+            background 0.15s;
+        }
+        .has-map .nx:hover {
+          border-color: #4a413c;
+          background: var(--surface-2);
+        }
+        .has-map .nx .days {
+          gap: 2px;
+        }
+        .has-map .nx .days span {
+          width: 21px;
+        }
+        .has-map .nx a.more {
+          font-size: 0;
+          padding: 0 2px;
+        }
+        .has-map .nx a.more::after {
+          content: "›";
+          font-size: 20px;
+          line-height: 1;
+          transition: transform 0.15s;
+          display: inline-block;
+        }
+        .has-map .nx:hover a.more::after {
+          transform: translateX(3px);
+        }
+        .has-map .nx a.more::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+        }
+        .has-map .nx a.cd {
+          position: relative;
+          z-index: 1;
+        }
+      }
+      @media (min-width: 1200px) {
+        .has-map .nx {
+          flex-wrap: nowrap;
+        }
+        .has-map .nx > * {
+          flex: none;
+        }
+        .has-map .nx strong {
+          flex: 0 1 auto;
+        }
+      }
+    </style>
+    <script src="/nav.js" defer></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="/">Jun<span>HotS</span></a>
+        <div class="tabs">
+          <a href="/" aria-current="page">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a
+          ><a href="/draft/">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a
+          ><a href="/overlay/">Overlay</a>
+        </div>
+        <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"
+          ><span class="dot"></span>Twitch</a
+        >
+      </nav>
+      <script>
+        /* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */ {
+          const t = document.querySelector(".tabs"),
+            a = t && t.querySelector('[aria-current="page"]');
+          if (a) {
+            const i = document.createElement("span");
+            i.className = "tab-ind";
+            i.setAttribute("aria-hidden", "true");
+            i.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
+            t.append(i);
+          }
+        }
+      </script>
 
-<div class="wrap">
-  <nav>
-    <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/" aria-current="page">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
-    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
-  </nav>
-  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
+      <header class="hero">
+        <div class="hero-txt">
+          <a class="whatsnew" href="/updates/" data-latest="all" hidden></a>
+          <div class="eyebrow" data-edit="eyebrow">Heroes of the Storm</div>
+          <h1>
+            <span data-edit="title1">Jun plays</span> <em data-edit="title2">Heroes</em>
+            <span data-edit="title3">live on Twitch</span>
+          </h1>
+          <p class="lead" data-edit="intro">
+            Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream
+            overlay uses, so it updates when I change it on stream.
+          </p>
+          <div class="cta">
+            <a class="btn live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"
+              ><span class="dot"></span><span data-edit="twitch_button">Watch on Twitch</span></a
+            >
+            <a class="btn" href="https://www.youtube.com/@junhots" target="_blank" rel="noopener"
+              ><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"
+                /></svg
+              >YouTube</a
+            >
+            <a class="btn" href="https://x.com/junhots_" target="_blank" rel="noopener"
+              ><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                /></svg
+              >X / Twitter</a
+            >
+            <a class="btn" href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener"
+              ><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.44.87-.61 1.25a18.3 18.3 0 0 0-5.49 0 12.6 12.6 0 0 0-.62-1.25.08.08 0 0 0-.08-.04 19.7 19.7 0 0 0-4.89 1.52.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-1.99a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.89.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.24.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.22.65-1.87.89a.08.08 0 0 0-.04.11c.36.7.78 1.36 1.23 1.99a.08.08 0 0 0 .08.03 19.8 19.8 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.67-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.33c-1.18 0-2.16-1.09-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.09-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.95 2.42-2.16 2.42z"
+                /></svg
+              >Discord</a
+            >
+          </div>
+          <div class="nx" id="nextstream" aria-label="Next stream" hidden></div>
+          <div class="stats" id="stats"></div>
+        </div>
+        <div class="fan" id="fan" aria-label="My S tier heroes"></div>
+        <div class="map" id="map" role="navigation" aria-label="Site map">
+          <span class="map-hint">drag to turn</span>
+        </div>
+      </header>
+      <script>
+        /* Use the 3D map when the browser can draw it (home-map.js); otherwise the hero-art fan stays */
+        try {
+          const c = document.createElement("canvas");
+          if ((c.getContext("webgl2") || c.getContext("webgl")) && !navigator.connection?.saveData)
+            document.querySelector(".hero").classList.add("has-map");
+        } catch {}
+      </script>
 
-  <header class="hero">
-    <div class="hero-txt">
-    <a class="whatsnew" href="/updates/" data-latest="all" hidden></a>
-    <div class="eyebrow" data-edit="eyebrow">Heroes of the Storm</div>
-    <h1><span data-edit="title1">Jun plays</span> <em data-edit="title2">Heroes</em> <span data-edit="title3">live on Twitch</span></h1>
-    <p class="lead" data-edit="intro">Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.</p>
-    <div class="cta">
-      <a class="btn live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span><span data-edit="twitch_button">Watch on Twitch</span></a>
-      <a class="btn" href="https://www.youtube.com/@junhots" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a>
-      <a class="btn" href="https://x.com/junhots_" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X / Twitter</a>
-      <a class="btn" href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.44.87-.61 1.25a18.3 18.3 0 0 0-5.49 0 12.6 12.6 0 0 0-.62-1.25.08.08 0 0 0-.08-.04 19.7 19.7 0 0 0-4.89 1.52.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-1.99a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.89.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.24.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.22.65-1.87.89a.08.08 0 0 0-.04.11c.36.7.78 1.36 1.23 1.99a.08.08 0 0 0 .08.03 19.8 19.8 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.67-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.33c-1.18 0-2.16-1.09-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.09-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.33-.95 2.42-2.16 2.42z"/></svg>Discord</a>
+      <section class="games" id="games" aria-label="My recent games" hidden></section>
+
+      <section class="cards" aria-label="On this site">
+        <a class="card c-tier" href="/tierlist/"
+          ><div class="pic" id="tlpic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list" /></div>
+          <div class="txt">
+            <b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b>
+            <p data-edit="card_tierlist_text">
+              My ranked tier list with counters, synergy and win rates for every hero.
+            </p>
+            <div class="meta" id="tlmeta"></div></div
+        ></a>
+        <a class="card c-builds" href="/builds/"
+          ><div class="pic" id="buildpics">
+            <img src="/img/art/jaina.webp" alt="" /><img src="/img/art/muradin.webp" alt="" /><img
+              src="/img/art/malfurion.webp"
+              alt=""
+            />
+          </div>
+          <div class="txt">
+            <b><span data-edit="card_builds_title">Builds</span><span class="arr">→</span></b>
+            <p data-edit="card_builds_text">Talents for every hero, my builds to copy into the game, and your own.</p>
+          </div></a
+        >
+        <div class="card c-maker">
+          <div class="pic">
+            <a href="/tierlist-maker/" aria-label="Make a tier list"><img src="/img/previews/maker.webp" alt="" /></a
+            ><a href="/builds/?make" aria-label="Make a build"><img src="/img/previews/build-maker.webp" alt="" /></a>
+          </div>
+          <div class="txt">
+            <b><span data-edit="card_maker_title">Make your own</span></b>
+            <p data-edit="card_maker_text">Your own tier list or talent build, ready to share.</p>
+            <div class="mk">
+              <a href="/tierlist-maker/">Tier list <span class="arr">→</span></a
+              ><a href="/builds/?make">Build <span class="arr">→</span></a>
+            </div>
+          </div>
+        </div>
+        <a class="card c-overlay" href="/overlay/"
+          ><div class="pic"><img src="/img/previews/overlay-talents.webp?v=2" alt="Stream overlay in a game" /></div>
+          <div class="txt">
+            <b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b>
+            <p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p>
+          </div></a
+        >
+      </section>
+
+      <footer>
+        <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+        <span class="social"
+          ><a href="/updates/">Updates</a
+          ><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a
+          ><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a
+          ><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a
+          ><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span
+        >
+        <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+      </footer>
     </div>
-    <div class="nx" id="nextstream" aria-label="Next stream" hidden></div>
-    <div class="stats" id="stats"></div>
-    </div>
-    <div class="fan" id="fan" aria-label="My S tier heroes"></div>
-    <div class="map" id="map" role="navigation" aria-label="Site map"><span class="map-hint">drag to turn</span></div>
-  </header>
-  <script>/* Use the 3D map when the browser can draw it (home-map.js); otherwise the hero-art fan stays */
-  try { const c = document.createElement("canvas"); if ((c.getContext("webgl2") || c.getContext("webgl")) && !navigator.connection?.saveData) document.querySelector(".hero").classList.add("has-map"); } catch {}</script>
 
+    <script>
+      // Hands Home's data (tier list, builds, games) to the 3D map, whichever of the two loads first
+      function sendHome(d) {
+        window.HOME_DATA = { ...(window.HOME_DATA || {}), ...d };
+        dispatchEvent(new CustomEvent("homedata", { detail: d }));
+      }
+    </script>
+    <script type="module" src="/home-map.js"></script>
+    <script src="/text.js"></script>
+    <script src="/site.js"></script>
+    <script src="/edge.js"></script>
+    <script src="/games.js"></script>
+    <script src="/schedule.js"></script>
+    <script>
+      scheduleLine(document.getElementById("nextstream"));
+    </script>
+    <script>
+      // YouTube, X and Discord buttons get the hover animation (site.css .hb)
+      for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
+        b.classList.add("hb");
+        b.innerHTML = `<span class="hb-dot"></span><span class="hb-a">${b.innerHTML}</span><span class="hb-b" aria-hidden="true">${b.textContent.trim()}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+      }
+      // The fan shows 5 random heroes from my S tier (a different 5 on each visit) and the numbers come from the same files the other pages use.
+      Promise.all([
+        fetch("/data/heroes.json").then((r) => r.json()),
+        loadTierlist(),
+        fetch("/api/builds", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : {}))
+          .catch(() => ({})),
+      ])
+        .then(([heroes, tl, builds]) => {
+          const name = Object.fromEntries(heroes.map((h) => [h[0], h[1]]));
+          const wr = (id) => tl.winrates?.rates?.[id]?.wr;
+          const top = tl.tiers?.[0]?.id;
+          const best = Object.keys(tl.overall || {})
+            .filter((id) => tl.overall[id] === top && name[id])
+            .sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+          // Builds card: my 3 highest win rate heroes in the top tier (the default 3 pictures stay if there's no win rate data)
+          const top3 = best.filter((id) => wr(id) != null).slice(0, 3);
+          if (top3.length === 3)
+            document.getElementById("buildpics").innerHTML = top3
+              .map(
+                (id) =>
+                  `<img src="/img/art/${id}.webp" alt="${name[id]}" onerror="this.onerror=null;this.src='/img/heroes/${id}.webp'">`,
+              )
+              .join("");
+          // Tier list card: the real tier list in the same tiles as /tierlist/ (best win rate first; the card cuts it off at the bottom)
+          const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
+          const rows = tierRows(heroes),
+            grole = Object.fromEntries(rows.map((r) => [r[0], r[3]])),
+            tname = Object.fromEntries(rows.map((r) => [r[0], r[1]]));
+          const tierIdx = (id) => tl.tiers.findIndex((t) => t.id === id);
+          const moveOf = (id) => {
+            const c = tl.changes?.[id];
+            if (!c || Date.now() - c.at > 7 * 864e5) return null;
+            const a = tierIdx(c.from),
+              b = tierIdx(c.to);
+            return { ...c, up: b >= 0 && (a < 0 || b < a) };
+          };
+          const arrow = (up) =>
+            `<svg viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
+          const wrClass = (v) => (v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid");
+          if (tl.tiers?.length)
+            document.getElementById("tlpic").innerHTML = `<div class="mini" aria-label="Jun's tier list">${tl.tiers
+              .map((t) => {
+                const list = rows
+                  .map((r) => r[0])
+                  .filter((id) => tl.overall?.[id] === t.id)
+                  .sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+                if (!list.length) return "";
+                return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${t.name}</div><div class="heroes">${list
+                  .map((id) => {
+                    const m = moveOf(id);
+                    return `<div class="h"><span class="port"><img src="${tierImg(id)}" alt="" loading="lazy">${roleIcon(grole[id], "rb")}${combosOf(tl, id).length ? `<i class="cb">${LINK_ICON}</i>` : ""}${m ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})">${arrow(m.up)}</i>` : ""}</span><span>${tname[id]}</span><div class="wr ${wrClass(wr(id))}">${wr(id) == null ? "" : wr(id).toFixed(1) + "%"}</div></div>`;
+                  })
+                  .join("")}</div></div>`;
+              })
+              .join("")}</div>`;
+          const moved = Object.keys(tl.changes || {})
+            .filter((id) => tname[id] && moveOf(id))
+            .sort((a, b) => tl.changes[b].at - tl.changes[a].at);
+          document.getElementById("tlmeta").innerHTML =
+            (tl.updated
+              ? `<span>Updated <strong>${new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" })}</strong></span>`
+              : "") +
+            (combosOf(tl).length
+              ? `<span class="cmbs" title="${combosOf(tl)
+                  .map((c) => `${tname[c.a]} + ${tname[c.b]}`)
+                  .join(
+                    ", ",
+                  )}">${LINK_ICON}${combosOf(tl).length} power combo${combosOf(tl).length > 1 ? "s" : ""}</span>`
+              : "") +
+            (moved.length
+              ? `<span>${moved.length} moved this week</span><span class="mvs">${moved
+                  .slice(0, 6)
+                  .map((id) => {
+                    const m = moveOf(id);
+                    return `<span title="${tname[id]}"><img src="${tierImg(id)}" alt="${tname[id]}">${arrow(m.up).replace("<svg", `<svg style="--c:var(--${m.up ? "good" : "bad"})"`)}</span>`;
+                  })
+                  .join("")}</span>`
+              : "");
+          const pool = [...best];
+          for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+          }
+          const show = pool.slice(0, 5),
+            mid = (show.length - 1) / 2;
+          // Middle card on top, the others fanned out behind it
+          document.getElementById("fan").innerHTML =
+            show
+              .map((id, i) => {
+                const o = i - mid;
+                return `<a href="/builds/#${id}" style="--o:${o};--x:${o * 60}px;--r:${o * 6}deg;--y:${Math.abs(o) * 16}px;--d:${Math.abs(o) * 80}ms;z-index:${9 - Math.abs(o) * 2}"><img src="/img/art/${id}.webp" alt="" loading="lazy"><span>${name[id]}${wr(id) == null ? "" : `<small>${wr(id).toFixed(1)}% win rate</small>`}</span></a>`;
+              })
+              .join("") +
+            (show.length
+              ? `<div class="cap">My ${tl.tiers[0].name} tier right now · <a href="/tierlist/">see the full list</a></div>`
+              : "");
+          const patch = (tl.winrates?.label || "").split(".").slice(0, 2).join(".");
+          // Pick the card by the mouse's position across the fan, not by what's under it,
+          // so a raised card never hides the one next to it.
+          const fan = document.getElementById("fan"),
+            cards = [...fan.querySelectorAll(":scope > a")];
+          // Like a real hand of cards: the hovered card comes to the top of the pile and stays there when you
+          // let go of it, so a card never has to jump back behind the others while it's moving (that looked glitchy).
+          let topZ = 10;
+          const pick = (i) => {
+            cards.forEach((c, k) => {
+              if (k === i && !c.classList.contains("on")) c.style.zIndex = ++topZ;
+              c.classList.toggle("on", k === i);
+            });
+            fan.classList.toggle("picking", i >= 0);
+          };
+          fan.addEventListener("pointermove", (e) => {
+            if (e.pointerType !== "mouse" || !cards.length) return;
+            if (e.target.closest(".cap")) return pick(-1);
+            const r = fan.getBoundingClientRect(),
+              step = matchMedia("(max-width: 720px)").matches ? 46 : 60;
+            pick(
+              Math.max(0, Math.min(cards.length - 1, Math.round((e.clientX - (r.left + r.width / 2)) / step + mid))),
+            );
+          });
+          fan.addEventListener("pointerleave", () => pick(-1));
+          // Headline: "Jun plays Heroes" -> "Jun plays Jaina" -> ... through every hero in a random order (with "Heroes"
+          // again after every 10 names). With the fan showing (no 3D map) it goes through the fan's heroes instead, and
+          // the named hero's card lifts a little. Stops while the mouse is on the fan, off for reduced motion.
+          const word = document.querySelector("h1 em"),
+            first = document.querySelector("h1 span"),
+            base = word.textContent;
+          // While I'm live in a game the headline stops on that hero: "Jun plays Whitemane live on Twitch" (schedule.js)
+          window.setHeadline = (hero) => {
+            window.headlineLocked = true;
+            cards.forEach((c) => c.classList.remove("cued"));
+            if (word.textContent === hero) return;
+            word.classList.add("out");
+            setTimeout(() => {
+              word.textContent = hero;
+              word.classList.replace("out", "in");
+              word.offsetWidth;
+              word.classList.remove("in");
+            }, 300);
+          };
+          if (window.pendingHeadline) window.setHeadline(window.pendingHeadline);
+          if (
+            (show.length || document.querySelector(".hero.has-map")) &&
+            !matchMedia("(prefers-reduced-motion: reduce)").matches
+          ) {
+            let cyc = show;
+            if (document.querySelector(".hero.has-map")) {
+              cyc = heroes.map((h) => h[0]).filter((id) => name[id]);
+              for (let i = cyc.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cyc[i], cyc[j]] = [cyc[j], cyc[i]];
+              }
+            }
+            const order = cyc.flatMap((_, i) => (i % 10 ? [i] : [-1, i]));
+            let k = 0,
+              hovering = false;
+            fan.addEventListener("pointerenter", () => {
+              hovering = true;
+              cards.forEach((c) => c.classList.remove("cued"));
+            });
+            fan.addEventListener("pointerleave", () => (hovering = false));
+            const next = () => {
+              if (window.headlineLocked) return; // live in a game: the headline names that hero (setHeadline)
+              if (hovering || document.hidden) return setTimeout(next, 1000);
+              // Skip a name that's too long to stay on the first line (it would push the page down), e.g. on phones
+              const fits = (t) => {
+                const old = word.textContent;
+                word.textContent = t;
+                const ok = Math.abs(word.offsetTop - first.offsetTop) < word.offsetHeight / 2;
+                word.textContent = old;
+                return ok;
+              };
+              do k = (k + 1) % order.length;
+              while (order[k] >= 0 && !fits(name[cyc[order[k]]]));
+              const i = order[k];
+              word.classList.add("out");
+              setTimeout(() => {
+                word.textContent = i < 0 ? base : name[cyc[i]];
+                word.classList.replace("out", "in");
+                word.offsetWidth; // let the browser place it below before it rises
+                word.classList.remove("in");
+                const f = i < 0 ? -1 : show.indexOf(cyc[i]);
+                cards.forEach((c, n) => {
+                  c.classList.toggle("cued", n === f);
+                  if (n === f) c.style.zIndex = ++topZ;
+                });
+              }, 300);
+              setTimeout(next, i < 0 ? 3200 : 2200);
+            };
+            setTimeout(next, 3200);
+          }
+          // A click opens the picked card, even if another card's edge was under the mouse
+          fan.addEventListener("click", (e) => {
+            const on = fan.querySelector(":scope > a.on");
+            if (on && e.target.closest("#fan > a") && e.target.closest("#fan > a") !== on) {
+              e.preventDefault();
+              location.href = on.href;
+            }
+          });
+          const nBuilds = Object.values(builds).reduce((n, l) => n + (Array.isArray(l) ? l.length : 0), 0);
+          const updated =
+            tl.updated && new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" });
+          const stats = [
+            [heroes.length, "heroes", "/builds/"],
+            nBuilds && [nBuilds, "builds", "/builds/"],
+            updated && [updated, "tier list updated", "/tierlist/"],
+            patch && [patch, "patch", "/patch-notes/"],
+          ].filter(Boolean);
+          sendHome({
+            heroes: heroes.length,
+            builds: nBuilds,
+            patch,
+            tiers: (tl.tiers || [])
+              .map((t) => {
+                const ids = rows
+                  .map((r) => r[0])
+                  .filter((id) => tl.overall?.[id] === t.id)
+                  .sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
+                return {
+                  name: t.name,
+                  color: PALETTE[t.color % PALETTE.length],
+                  imgs: ids.map(tierImg),
+                  names: ids.map((id) => tname[id]),
+                };
+              })
+              .filter((t) => t.imgs.length),
+          });
+          const box = document.getElementById("stats");
+          box.innerHTML = stats
+            .map(
+              ([v, label, href]) =>
+                `<a class="stat" href="${href}"><b data-to="${v}">${typeof v === "number" ? 0 : v}</b><span>${label}</span></a>`,
+            )
+            .join("");
+          // Count the numbers up
+          const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+          for (const el of box.querySelectorAll("b")) {
+            const to = +el.dataset.to;
+            if (isNaN(to) || !Number.isInteger(to)) continue;
+            if (still) {
+              el.textContent = to;
+              continue;
+            }
+            const t0 = performance.now();
+            const step = (t) => {
+              const k = Math.min(1, (t - t0) / 1100);
+              el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+              if (k < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          }
+        })
+        .catch(() => {});
 
-
-  <section class="games" id="games" aria-label="My recent games" hidden></section>
-
-  <section class="cards" aria-label="On this site">
-    <a class="card c-tier" href="/tierlist/"><div class="pic" id="tlpic"><img src="/img/previews/tierlist.webp" alt="Jun's tier list"></div><div class="txt"><b><span data-edit="card_tierlist_title">Tier list</span><span class="arr">→</span></b><p data-edit="card_tierlist_text">My ranked tier list with counters, synergy and win rates for every hero.</p><div class="meta" id="tlmeta"></div></div></a>
-    <a class="card c-builds" href="/builds/"><div class="pic" id="buildpics"><img src="/img/art/jaina.webp" alt=""><img src="/img/art/muradin.webp" alt=""><img src="/img/art/malfurion.webp" alt=""></div><div class="txt"><b><span data-edit="card_builds_title">Builds</span><span class="arr">→</span></b><p data-edit="card_builds_text">Talents for every hero, my builds to copy into the game, and your own.</p></div></a>
-    <div class="card c-maker"><div class="pic"><a href="/tierlist-maker/" aria-label="Make a tier list"><img src="/img/previews/maker.webp" alt=""></a><a href="/builds/?make" aria-label="Make a build"><img src="/img/previews/build-maker.webp" alt=""></a></div><div class="txt"><b><span data-edit="card_maker_title">Make your own</span></b><p data-edit="card_maker_text">Your own tier list or talent build, ready to share.</p><div class="mk"><a href="/tierlist-maker/">Tier list <span class="arr">→</span></a><a href="/builds/?make">Build <span class="arr">→</span></a></div></div></div>
-    <a class="card c-overlay" href="/overlay/"><div class="pic"><img src="/img/previews/overlay-talents.webp?v=2" alt="Stream overlay in a game"></div><div class="txt"><b><span data-edit="card_overlay_title">Stream overlay</span><span class="arr">→</span></b><p data-edit="card_overlay_text">Live talents, rank, win streak and a draft banner for your stream.</p></div></a>
-  </section>
-
-  <footer>
-    <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
-    <span class="social"><a href="/updates/">Updates</a><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
-    <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
-  </footer>
-</div>
-
-<script>
-// Hands Home's data (tier list, builds, games) to the 3D map, whichever of the two loads first
-function sendHome(d) { window.HOME_DATA = { ...(window.HOME_DATA || {}), ...d }; dispatchEvent(new CustomEvent("homedata", { detail: d })); }
-</script>
-<script type="module" src="/home-map.js"></script>
-<script src="/text.js"></script>
-<script src="/site.js"></script>
-<script src="/edge.js"></script>
-<script src="/games.js"></script>
-<script src="/schedule.js"></script>
-<script>scheduleLine(document.getElementById("nextstream"));</script>
-<script>
-// YouTube, X and Discord buttons get the hover animation (site.css .hb)
-for (const b of document.querySelectorAll(".cta .btn:not(.live)")) {
-  b.classList.add("hb");
-  b.innerHTML = `<span class="hb-dot"></span><span class="hb-a">${b.innerHTML}</span><span class="hb-b" aria-hidden="true">${b.textContent.trim()}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
-}
-// The fan shows 5 random heroes from my S tier (a different 5 on each visit) and the numbers come from the same files the other pages use.
-Promise.all([
-  fetch("/data/heroes.json").then(r => r.json()),
-  loadTierlist(),
-  fetch("/api/builds", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-]).then(([heroes, tl, builds]) => {
-  const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
-  const wr = id => tl.winrates?.rates?.[id]?.wr;
-  const top = tl.tiers?.[0]?.id;
-  const best = Object.keys(tl.overall || {}).filter(id => tl.overall[id] === top && name[id]).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
-  // Builds card: my 3 highest win rate heroes in the top tier (the default 3 pictures stay if there's no win rate data)
-  const top3 = best.filter(id => wr(id) != null).slice(0, 3);
-  if (top3.length === 3) document.getElementById("buildpics").innerHTML = top3.map(id =>
-    `<img src="/img/art/${id}.webp" alt="${name[id]}" onerror="this.onerror=null;this.src='/img/heroes/${id}.webp'">`).join("");
-  // Tier list card: the real tier list in the same tiles as /tierlist/ (best win rate first; the card cuts it off at the bottom)
-  const PALETTE = ["#ff7a59", "#ffb84d", "#ffe27a", "#7be0a1", "#8fb4ff", "#c39bff", "#c8a27a", "#e8ecf5"];
-  const rows = tierRows(heroes), grole = Object.fromEntries(rows.map(r => [r[0], r[3]])), tname = Object.fromEntries(rows.map(r => [r[0], r[1]]));
-  const tierIdx = id => tl.tiers.findIndex(t => t.id === id);
-  const moveOf = id => { const c = tl.changes?.[id]; if (!c || Date.now() - c.at > 7 * 864e5) return null; const a = tierIdx(c.from), b = tierIdx(c.to); return { ...c, up: b >= 0 && (a < 0 || b < a) }; };
-  const arrow = up => `<svg viewBox="0 0 10 10" aria-hidden="true"><path d="${up ? "M5 1.5 9 7.5H1z" : "M5 8.5 1 2.5h8z"}" fill="currentColor"/></svg>`;
-  const wrClass = v => v == null ? "mid" : v >= 51 ? "good" : v < 49 ? "bad" : "mid";
-  if (tl.tiers?.length) document.getElementById("tlpic").innerHTML = `<div class="mini" aria-label="Jun's tier list">${tl.tiers.map(t => {
-    const list = rows.map(r => r[0]).filter(id => tl.overall?.[id] === t.id).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
-    if (!list.length) return "";
-    return `<div class="row"><div class="tier" style="--c:${PALETTE[t.color % PALETTE.length]}">${t.name}</div><div class="heroes">${list.map(id => { const m = moveOf(id);
-      return `<div class="h"><span class="port"><img src="${tierImg(id)}" alt="" loading="lazy">${roleIcon(grole[id], "rb")}${combosOf(tl, id).length ? `<i class="cb">${LINK_ICON}</i>` : ""}${m ? `<i class="mv" style="--c:var(--${m.up ? "good" : "bad"})">${arrow(m.up)}</i>` : ""}</span><span>${tname[id]}</span><div class="wr ${wrClass(wr(id))}">${wr(id) == null ? "" : wr(id).toFixed(1) + "%"}</div></div>`; }).join("")}</div></div>`;
-  }).join("")}</div>`;
-  const moved = Object.keys(tl.changes || {}).filter(id => tname[id] && moveOf(id)).sort((a, b) => tl.changes[b].at - tl.changes[a].at);
-  document.getElementById("tlmeta").innerHTML = (tl.updated ? `<span>Updated <strong>${new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" })}</strong></span>` : "") +
-    (combosOf(tl).length ? `<span class="cmbs" title="${combosOf(tl).map(c => `${tname[c.a]} + ${tname[c.b]}`).join(", ")}">${LINK_ICON}${combosOf(tl).length} power combo${combosOf(tl).length > 1 ? "s" : ""}</span>` : "") +
-    (moved.length ? `<span>${moved.length} moved this week</span><span class="mvs">${moved.slice(0, 6).map(id => { const m = moveOf(id); return `<span title="${tname[id]}"><img src="${tierImg(id)}" alt="${tname[id]}">${arrow(m.up).replace("<svg", `<svg style="--c:var(--${m.up ? "good" : "bad"})"`)}</span>`; }).join("")}</span>` : "");
-  const pool = [...best];
-  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  const show = pool.slice(0, 5), mid = (show.length - 1) / 2;
-  // Middle card on top, the others fanned out behind it
-  document.getElementById("fan").innerHTML = show.map((id, i) => {
-    const o = i - mid;
-    return `<a href="/builds/#${id}" style="--o:${o};--x:${o * 60}px;--r:${o * 6}deg;--y:${Math.abs(o) * 16}px;--d:${Math.abs(o) * 80}ms;z-index:${9 - Math.abs(o) * 2}"><img src="/img/art/${id}.webp" alt="" loading="lazy"><span>${name[id]}${wr(id) == null ? "" : `<small>${wr(id).toFixed(1)}% win rate</small>`}</span></a>`;
-  }).join("") + (show.length ? `<div class="cap">My ${tl.tiers[0].name} tier right now · <a href="/tierlist/">see the full list</a></div>` : "");
-  const patch = (tl.winrates?.label || "").split(".").slice(0, 2).join(".");
-  // Pick the card by the mouse's position across the fan, not by what's under it,
-  // so a raised card never hides the one next to it.
-  const fan = document.getElementById("fan"), cards = [...fan.querySelectorAll(":scope > a")];
-  // Like a real hand of cards: the hovered card comes to the top of the pile and stays there when you
-  // let go of it, so a card never has to jump back behind the others while it's moving (that looked glitchy).
-  let topZ = 10;
-  const pick = i => {
-    cards.forEach((c, k) => {
-      if (k === i && !c.classList.contains("on")) c.style.zIndex = ++topZ;
-      c.classList.toggle("on", k === i);
-    });
-    fan.classList.toggle("picking", i >= 0);
-  };
-  fan.addEventListener("pointermove", e => {
-    if (e.pointerType !== "mouse" || !cards.length) return;
-    if (e.target.closest(".cap")) return pick(-1);
-    const r = fan.getBoundingClientRect(), step = matchMedia("(max-width: 720px)").matches ? 46 : 60;
-    pick(Math.max(0, Math.min(cards.length - 1, Math.round((e.clientX - (r.left + r.width / 2)) / step + mid))));
-  });
-  fan.addEventListener("pointerleave", () => pick(-1));
-  // Headline: "Jun plays Heroes" -> "Jun plays Jaina" -> ... through every hero in a random order (with "Heroes"
-  // again after every 10 names). With the fan showing (no 3D map) it goes through the fan's heroes instead, and
-  // the named hero's card lifts a little. Stops while the mouse is on the fan, off for reduced motion.
-  const word = document.querySelector("h1 em"), first = document.querySelector("h1 span"), base = word.textContent;
-  // While I'm live in a game the headline stops on that hero: "Jun plays Whitemane live on Twitch" (schedule.js)
-  window.setHeadline = hero => {
-    window.headlineLocked = true;
-    cards.forEach(c => c.classList.remove("cued"));
-    if (word.textContent === hero) return;
-    word.classList.add("out");
-    setTimeout(() => { word.textContent = hero; word.classList.replace("out", "in"); word.offsetWidth; word.classList.remove("in"); }, 300);
-  };
-  if (window.pendingHeadline) window.setHeadline(window.pendingHeadline);
-  if ((show.length || document.querySelector(".hero.has-map")) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    let cyc = show;
-    if (document.querySelector(".hero.has-map")) {
-      cyc = heroes.map(h => h[0]).filter(id => name[id]);
-      for (let i = cyc.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cyc[i], cyc[j]] = [cyc[j], cyc[i]]; }
-    }
-    const order = cyc.flatMap((_, i) => i % 10 ? [i] : [-1, i]);
-    let k = 0, hovering = false;
-    fan.addEventListener("pointerenter", () => { hovering = true; cards.forEach(c => c.classList.remove("cued")); });
-    fan.addEventListener("pointerleave", () => hovering = false);
-    const next = () => {
-      if (window.headlineLocked) return;   // live in a game: the headline names that hero (setHeadline)
-      if (hovering || document.hidden) return setTimeout(next, 1000);
-      // Skip a name that's too long to stay on the first line (it would push the page down), e.g. on phones
-      const fits = t => { const old = word.textContent; word.textContent = t; const ok = Math.abs(word.offsetTop - first.offsetTop) < word.offsetHeight / 2; word.textContent = old; return ok; };
-      do k = (k + 1) % order.length; while (order[k] >= 0 && !fits(name[cyc[order[k]]]));
-      const i = order[k];
-      word.classList.add("out");
-      setTimeout(() => {
-        word.textContent = i < 0 ? base : name[cyc[i]];
-        word.classList.replace("out", "in");
-        word.offsetWidth;   // let the browser place it below before it rises
-        word.classList.remove("in");
-        const f = i < 0 ? -1 : show.indexOf(cyc[i]);
-        cards.forEach((c, n) => { c.classList.toggle("cued", n === f); if (n === f) c.style.zIndex = ++topZ; });
-      }, 300);
-      setTimeout(next, i < 0 ? 3200 : 2200);
-    };
-    setTimeout(next, 3200);
-  }
-  // A click opens the picked card, even if another card's edge was under the mouse
-  fan.addEventListener("click", e => {
-    const on = fan.querySelector(":scope > a.on");
-    if (on && e.target.closest("#fan > a") && e.target.closest("#fan > a") !== on) { e.preventDefault(); location.href = on.href; }
-  });
-  const nBuilds = Object.values(builds).reduce((n, l) => n + (Array.isArray(l) ? l.length : 0), 0);
-  const updated = tl.updated && new Date(tl.updated).toLocaleDateString("en", { month: "short", day: "numeric" });
-  const stats = [[heroes.length, "heroes", "/builds/"], nBuilds && [nBuilds, "builds", "/builds/"], updated && [updated, "tier list updated", "/tierlist/"], patch && [patch, "patch", "/patch-notes/"]].filter(Boolean);
-  sendHome({ heroes: heroes.length, builds: nBuilds, patch, tiers: (tl.tiers || []).map(t => {
-    const ids = rows.map(r => r[0]).filter(id => tl.overall?.[id] === t.id).sort((a, b) => (wr(b) ?? 0) - (wr(a) ?? 0));
-    return { name: t.name, color: PALETTE[t.color % PALETTE.length], imgs: ids.map(tierImg), names: ids.map(id => tname[id]) };
-  }).filter(t => t.imgs.length) });
-  const box = document.getElementById("stats");
-  box.innerHTML = stats.map(([v, label, href]) => `<a class="stat" href="${href}"><b data-to="${v}">${typeof v === "number" ? 0 : v}</b><span>${label}</span></a>`).join("");
-  // Count the numbers up
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  for (const el of box.querySelectorAll("b")) {
-    const to = +el.dataset.to;
-    if (isNaN(to) || !Number.isInteger(to)) continue;
-    if (still) { el.textContent = to; continue; }
-    const t0 = performance.now();
-    const step = t => { const k = Math.min(1, (t - t0) / 1100); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
-    requestAnimationFrame(step);
-  }
-}).catch(() => {});
-
-// Card light follows the mouse (mouse only; phones don't hover)
-// Make your own card: hovering a picture lights up its button below
-document.querySelectorAll(".c-maker .pic a").forEach((a, i) => {
-  const btn = document.querySelectorAll(".c-maker .mk a")[i];
-  a.addEventListener("pointerenter", () => btn.classList.add("lit"));
-  a.addEventListener("pointerleave", () => btn.classList.remove("lit"));
-});
-for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointermove", e => {
-  if (e.pointerType !== "mouse") return;
-  const r = c.getBoundingClientRect();
-  c.style.setProperty("--mx", e.clientX - r.left + "px");
-  c.style.setProperty("--my", e.clientY - r.top + "px");
-});
-</script>
-<script>
-// My recent games, from /api/games (the overlay sends each one when a match ends). Win rate and streak from the last 10.
-// Click a game to open its card (public/games.js) under the row; all of them are on the Match history page.
-(() => {
-  const T = window.SITE_TEXT || {};
-  const tl = loadTierlist().catch(() => null);
-  Promise.all([fetch("/api/games?limit=10").then(r => r.ok ? r.json() : Promise.reject()), fetch("/data/heroes.json").then(r => r.json())]).then(async ([d, heroes]) => {
-    const name = Object.fromEntries(heroes.map(h => [h[0], h[1]]));
-    const last = (d.games || []).filter(g => name[g.hero]).slice(0, 10);
-    if (!last.length) return;
-    const kit = gameKit(heroes, await tl);
-    const w = last.filter(g => g.result === "win").length, l = last.length - w;
-    let n = 0;
-    while (n < last.length && last[n].result === last[0].result) n++;
-    const streak = n >= 2 ? `<span class="streak" style="--c:var(--${last[0].result === "win" ? "good" : "bad"})">${n} ${last[0].result === "win" ? "win" : "loss"} streak</span>` : "";
-    sendHome({ results: last.slice(0, 8).map(g => g.result === "win" ? "W" : "L").join("") });
-    const box = document.getElementById("games");
-    box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}<a class="g-all" href="/games/">All games</a></div></div>
-      <div class="g-row">${last.map((g, i) => `<button class="g ${g.result}" type="button" data-i="${i}" aria-expanded="false" aria-controls="g-open" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
-        <span class="tip"><b>${name[g.hero]}</b>${g.map ? g.map + "<br>" : ""}<i>${g.result === "win" ? "Win" : "Loss"}</i> · ${kit.ago(g.at)}</span></button>`).join("")}</div>
+      // Card light follows the mouse (mouse only; phones don't hover)
+      // Make your own card: hovering a picture lights up its button below
+      document.querySelectorAll(".c-maker .pic a").forEach((a, i) => {
+        const btn = document.querySelectorAll(".c-maker .mk a")[i];
+        a.addEventListener("pointerenter", () => btn.classList.add("lit"));
+        a.addEventListener("pointerleave", () => btn.classList.remove("lit"));
+      });
+      for (const c of document.querySelectorAll("a.card"))
+        c.addEventListener("pointermove", (e) => {
+          if (e.pointerType !== "mouse") return;
+          const r = c.getBoundingClientRect();
+          c.style.setProperty("--mx", e.clientX - r.left + "px");
+          c.style.setProperty("--my", e.clientY - r.top + "px");
+        });
+    </script>
+    <script>
+      // My recent games, from /api/games (the overlay sends each one when a match ends). Win rate and streak from the last 10.
+      // Click a game to open its card (public/games.js) under the row; all of them are on the Match history page.
+      (() => {
+        const T = window.SITE_TEXT || {};
+        const tl = loadTierlist().catch(() => null);
+        Promise.all([
+          fetch("/api/games?limit=10").then((r) => (r.ok ? r.json() : Promise.reject())),
+          fetch("/data/heroes.json").then((r) => r.json()),
+        ])
+          .then(async ([d, heroes]) => {
+            const name = Object.fromEntries(heroes.map((h) => [h[0], h[1]]));
+            const last = (d.games || []).filter((g) => name[g.hero]).slice(0, 10);
+            if (!last.length) return;
+            const kit = gameKit(heroes, await tl);
+            const w = last.filter((g) => g.result === "win").length,
+              l = last.length - w;
+            let n = 0;
+            while (n < last.length && last[n].result === last[0].result) n++;
+            const streak =
+              n >= 2
+                ? `<span class="streak" style="--c:var(--${last[0].result === "win" ? "good" : "bad"})">${n} ${last[0].result === "win" ? "win" : "loss"} streak</span>`
+                : "";
+            sendHome({
+              results: last
+                .slice(0, 8)
+                .map((g) => (g.result === "win" ? "W" : "L"))
+                .join(""),
+            });
+            const box = document.getElementById("games");
+            box.innerHTML = `<div><h2>${T.games_title || "My recent games"}</h2><div class="g-rec"><span><b class="w">${w}</b>W <b class="l">${l}</b>L · last ${last.length}</span>${streak}<a class="g-all" href="/games/">All games</a></div></div>
+      <div class="g-row">${last
+        .map(
+          (
+            g,
+            i,
+          ) => `<button class="g ${g.result}" type="button" data-i="${i}" aria-expanded="false" aria-controls="g-open" style="--c:var(--${g.result === "win" ? "good" : "bad"})"><img src="/img/heroes/${g.hero}.webp" alt="${name[g.hero]}, ${g.result}">
+        <span class="tip"><b>${name[g.hero]}</b>${g.map ? g.map + "<br>" : ""}<i>${g.result === "win" ? "Win" : "Loss"}</i> · ${kit.ago(g.at)}</span></button>`,
+        )
+        .join("")}</div>
       <div class="g-open" id="g-open"><div></div></div>`;
-    box.hidden = false;
-    const open = box.querySelector(".g-open"), inner = open.firstElementChild;
-    box.querySelector(".g-row").addEventListener("click", e => {
-      const b = e.target.closest(".g");
-      if (!b) return;
-      const was = b.getAttribute("aria-expanded") === "true";
-      box.querySelectorAll(".g").forEach(x => x.setAttribute("aria-expanded", "false"));
-      if (was) { open.classList.remove("on"); return; }
-      b.setAttribute("aria-expanded", "true");
-      inner.innerHTML = kit.card(last[+b.dataset.i]);
-      kit.fill(inner);
-      open.classList.add("on");
-    });
-    addEventListener("keydown", e => { if (e.key === "Escape" && open.classList.contains("on")) box.querySelector('.g[aria-expanded="true"]')?.click(); });
-  }).catch(() => {});
-})();
-</script>
-<script>
-// What's new on YouTube and Twitch, from /api/media (src/worker.js), shown on the buttons that are already there:
-// Twitch says "Live now" while I'm live, YouTube gets a NEW tag for a fresh video, and hovering either one
-// shows a small peek (the stream right now / the latest video). Pictures and links only, so Home stays fast.
-(() => {
-  const T = window.SITE_TEXT || {};
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const ago = d => {
-    const s = (new Date(d) - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    for (const [u, n] of [["year", 31536000], ["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]])
-      if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
-    return "just now";
-  };
-  // Wrap a button so a peek card can hang under it
-  const peek = (btn, html) => {
-    const pk = document.createElement("span");
-    pk.className = "pk";
-    btn.replaceWith(pk);
-    pk.append(btn);
-    pk.insertAdjacentHTML("beforeend", `<span class="peek">${html}</span>`);
-  };
-  fetch("/api/media").then(r => r.ok ? r.json() : Promise.reject()).then(m => {
-    const v = m.youtube?.videos?.[0], ch = m.twitch?.channel || "junhots_";
-    const tw = document.querySelector(".cta .btn.live"), yt = document.querySelector('.cta a[href*="youtube.com"]');
-    if (v && yt) {
-      // NEW tag for two weeks after an upload
-      if (Date.now() - new Date(v.date) < 14 * 864e5) yt.querySelector(".hb-a")?.insertAdjacentHTML("beforeend", '<span class="new">NEW</span>');
-      peek(yt, `<a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener"><span class="pic"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt=""></span>
-        <span class="t"><small>${esc(T.media_video || "Latest video")} · ${ago(v.date)}</small><b>${esc(v.title)}</b></span></a>`);
-    }
-    if (m.twitch?.live) {
-      tw.querySelector("[data-edit]").textContent = T.media_live_button || "Live now";
-      document.querySelector(".nav-live").classList.add("on");
-      document.querySelector(".nav-live").lastChild.textContent = "Live now";
-      // Twitch's own picture of the stream right now (the time in the link stops old copies)
-      peek(tw, `<a href="https://www.twitch.tv/${ch}" target="_blank" rel="noopener"><span class="pic"><img src="https://static-cdn.jtvnw.net/previews-ttv/live_user_${ch}-640x360.jpg?t=${Math.floor(Date.now() / 60000)}" alt="My stream right now"><span class="badge"><span class="dot"></span>LIVE</span></span>
-        <span class="t"><small>${esc(T.media_live || "Live now on Twitch")}</small><b>${esc(m.twitch.title || "Come say hi")}</b></span></a>`);
-    } else {
-      document.querySelectorAll(".cta .dot, .nav-live .dot").forEach(d => d.classList.add("off"));
-      // Offline: ask for the follow (Twitch tells followers when I go live) instead of "Watch" on an empty channel
-      tw.querySelector("[data-edit]").textContent = T.twitch_follow_button || "Follow on Twitch";
-    }
-  }).catch(() => {});
-})();
-</script>
-</body>
+            box.hidden = false;
+            const open = box.querySelector(".g-open"),
+              inner = open.firstElementChild;
+            box.querySelector(".g-row").addEventListener("click", (e) => {
+              const b = e.target.closest(".g");
+              if (!b) return;
+              const was = b.getAttribute("aria-expanded") === "true";
+              box.querySelectorAll(".g").forEach((x) => x.setAttribute("aria-expanded", "false"));
+              if (was) {
+                open.classList.remove("on");
+                return;
+              }
+              b.setAttribute("aria-expanded", "true");
+              inner.innerHTML = kit.card(last[+b.dataset.i]);
+              kit.fill(inner);
+              open.classList.add("on");
+            });
+            addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && open.classList.contains("on"))
+                box.querySelector('.g[aria-expanded="true"]')?.click();
+            });
+          })
+          .catch(() => {});
+      })();
+    </script>
+    <script>
+      // What's new on YouTube and Twitch, from /api/media (src/worker.js), shown on the buttons that are already there:
+      // Twitch says "Live now" while I'm live, YouTube gets a NEW tag for a fresh video, and hovering either one
+      // shows a small peek (the stream right now / the latest video). Pictures and links only, so Home stays fast.
+      (() => {
+        const T = window.SITE_TEXT || {};
+        const esc = (s) =>
+          String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+        const ago = (d) => {
+          const s = (new Date(d) - Date.now()) / 1000,
+            rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+          for (const [u, n] of [
+            ["year", 31536000],
+            ["month", 2592000],
+            ["week", 604800],
+            ["day", 86400],
+            ["hour", 3600],
+            ["minute", 60],
+          ])
+            if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+          return "just now";
+        };
+        // Wrap a button so a peek card can hang under it
+        const peek = (btn, html) => {
+          const pk = document.createElement("span");
+          pk.className = "pk";
+          btn.replaceWith(pk);
+          pk.append(btn);
+          pk.insertAdjacentHTML("beforeend", `<span class="peek">${html}</span>`);
+        };
+        fetch("/api/media")
+          .then((r) => (r.ok ? r.json() : Promise.reject()))
+          .then((m) => {
+            const v = m.youtube?.videos?.[0],
+              ch = m.twitch?.channel || "junhots_";
+            const tw = document.querySelector(".cta .btn.live"),
+              yt = document.querySelector('.cta a[href*="youtube.com"]');
+            if (v && yt) {
+              // NEW tag for two weeks after an upload
+              if (Date.now() - new Date(v.date) < 14 * 864e5)
+                yt.querySelector(".hb-a")?.insertAdjacentHTML("beforeend", '<span class="new">NEW</span>');
+              peek(
+                yt,
+                `<a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener"><span class="pic"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt=""></span>
+        <span class="t"><small>${esc(T.media_video || "Latest video")} · ${ago(v.date)}</small><b>${esc(v.title)}</b></span></a>`,
+              );
+            }
+            if (m.twitch?.live) {
+              tw.querySelector("[data-edit]").textContent = T.media_live_button || "Live now";
+              document.querySelector(".nav-live").classList.add("on");
+              document.querySelector(".nav-live").lastChild.textContent = "Live now";
+              // Twitch's own picture of the stream right now (the time in the link stops old copies)
+              peek(
+                tw,
+                `<a href="https://www.twitch.tv/${ch}" target="_blank" rel="noopener"><span class="pic"><img src="https://static-cdn.jtvnw.net/previews-ttv/live_user_${ch}-640x360.jpg?t=${Math.floor(Date.now() / 60000)}" alt="My stream right now"><span class="badge"><span class="dot"></span>LIVE</span></span>
+        <span class="t"><small>${esc(T.media_live || "Live now on Twitch")}</small><b>${esc(m.twitch.title || "Come say hi")}</b></span></a>`,
+              );
+            } else {
+              document.querySelectorAll(".cta .dot, .nav-live .dot").forEach((d) => d.classList.add("off"));
+              // Offline: ask for the follow (Twitch tells followers when I go live) instead of "Watch" on an empty channel
+              tw.querySelector("[data-edit]").textContent = T.twitch_follow_button || "Follow on Twitch";
+            }
+          })
+          .catch(() => {});
+      })();
+    </script>
+  </body>
 </html>

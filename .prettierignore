@@ -1,0 +1,7 @@
+# Prettier formats the site's own HTML, CSS and JS.
+# Data files are written by the Worker and tools, and vendor files are third-party, so leave them as they are.
+public/data/
+public/vendor/
+*.json
+*.jsonc
+*.md

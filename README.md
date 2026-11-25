@@ -44,3 +44,9 @@ Cloudflare settings are in `wrangler.jsonc`. Secrets live only in the Cloudflare
 - `python tools/update_builds_data.py` rebuilds `public/data/heroes/*.json` and the talent icons.
 - `node tools/make_link_previews.mjs` remakes the link preview pictures in `public/img/og/` (one per hero, plus
   `_home`, `_tierlist`, `_builds`, `_maker`, `_overlay`). Needs Playwright.
+
+## Code formatting
+HTML, CSS and JS are formatted with [Prettier](https://prettier.io) (settings in `.prettierrc.json`, skipped files in
+`.prettierignore`). In VS Code, install the recommended Prettier extension and files format when you save.
+From a terminal: `npx prettier --write .` (or `--check .` to only look).
+Where line breaks show on the page (text with `white-space: pre-line`), put `<!-- prettier-ignore -->` above it.

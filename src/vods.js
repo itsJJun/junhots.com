@@ -9,25 +9,34 @@ const KEY = "vods";
 const KEEP = 60 * 864e5;
 
 // "3h12m40s" -> seconds
-const seconds = d => [...String(d || "").matchAll(/(\d+)([hms])/g)].reduce((s, [, n, u]) => s + n * { h: 3600, m: 60, s: 1 }[u], 0);
+const seconds = (d) =>
+  [...String(d || "").matchAll(/(\d+)([hms])/g)].reduce((s, [, n, u]) => s + n * { h: 3600, m: 60, s: 1 }[u], 0);
 
 export async function refreshVods(env, readOnly) {
   if (!env.BUILDS) return;
   const j = await helix(env, "GET", `videos?user_id=${TWITCH_ID}&type=archive&first=100`, null, readOnly);
-  const vods = (j.data || []).map(v => ({ id: String(v.id), start: Date.parse(v.created_at), dur: seconds(v.duration) }))
-    .filter(v => /^\d+$/.test(v.id) && v.start && Date.now() - v.start < KEEP).sort((a, b) => b.start - a.start);
+  const vods = (j.data || [])
+    .map((v) => ({ id: String(v.id), start: Date.parse(v.created_at), dur: seconds(v.duration) }))
+    .filter((v) => /^\d+$/.test(v.id) && v.start && Date.now() - v.start < KEEP)
+    .sort((a, b) => b.start - a.start);
   // Twitch sometimes answers with an empty list for a moment: never let that wipe the VODs we already know
   if (!vods.length) {
     let old = null;
-    try { old = JSON.parse((await env.BUILDS.get(KEY)) || "null"); } catch {}
-    if (old?.vods?.some(v => Date.now() - v.start < KEEP)) return;
+    try {
+      old = JSON.parse((await env.BUILDS.get(KEY)) || "null");
+    } catch {}
+    if (old?.vods?.some((v) => Date.now() - v.start < KEEP)) return;
   }
   await env.BUILDS.put(KEY, JSON.stringify({ vods, at: Date.now() }));
 }
 
 export async function vodList(env) {
   let d = null;
-  try { d = JSON.parse((await env.BUILDS?.get(KEY)) || "null"); } catch {}
-  const vods = (d?.vods || []).filter(v => Date.now() - v.start < KEEP);
-  return new Response(JSON.stringify({ vods }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=300" } });
+  try {
+    d = JSON.parse((await env.BUILDS?.get(KEY)) || "null");
+  } catch {}
+  const vods = (d?.vods || []).filter((v) => Date.now() - v.start < KEEP);
+  return new Response(JSON.stringify({ vods }), {
+    headers: { "content-type": "application/json", "cache-control": "public, max-age=300" },
+  });
 }

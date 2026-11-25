@@ -13,16 +13,20 @@ import path from "node:path";
 
 const SITE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "public");
 const OUT = path.join(SITE, "img", "og");
-const file = p => pathToFileURL(path.join(SITE, p)).href;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const file = (p) => pathToFileURL(path.join(SITE, p)).href;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 // Role icons, same as public/site.js
 const site = readFileSync(path.join(SITE, "site.js"), "utf8");
 const ROLE_COLORS = eval("(" + site.match(/ROLE_COLORS = (\{[^;]*\});/)[1] + ")");
 const ROLE_PATHS = eval("(" + site.match(/ROLE_PATHS = (\{[\s\S]*?\n\});/)[1] + ")");
-const roleIcon = r => `<svg viewBox="0 0 24 24" style="color:${ROLE_COLORS[r]}">${ROLE_PATHS[r]}</svg>`;
+const roleIcon = (r) => `<svg viewBox="0 0 24 24" style="color:${ROLE_COLORS[r]}">${ROLE_PATHS[r]}</svg>`;
 
-const heroes = JSON.parse(readFileSync(path.join(SITE, "data", "heroes.json"), "utf8")).map(([id, name, , grole]) => ({ id, name, grole }));
+const heroes = JSON.parse(readFileSync(path.join(SITE, "data", "heroes.json"), "utf8")).map(([id, name, , grole]) => ({
+  id,
+  name,
+  grole,
+}));
 
 const BASE = `
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&family=Sora:wght@600;700&display=block">
@@ -65,10 +69,38 @@ ${existsSync(path.join(SITE, "img", "art", h.id + ".webp")) ? `<img class="art" 
 // Main pages: words on the left, the page's own preview picture on the right
 const PAGES = [
   ["home", "HEROES OF THE STORM", "Tier list, builds and stream overlay", "Jun plays HotS live on Twitch.", null, ""],
-  ["tierlist", "TIER LIST", "Jun's tier list", "Every hero ranked, with counters, synergy and win rates.", "previews/tierlist.webp", "tierlist"],
-  ["builds", "TALENT BUILDS", "Builds for every hero", "Talents, abilities and Jun's builds to copy into the game.", null, "builds"],
-  ["maker", "MAKE YOUR OWN", "Tier list maker", "Drag heroes into your own tiers and share it.", "previews/maker.webp", "tierlist-maker"],
-  ["overlay", "STREAM OVERLAY", "HotS stream overlay", "Live talents, rank, win streak and a draft banner.", "previews/overlay-talents.webp", "overlay"],
+  [
+    "tierlist",
+    "TIER LIST",
+    "Jun's tier list",
+    "Every hero ranked, with counters, synergy and win rates.",
+    "previews/tierlist.webp",
+    "tierlist",
+  ],
+  [
+    "builds",
+    "TALENT BUILDS",
+    "Builds for every hero",
+    "Talents, abilities and Jun's builds to copy into the game.",
+    null,
+    "builds",
+  ],
+  [
+    "maker",
+    "MAKE YOUR OWN",
+    "Tier list maker",
+    "Drag heroes into your own tiers and share it.",
+    "previews/maker.webp",
+    "tierlist-maker",
+  ],
+  [
+    "overlay",
+    "STREAM OVERLAY",
+    "HotS stream overlay",
+    "Live talents, rank, win streak and a draft banner.",
+    "previews/overlay-talents.webp",
+    "overlay",
+  ],
 ];
 // A tilted wall of hero portraits for pages without their own picture
 function mosaic() {
@@ -77,7 +109,7 @@ function mosaic() {
 .wall { position: absolute; left: 690px; top: -60px; display: grid; grid-template-columns: repeat(5, 112px); gap: 14px; transform: rotate(-8deg); }
 .wall img { width: 112px; height: 112px; border-radius: 14px; border: 1px solid #3d3531; }
 .fade { position: absolute; inset: 0; background: linear-gradient(to right, #12100f 54%, rgba(11,12,15,.2) 70%, rgba(11,12,15,.5)); }
-</style><div class="wall">${pick.map(h => `<img src="${file(`img/heroes/${h.id}.webp`)}">`).join("")}</div><div class="fade"></div><div class="glow"></div>`;
+</style><div class="wall">${pick.map((h) => `<img src="${file(`img/heroes/${h.id}.webp`)}">`).join("")}</div><div class="fade"></div><div class="glow"></div>`;
 }
 function mainPage([, kicker, title, sub, pic, slug]) {
   return `${BASE}

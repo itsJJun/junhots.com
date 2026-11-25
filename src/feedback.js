@@ -19,20 +19,29 @@ const RATE = 5;
 const DAY_CAP = 100;
 
 const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
 
 async function visitorKey(request) {
   const ip = request.headers.get("cf-connecting-ip") || "unknown";
   const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("junhots-fb:" + ip));
-  return "fbrate:" + [...new Uint8Array(hash).slice(0, 12)].map(b => b.toString(16).padStart(2, "0")).join("");
+  return "fbrate:" + [...new Uint8Array(hash).slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function send(request, env, ctx) {
   let body;
-  try { body = await request.json(); } catch { return json({ error: "bad data" }, 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "bad data" }, 400);
+  }
   // Bots: pretend it worked so they don't try again
   if (body.hp || Number(body.ms) < 1200) return json({ ok: true });
-  const text = String(body.text || "").trim().slice(0, MAX_TEXT);
+  const text = String(body.text || "")
+    .trim()
+    .slice(0, MAX_TEXT);
   if (text.length < 3) return json({ error: "Write a little more first." }, 400);
   if ((text.match(/https?:\/\//g) || []).length > 6) return json({ ok: true });
 
@@ -44,9 +53,14 @@ async function send(request, env, ctx) {
     form.append("secret", env.TURNSTILE_SECRET);
     form.append("response", String(body.token || ""));
     form.append("remoteip", ip);
-    const check = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form })
-      .then(r => r.json()).catch(() => ({ success: false }));
-    if (!check.success) return json({ error: "Couldn't check you're human. Close the form, open it again and resend." }, 403);
+    const check = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form,
+    })
+      .then((r) => r.json())
+      .catch(() => ({ success: false }));
+    if (!check.success)
+      return json({ error: "Couldn't check you're human. Close the form, open it again and resend." }, 403);
   }
 
   const rk = await visitorKey(request);
@@ -54,7 +68,8 @@ async function send(request, env, ctx) {
   if (sent >= RATE) return json({ error: "Thanks, that's plenty for now. Try again in an hour." }, 429);
   const dk = "fbday:" + new Date().toISOString().slice(0, 10);
   const today = Number(await env.BUILDS.get(dk)) || 0;
-  if (today >= DAY_CAP) return json({ error: "The inbox is full for today. Try again tomorrow, or message Jun on Discord." }, 429);
+  if (today >= DAY_CAP)
+    return json({ error: "The inbox is full for today. Try again tomorrow, or message Jun on Discord." }, 429);
   await env.BUILDS.put(rk, String(sent + 1), { expirationTtl: 3600 });
   await env.BUILDS.put(dk, String(today + 1), { expirationTtl: 2 * 86400 });
 
@@ -64,7 +79,9 @@ async function send(request, env, ctx) {
     at: now,
     type: TYPES[body.type] ? body.type : "other",
     text,
-    name: String(body.name || "").trim().slice(0, 60),
+    name: String(body.name || "")
+      .trim()
+      .slice(0, 60),
     page: /^\/(?!\/)[\w\-./?=&%#]*$/.test(body.page || "") ? String(body.page).slice(0, 200) : "",
     device: /Mobi|Android|iPhone/i.test(request.headers.get("user-agent") || "") ? "phone" : "computer",
     country: request.cf?.country || "",
@@ -72,22 +89,29 @@ async function send(request, env, ctx) {
   };
   await env.BUILDS.put("fb:" + item.id, JSON.stringify(item), { metadata: { done: false } });
 
-  if (env.FEEDBACK_WEBHOOK) ctx.waitUntil(fetch(env.FEEDBACK_WEBHOOK, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      username: "junhots.com feedback",
-      allowed_mentions: { parse: [] },
-      embeds: [{
-        title: TYPES[item.type] + (item.page ? " · " + item.page : ""),
-        url: "https://junhots.com/inbox/",
-        description: text.slice(0, 1000),
-        color: COLORS[item.type],
-        footer: { text: [item.name && "From " + item.name, item.device, item.country].filter(Boolean).join(" · ") },
-        timestamp: new Date(now).toISOString(),
-      }],
-    }),
-  }).catch(() => {}));
+  if (env.FEEDBACK_WEBHOOK)
+    ctx.waitUntil(
+      fetch(env.FEEDBACK_WEBHOOK, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "junhots.com feedback",
+          allowed_mentions: { parse: [] },
+          embeds: [
+            {
+              title: TYPES[item.type] + (item.page ? " · " + item.page : ""),
+              url: "https://junhots.com/inbox/",
+              description: text.slice(0, 1000),
+              color: COLORS[item.type],
+              footer: {
+                text: [item.name && "From " + item.name, item.device, item.country].filter(Boolean).join(" · "),
+              },
+              timestamp: new Date(now).toISOString(),
+            },
+          ],
+        }),
+      }).catch(() => {}),
+    );
   return json({ ok: true });
 }
 
@@ -104,21 +128,22 @@ async function keysOf(env) {
 
 async function list(env) {
   const keys = await keysOf(env);
-  const items = (await Promise.all(keys.map(k => env.BUILDS.get(k.name, "json")))).filter(Boolean);
+  const items = (await Promise.all(keys.map((k) => env.BUILDS.get(k.name, "json")))).filter(Boolean);
   return json({ items });
 }
 
 export async function feedback(request, env, ctx, passwordOk) {
   if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
   if (request.method === "POST") return send(request, env, ctx);
-  if (request.method === "GET" && new URL(request.url).searchParams.has("config")) return json({ sitekey: env.TURNSTILE_SITEKEY || "" });
+  if (request.method === "GET" && new URL(request.url).searchParams.has("config"))
+    return json({ sitekey: env.TURNSTILE_SITEKEY || "" });
   if (!(await passwordOk(request, env))) return json({ error: "wrong password" }, 401);
   if (request.method === "GET") {
     if (!new URL(request.url).searchParams.has("count")) return list(env);
     // The key list can lag a minute behind a Done/Delete; reading the few "new" messages themselves is up to date
-    const fresh = (await keysOf(env)).filter(k => !k.metadata?.done);
-    const items = await Promise.all(fresh.map(k => env.BUILDS.get(k.name, "json")));
-    return json({ new: items.filter(i => i && !i.done).length });
+    const fresh = (await keysOf(env)).filter((k) => !k.metadata?.done);
+    const items = await Promise.all(fresh.map((k) => env.BUILDS.get(k.name, "json")));
+    return json({ new: items.filter((i) => i && !i.done).length });
   }
   const id = request.method === "DELETE" ? new URL(request.url).searchParams.get("id") : null;
   if (request.method === "DELETE") {
@@ -128,7 +153,11 @@ export async function feedback(request, env, ctx, passwordOk) {
   }
   if (request.method === "PATCH") {
     let body;
-    try { body = await request.json(); } catch { return json({ error: "bad data" }, 400); }
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "bad data" }, 400);
+    }
     if (!/^[\w-]{1,40}$/.test(body.id || "")) return json({ error: "bad id" }, 400);
     const item = await env.BUILDS.get("fb:" + body.id, "json");
     if (!item) return json({ error: "not found" }, 404);

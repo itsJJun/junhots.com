@@ -9,7 +9,21 @@ import { DurableObject } from "cloudflare:workers";
 
 // What a hit may say. Anything else is dropped, so the table stays small and clean.
 const KINDS = ["visit", "view", "click", "copy"];
-const PAGES = ["home", "tierlist", "builds", "hero", "draft", "patch-notes", "schedule", "games", "overlay", "maker", "make-build", "updates", "other"];
+const PAGES = [
+  "home",
+  "tierlist",
+  "builds",
+  "hero",
+  "draft",
+  "patch-notes",
+  "schedule",
+  "games",
+  "overlay",
+  "maker",
+  "make-build",
+  "updates",
+  "other",
+];
 const TARGETS = ["", "twitch", "twitch-live", "discord", "youtube", "x", "build"];
 const KEEP_DAYS = 400;
 
@@ -21,28 +35,42 @@ export class Stats extends DurableObject {
       PRIMARY KEY (day, kind, page, target, ret))`);
   }
   add(day, kind, page, target, ret) {
-    this.sql.exec(`INSERT INTO hits VALUES (?, ?, ?, ?, ?, 1) ON CONFLICT DO UPDATE SET n = n + 1`, day, kind, page, target, ret);
+    this.sql.exec(
+      `INSERT INTO hits VALUES (?, ?, ?, ?, ?, 1) ON CONFLICT DO UPDATE SET n = n + 1`,
+      day,
+      kind,
+      page,
+      target,
+      ret,
+    );
     // Now and then, forget days older than about a year
     if (Math.random() < 0.002) this.sql.exec(`DELETE FROM hits WHERE day < ?`, dayOf(Date.now() - KEEP_DAYS * 864e5));
   }
   read(since) {
-    return this.sql.exec(`SELECT day, kind, page, target, ret, n FROM hits WHERE day >= ? ORDER BY day`, since).toArray();
+    return this.sql
+      .exec(`SELECT day, kind, page, target, ret, n FROM hits WHERE day >= ? ORDER BY day`, since)
+      .toArray();
   }
 }
 
-const dayOf = t => new Date(t).toISOString().slice(0, 10);
-const stub = env => env.STATS.get(env.STATS.idFromName("all"));
+const dayOf = (t) => new Date(t).toISOString().slice(0, 10);
+const stub = (env) => env.STATS.get(env.STATS.idFromName("all"));
 
 export async function stats(request, env, passwordOk) {
   const url = new URL(request.url);
   const done = (status = 204) => new Response(null, { status, headers: { "cache-control": "no-store" } });
-  if (!env.STATS) return url.pathname === "/api/hit" ? done() : Response.json({ error: "stats not set up" }, { status: 503 });
+  if (!env.STATS)
+    return url.pathname === "/api/hit" ? done() : Response.json({ error: "stats not set up" }, { status: 503 });
 
   if (url.pathname === "/api/hit" && request.method === "POST") {
     // Ignore other sites and obvious bots; keep each visitor to a sane number of hits
     const from = request.headers.get("origin") || request.headers.get("referer") || "";
     let host = url.host;
-    try { if (from) host = new URL(from).host; } catch { host = ""; }
+    try {
+      if (from) host = new URL(from).host;
+    } catch {
+      host = "";
+    }
     if (host !== url.host) return done();
     if (/bot|crawl|spider|headless|preview/i.test(request.headers.get("user-agent") || "")) return done();
     if (env.HIT_LIMIT) {
@@ -50,8 +78,15 @@ export async function stats(request, env, passwordOk) {
       if (!success) return done(429);
     }
     let b;
-    try { b = JSON.parse(await request.text()); } catch { return done(400); }
-    const kind = String(b?.k || ""), page = String(b?.p || ""), target = String(b?.t || ""), ret = b?.r ? 1 : 0;
+    try {
+      b = JSON.parse(await request.text());
+    } catch {
+      return done(400);
+    }
+    const kind = String(b?.k || ""),
+      page = String(b?.p || ""),
+      target = String(b?.t || ""),
+      ret = b?.r ? 1 : 0;
     if (!KINDS.includes(kind) || !PAGES.includes(page) || !TARGETS.includes(target)) return done(400);
     await stub(env).add(dayOf(Date.now()), kind, page, target, ret);
     return done();

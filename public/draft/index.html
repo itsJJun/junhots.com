@@ -1,468 +1,1385 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Heroes of the Storm draft helper · JunHotS</title>
-<meta name="description" content="Pick the map and the heroes in your draft, and get the best picks from Jun's tier list, counters and win rates.">
-<meta property="og:title" content="Heroes of the Storm draft helper · JunHotS">
-<meta property="og:description" content="Pick the map and the heroes in your draft, and get the best picks from Jun's tier list, counters and win rates.">
-<meta property="og:url" content="https://junhots.com/draft/">
-<meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="JunHotS">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://junhots.com/draft/">
-<meta name="color-scheme" content="dark">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/site.css">
-<link rel="stylesheet" href="/map-picker.css">
-<style>
-:root { --combo: #f5c04a; }
-.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.seg { display: flex; gap: 4px; flex-wrap: wrap; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
-.tab { font: 500 13px/1 var(--sans); color: var(--muted); height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"] { color: #1f0b05; background: var(--brand); }
-.tab[aria-pressed="true"] .ri { color: #1f0b05 !important; }
-.tab .ri { width: 14px; height: 14px; }
-.reset { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); font: 500 13px var(--sans); color: var(--text); transition: border-color .15s, background .15s; }
-.reset svg { width: 14px; height: 14px; color: var(--muted); transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
-.reset:hover { border-color: var(--brand); background: rgba(242, 106, 75, 0.08); }
-.reset:hover svg { color: var(--brand); transform: rotate(-180deg); }
-.controls .mp .mp-btn { height: 36px; border-radius: 9px; }
-.kind { padding: 2px; }
-.kind .tab { font: 600 14px/1 var(--display); height: 30px; }
-.kind .tab[aria-pressed="false"] { color: var(--muted); }
-/* Edge between the teams: one bar, green from the left for your team, red for the enemy */
-.edge { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
-.edge .row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--muted); }
-.edge .row b { font: 600 20px/1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.edge .you b { color: var(--good); } .edge .them b { color: var(--bad); }
-.edge .them { text-align: right; }
-.edge .bar { position: relative; height: 6px; margin: 8px 0 8px; border-radius: 3px; background: color-mix(in srgb, var(--bad) 55%, var(--surface-2)); overflow: hidden; }
-.edge .bar span { position: absolute; inset: 0 auto 0 0; width: var(--w, 50%); border-radius: 3px 0 0 3px; background: var(--good); transition: width .5s cubic-bezier(.22, 1, .36, 1); }
-.edge .bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--surface); }
-.edge .parts { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 12px; color: var(--muted); }
-.edge .parts i { font-style: normal; font-family: var(--mono); }
-.edge + .team { margin-top: 18px; }
-/* Why: the 3 matchups that move the edge most. Shows while the mouse is on the edge (tap on phones). */
-.edge { position: relative; }
-.edge .whys { display: none; position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); gap: 4px; padding: 10px 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
-.edge .whys span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; background: var(--c); }
-.edge .whys small { color: var(--muted); opacity: .7; }
-.edge:hover .whys, .edge.open .whys { display: grid; }
-.edge .hint { font-size: 11px; color: var(--muted); opacity: .7; margin-left: auto; }
-.edge:hover .hint, .edge.open .hint { visibility: hidden; }
-.pick .adv { grid-column: 4; grid-row: 1 / span 2; align-self: center; display: grid; justify-items: end; font: 600 15px/1 var(--mono); color: var(--good); }
-.pick .adv small { margin-top: 3px; font: 400 10.5px var(--sans); color: var(--muted); }
-.pick .adv.ban { color: var(--brand); }
-.pick .adv.low { color: var(--text); }
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        @view-transition {
+          navigation: auto;
+        }
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Heroes of the Storm draft helper · JunHotS</title>
+    <meta
+      name="description"
+      content="Pick the map and the heroes in your draft, and get the best picks from Jun's tier list, counters and win rates."
+    />
+    <meta property="og:title" content="Heroes of the Storm draft helper · JunHotS" />
+    <meta
+      property="og:description"
+      content="Pick the map and the heroes in your draft, and get the best picks from Jun's tier list, counters and win rates."
+    />
+    <meta property="og:url" content="https://junhots.com/draft/" />
+    <meta property="og:image" content="https://junhots.com/img/og/_tierlist.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JunHotS" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://junhots.com/draft/" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sora.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/map-picker.css" />
+    <style>
+      :root {
+        --combo: #f5c04a;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .seg {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--surface);
+      }
+      .tab {
+        font: 500 13px/1 var(--sans);
+        color: var(--muted);
+        height: 30px;
+        padding: 0 12px;
+        border-radius: 6px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab[aria-pressed="true"] {
+        color: #1f0b05;
+        background: var(--brand);
+      }
+      .tab[aria-pressed="true"] .ri {
+        color: #1f0b05 !important;
+      }
+      .tab .ri {
+        width: 14px;
+        height: 14px;
+      }
+      .reset {
+        all: unset;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 9px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        font: 500 13px var(--sans);
+        color: var(--text);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .reset svg {
+        width: 14px;
+        height: 14px;
+        color: var(--muted);
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .reset:hover {
+        border-color: var(--brand);
+        background: rgba(242, 106, 75, 0.08);
+      }
+      .reset:hover svg {
+        color: var(--brand);
+        transform: rotate(-180deg);
+      }
+      .controls .mp .mp-btn {
+        height: 36px;
+        border-radius: 9px;
+      }
+      .kind {
+        padding: 2px;
+      }
+      .kind .tab {
+        font: 600 14px/1 var(--display);
+        height: 30px;
+      }
+      .kind .tab[aria-pressed="false"] {
+        color: var(--muted);
+      }
+      /* Edge between the teams: one bar, green from the left for your team, red for the enemy */
+      .edge {
+        margin: 18px 0 0;
+        padding: 14px 0 0;
+        border-top: 1px solid var(--line);
+      }
+      .edge .row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .edge .row b {
+        font: 600 20px/1 var(--display);
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+      .edge .you b {
+        color: var(--good);
+      }
+      .edge .them b {
+        color: var(--bad);
+      }
+      .edge .them {
+        text-align: right;
+      }
+      .edge .bar {
+        position: relative;
+        height: 6px;
+        margin: 8px 0 8px;
+        border-radius: 3px;
+        background: color-mix(in srgb, var(--bad) 55%, var(--surface-2));
+        overflow: hidden;
+      }
+      .edge .bar span {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--w, 50%);
+        border-radius: 3px 0 0 3px;
+        background: var(--good);
+        transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .edge .bar::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        margin-left: -1px;
+        background: var(--surface);
+      }
+      .edge .parts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .edge .parts i {
+        font-style: normal;
+        font-family: var(--mono);
+      }
+      .edge + .team {
+        margin-top: 18px;
+      }
+      /* Why: the 3 matchups that move the edge most. Shows while the mouse is on the edge (tap on phones). */
+      .edge {
+        position: relative;
+      }
+      .edge .whys {
+        display: none;
+        position: absolute;
+        z-index: 5;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        gap: 4px;
+        padding: 10px 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .edge .whys span::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: 1px;
+        background: var(--c);
+      }
+      .edge .whys small {
+        color: var(--muted);
+        opacity: 0.7;
+      }
+      .edge:hover .whys,
+      .edge.open .whys {
+        display: grid;
+      }
+      .edge .hint {
+        font-size: 11px;
+        color: var(--muted);
+        opacity: 0.7;
+        margin-left: auto;
+      }
+      .edge:hover .hint,
+      .edge.open .hint {
+        visibility: hidden;
+      }
+      .pick .adv {
+        grid-column: 4;
+        grid-row: 1 / span 2;
+        align-self: center;
+        display: grid;
+        justify-items: end;
+        font: 600 15px/1 var(--mono);
+        color: var(--good);
+      }
+      .pick .adv small {
+        margin-top: 3px;
+        font: 400 10.5px var(--sans);
+        color: var(--muted);
+      }
+      .pick .adv.ban {
+        color: var(--brand);
+      }
+      .pick .adv.low {
+        color: var(--text);
+      }
 
-.board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
-.panel { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 18px; }
-.panel h2 { margin: 0 0 12px; font: 600 15px/1.2 var(--display); letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
-.panel h2 small { margin-left: auto; font: 400 12px var(--sans); color: var(--muted); }
-.team + .team { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
-.team h3 { margin: 0 0 10px; font-size: 12px; font-weight: 500; color: var(--muted); }
-.team h3::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--c); }
-.slots { display: grid; grid-template-columns: repeat(5, minmax(0, 72px)); gap: 8px; }
-.slot { all: unset; box-sizing: border-box; cursor: pointer; position: relative; aspect-ratio: 1; border-radius: 10px; border: 1px dashed #463d38; display: grid; place-items: center; color: var(--muted); font-size: 22px; font-weight: 300; transition: border-color .15s, color .15s, background .15s; }
-.slot:hover, .slot:focus-visible { border-color: var(--brand); color: var(--brand); background: rgba(242, 106, 75, 0.06); }
-.slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
-.slot.full { border: 1px solid var(--line); }
-.slot.full::after { content: "×"; position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: rgba(10, 8, 7, 0.8); color: var(--text); font: 600 13px/1 var(--sans); opacity: 0; transition: opacity .15s; }
-.slot.full:hover::after, .slot.full:focus-visible::after { opacity: 1; }
-@media (hover: none) { .slot.full::after { opacity: 1; } }
-/* Bans: 3 small slots per team under its picks; a banned hero is greyed out with a slash */
-.bans { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-.bans > span { width: 40px; font-size: 12px; color: var(--muted); }
-.bans .slot { width: 44px; aspect-ratio: 1; font-size: 16px; border-radius: 8px; }
-.bans .slot img { border-radius: 7px; filter: grayscale(1) brightness(.6); }
-.bans .slot .nm { display: none; }
-.bans .slot.full::before { content: ""; position: absolute; z-index: 1; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--bad); transform: rotate(45deg); box-shadow: 0 0 0 1px rgba(10, 8, 7, 0.6); }
-.bans .slot.full::after { z-index: 2; top: -6px; right: -6px; width: 16px; height: 16px; font-size: 11px; }
-.slot .nm { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 4px 4px; border-radius: 0 0 9px 9px; background: linear-gradient(to top, rgba(10, 8, 7, 0.9), transparent); font: 600 10.5px/1.1 var(--sans); color: #fff; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .board {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+        gap: 20px;
+        align-items: start;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        padding: 18px;
+      }
+      .panel h2 {
+        margin: 0 0 12px;
+        font: 600 15px/1.2 var(--display);
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel h2 small {
+        margin-left: auto;
+        font: 400 12px var(--sans);
+        color: var(--muted);
+      }
+      .team + .team {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .team h3 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .team h3::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 7px;
+        vertical-align: 1px;
+        background: var(--c);
+      }
+      .slots {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 72px));
+        gap: 8px;
+      }
+      .slot {
+        all: unset;
+        box-sizing: border-box;
+        cursor: pointer;
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 10px;
+        border: 1px dashed #463d38;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 22px;
+        font-weight: 300;
+        transition:
+          border-color 0.15s,
+          color 0.15s,
+          background 0.15s;
+      }
+      .slot:hover,
+      .slot:focus-visible {
+        border-color: var(--brand);
+        color: var(--brand);
+        background: rgba(242, 106, 75, 0.06);
+      }
+      .slot img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 9px;
+      }
+      .slot.full {
+        border: 1px solid var(--line);
+      }
+      .slot.full::after {
+        content: "×";
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 18px;
+        height: 18px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(10, 8, 7, 0.8);
+        color: var(--text);
+        font: 600 13px/1 var(--sans);
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .slot.full:hover::after,
+      .slot.full:focus-visible::after {
+        opacity: 1;
+      }
+      @media (hover: none) {
+        .slot.full::after {
+          opacity: 1;
+        }
+      }
+      /* Bans: 3 small slots per team under its picks; a banned hero is greyed out with a slash */
+      .bans {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .bans > span {
+        width: 40px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .bans .slot {
+        width: 44px;
+        aspect-ratio: 1;
+        font-size: 16px;
+        border-radius: 8px;
+      }
+      .bans .slot img {
+        border-radius: 7px;
+        filter: grayscale(1) brightness(0.6);
+      }
+      .bans .slot .nm {
+        display: none;
+      }
+      .bans .slot.full::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        top: -3px;
+        bottom: -3px;
+        width: 2px;
+        margin-left: -1px;
+        border-radius: 2px;
+        background: var(--bad);
+        transform: rotate(45deg);
+        box-shadow: 0 0 0 1px rgba(10, 8, 7, 0.6);
+      }
+      .bans .slot.full::after {
+        z-index: 2;
+        top: -6px;
+        right: -6px;
+        width: 16px;
+        height: 16px;
+        font-size: 11px;
+      }
+      .slot .nm {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 4px 4px;
+        border-radius: 0 0 9px 9px;
+        background: linear-gradient(to top, rgba(10, 8, 7, 0.9), transparent);
+        font: 600 10.5px/1.1 var(--sans);
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
-.picks { display: grid; gap: 8px; counter-reset: n; }
-.pick { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 18px 44px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); transition: border-color .15s, transform .15s; }
-.pick:hover { border-color: #4a413c; transform: translateY(-1px); }
-.pick::before { counter-increment: n; content: counter(n); font: 500 12px var(--mono); color: var(--muted); text-align: center; grid-row: span 2; }
-.pick img { grid-row: span 2; width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
-.pick .top { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.pick b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pick .meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.pick .meta i { font-style: normal; font-family: var(--mono); }
+      .picks {
+        display: grid;
+        gap: 8px;
+        counter-reset: n;
+      }
+      .pick {
+        all: unset;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: grid;
+        grid-template-columns: 18px 44px minmax(0, 1fr) auto;
+        gap: 4px 12px;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--surface-2);
+        transition:
+          border-color 0.15s,
+          transform 0.15s;
+      }
+      .pick:hover {
+        border-color: #4a413c;
+        transform: translateY(-1px);
+      }
+      .pick::before {
+        counter-increment: n;
+        content: counter(n);
+        font: 500 12px var(--mono);
+        color: var(--muted);
+        text-align: center;
+        grid-row: span 2;
+      }
+      .pick img {
+        grid-row: span 2;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+      .pick .top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+      .pick b {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pick .meta {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .pick .meta i {
+        font-style: normal;
+        font-family: var(--mono);
+      }
 
-.why { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
-.pick .meta .up { color: var(--combo); font-family: inherit; font-weight: 600; }
-.why .cmb, .whys .cmb { color: var(--combo); font-weight: 600; }
-.why .cmb::before, .whys .cmb::before { border-radius: 1px; transform: rotate(45deg); box-shadow: 0 0 6px var(--combo); }
-.why span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--c, var(--muted)); }
-.empty { color: var(--muted); font-size: 14px; padding: 6px 0; }
-.note { margin: 14px 0 0; font-size: 12px; color: var(--muted); }
+      .why {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .pick .meta .up {
+        color: var(--combo);
+        font-family: inherit;
+        font-weight: 600;
+      }
+      .why .cmb,
+      .whys .cmb {
+        color: var(--combo);
+        font-weight: 600;
+      }
+      .why .cmb::before,
+      .whys .cmb::before {
+        border-radius: 1px;
+        transform: rotate(45deg);
+        box-shadow: 0 0 6px var(--combo);
+      }
+      .why span::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: 1px;
+        background: var(--c, var(--muted));
+      }
+      .empty {
+        color: var(--muted);
+        font-size: 14px;
+        padding: 6px 0;
+      }
+      .note {
+        margin: 14px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
 
-/* Hero picker: always open under the draft. The row it adds to is picked with the "Add to" buttons or by tapping a slot. */
-.slot.next { border: 1.5px solid var(--brand); color: var(--brand); background: rgba(242, 106, 75, 0.08); box-shadow: 0 0 0 3px rgba(242, 106, 75, 0.12); }
-.chooser { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-.chooser h3 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--muted); }
-.addto { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 10px; }
-.addto .tab { justify-content: center; font-size: 12.5px; height: 30px; padding: 0 6px; white-space: nowrap; }
-.addto .tab::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
-.addto .tab[aria-pressed="true"]::before { background: #1f0b05; }
-.addto .tab small { font: 500 11px var(--mono); opacity: .7; }
-.qrow { display: flex; gap: 8px; align-items: center; }
-.qrow input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 14px var(--sans); }
-.qrow input:focus { outline: none; border-color: var(--brand); }
-.qrow .reset { height: 36px; padding: 0 12px; }
-.qrow .reset[disabled] { opacity: .4; cursor: default; pointer-events: none; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; margin-top: 10px; padding-top: 2px; }
-.hc { all: unset; position: relative; cursor: pointer; border-radius: 7px; }
-.hc img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; background: var(--surface-2); border: 1.5px solid transparent; transition: border-color .12s, transform .12s; }
-.hc:hover img, .hc:focus-visible img { border-color: var(--brand); transform: translateY(-2px); }
-.hc[disabled] { cursor: default; opacity: .22; }
-.hc[disabled] img { transform: none; border-color: transparent; filter: grayscale(1); }
-.hc.first img { border-color: var(--brand); }
-.hc .tip { display: none; position: absolute; z-index: 3; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); padding: 3px 7px; border-radius: 5px; background: #0d0b0a; border: 1px solid var(--line); font-size: 11px; white-space: nowrap; pointer-events: none; }
-.hc:hover .tip, .hc:focus-visible .tip, .hc.first .tip { display: block; }
-.hc.first .tip { bottom: auto; top: calc(100% + 4px); border-color: var(--brand); }
-.grid .empty { grid-column: 1 / -1; }
-/* A suggested hero is picked (or banned) with one click; its builds are behind the small link */
-.pick .bl { grid-column: 4; justify-self: end; font-size: 11px; color: var(--muted); text-decoration: none; padding: 2px 0; }
-.pick .bl:hover { color: var(--brand); }
-.pick .adv { grid-row: 1; }
-.pick .act { display: none; }
-.pick:hover .adv small, .pick:focus-visible .adv small { display: none; }
-.pick:hover .act, .pick:focus-visible .act { display: block; margin-top: 3px; font: 600 10.5px var(--sans); color: var(--brand); }
-.pick.added { animation: added .35s ease-out; }
-@keyframes added { 50% { border-color: var(--good); } }
-.toast { position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translate(-50%, 12px); opacity: 0; z-index: 20; display: flex; gap: 12px; align-items: center; padding: 9px 14px; border-radius: 10px; background: #0d0b0a; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(0,0,0,.5); font-size: 13px; transition: opacity .2s, transform .2s; pointer-events: none; }
-.toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-.toast button { all: unset; cursor: pointer; color: var(--brand); font-weight: 600; }
+      /* Hero picker: always open under the draft. The row it adds to is picked with the "Add to" buttons or by tapping a slot. */
+      .slot.next {
+        border: 1.5px solid var(--brand);
+        color: var(--brand);
+        background: rgba(242, 106, 75, 0.08);
+        box-shadow: 0 0 0 3px rgba(242, 106, 75, 0.12);
+      }
+      .chooser {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+      .chooser h3 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .addto {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 10px;
+      }
+      .addto .tab {
+        justify-content: center;
+        font-size: 12.5px;
+        height: 30px;
+        padding: 0 6px;
+        white-space: nowrap;
+      }
+      .addto .tab::before {
+        content: "";
+        flex: none;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--c);
+      }
+      .addto .tab[aria-pressed="true"]::before {
+        background: #1f0b05;
+      }
+      .addto .tab small {
+        font: 500 11px var(--mono);
+        opacity: 0.7;
+      }
+      .qrow {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .qrow input {
+        flex: 1;
+        min-width: 0;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        color: var(--text);
+        font: 14px var(--sans);
+      }
+      .qrow input:focus {
+        outline: none;
+        border-color: var(--brand);
+      }
+      .qrow .reset {
+        height: 36px;
+        padding: 0 12px;
+      }
+      .qrow .reset[disabled] {
+        opacity: 0.4;
+        cursor: default;
+        pointer-events: none;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+        gap: 6px;
+        margin-top: 10px;
+        padding-top: 2px;
+      }
+      .hc {
+        all: unset;
+        position: relative;
+        cursor: pointer;
+        border-radius: 7px;
+      }
+      .hc img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 7px;
+        background: var(--surface-2);
+        border: 1.5px solid transparent;
+        transition:
+          border-color 0.12s,
+          transform 0.12s;
+      }
+      .hc:hover img,
+      .hc:focus-visible img {
+        border-color: var(--brand);
+        transform: translateY(-2px);
+      }
+      .hc[disabled] {
+        cursor: default;
+        opacity: 0.22;
+      }
+      .hc[disabled] img {
+        transform: none;
+        border-color: transparent;
+        filter: grayscale(1);
+      }
+      .hc.first img {
+        border-color: var(--brand);
+      }
+      .hc .tip {
+        display: none;
+        position: absolute;
+        z-index: 3;
+        left: 50%;
+        bottom: calc(100% + 4px);
+        transform: translateX(-50%);
+        padding: 3px 7px;
+        border-radius: 5px;
+        background: #0d0b0a;
+        border: 1px solid var(--line);
+        font-size: 11px;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+      .hc:hover .tip,
+      .hc:focus-visible .tip,
+      .hc.first .tip {
+        display: block;
+      }
+      .hc.first .tip {
+        bottom: auto;
+        top: calc(100% + 4px);
+        border-color: var(--brand);
+      }
+      .grid .empty {
+        grid-column: 1 / -1;
+      }
+      /* A suggested hero is picked (or banned) with one click; its builds are behind the small link */
+      .pick .bl {
+        grid-column: 4;
+        justify-self: end;
+        font-size: 11px;
+        color: var(--muted);
+        text-decoration: none;
+        padding: 2px 0;
+      }
+      .pick .bl:hover {
+        color: var(--brand);
+      }
+      .pick .adv {
+        grid-row: 1;
+      }
+      .pick .act {
+        display: none;
+      }
+      .pick:hover .adv small,
+      .pick:focus-visible .adv small {
+        display: none;
+      }
+      .pick:hover .act,
+      .pick:focus-visible .act {
+        display: block;
+        margin-top: 3px;
+        font: 600 10.5px var(--sans);
+        color: var(--brand);
+      }
+      .pick.added {
+        animation: added 0.35s ease-out;
+      }
+      @keyframes added {
+        50% {
+          border-color: var(--good);
+        }
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: max(22px, env(safe-area-inset-bottom));
+        transform: translate(-50%, 12px);
+        opacity: 0;
+        z-index: 20;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 9px 14px;
+        border-radius: 10px;
+        background: #0d0b0a;
+        border: 1px solid var(--line);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        font-size: 13px;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        pointer-events: none;
+      }
+      .toast.on {
+        opacity: 1;
+        transform: translate(-50%, 0);
+        pointer-events: auto;
+      }
+      .toast button {
+        all: unset;
+        cursor: pointer;
+        color: var(--brand);
+        font-weight: 600;
+      }
 
-@media (max-width: 860px) { .board { grid-template-columns: 1fr; } }
-@media (max-width: 520px) {
-  .panel { padding: 14px; }
-  .slots { gap: 6px; }
-  .grid { max-height: 280px; overflow-y: auto; }
-  .addto .tab { font-size: 11.5px; padding: 0 4px; }
-  .addto .tab small { display: none; }
-  .hc .tip { display: none !important; }
-}
-@media (prefers-reduced-motion: reduce) { .pick, .slot, .hc img { transition: none; } .pick.added { animation: none; } }
-</style>
-<script src="/nav.js" defer></script>
-</head>
-<body>
+      @media (max-width: 860px) {
+        .board {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 520px) {
+        .panel {
+          padding: 14px;
+        }
+        .slots {
+          gap: 6px;
+        }
+        .grid {
+          max-height: 280px;
+          overflow-y: auto;
+        }
+        .addto .tab {
+          font-size: 11.5px;
+          padding: 0 4px;
+        }
+        .addto .tab small {
+          display: none;
+        }
+        .hc .tip {
+          display: none !important;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pick,
+        .slot,
+        .hc img {
+          transition: none;
+        }
+        .pick.added {
+          animation: none;
+        }
+      }
+    </style>
+    <script src="/nav.js" defer></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="/">Jun<span>HotS</span></a>
+        <div class="tabs">
+          <a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a
+          ><a href="/draft/" aria-current="page">Draft</a><a href="/patch-notes/">Patch notes</a
+          ><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a>
+        </div>
+        <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"
+          ><span class="dot"></span>Twitch</a
+        >
+      </nav>
+      <script>
+        /* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */ {
+          const t = document.querySelector(".tabs"),
+            a = t && t.querySelector('[aria-current="page"]');
+          if (a) {
+            const i = document.createElement("span");
+            i.className = "tab-ind";
+            i.setAttribute("aria-hidden", "true");
+            i.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
+            t.append(i);
+          }
+        }
+      </script>
 
-<div class="wrap">
-  <nav>
-    <a class="logo" href="/">Jun<span>HotS</span></a>
-    <div class="tabs"><a href="/">Home</a><a href="/tierlist/">Tier list</a><a href="/builds/">Builds</a><a href="/draft/" aria-current="page">Draft</a><a href="/patch-notes/">Patch notes</a><a href="/tierlist-maker/">Make your own</a><a href="/overlay/">Overlay</a></div>
-    <a class="nav-live" href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
-  </nav>
-  <script>/* coral line under the current tab (site.css .tab-ind; nav.js keeps it in place) */{const t=document.querySelector(".tabs"),a=t&&t.querySelector('[aria-current="page"]');if(a){const i=document.createElement("span");i.className="tab-ind";i.setAttribute("aria-hidden","true");i.style.cssText=`left:${a.offsetLeft}px;width:${a.offsetWidth}px`;t.append(i)}}</script>
+      <header class="page-head">
+        <div>
+          <h1 data-edit="draft_title">Draft helper</h1>
+          <p class="sub" data-edit="draft_text">
+            Add the bans and picks so far and get the best picks for your team, from my tier list, counters and win
+            rates.
+          </p>
+        </div>
+        <div class="controls">
+          <span id="map"></span>
+          <button class="reset" id="clear" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg
+            >Reset
+          </button>
+        </div>
+      </header>
 
-  <header class="page-head">
-    <div>
-      <h1 data-edit="draft_title">Draft helper</h1>
-      <p class="sub" data-edit="draft_text">Add the bans and picks so far and get the best picks for your team, from my tier list, counters and win rates.</p>
-    </div>
-    <div class="controls">
-      <span id="map"></span>
-      <button class="reset" id="clear" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reset</button>
-    </div>
-  </header>
-
-  <div class="board">
-    <section class="panel" aria-label="The draft">
-      <h2>The draft <small>Click a hero below to add it</small></h2>
-      <div class="team" style="--c:var(--bad)"><h3>Enemy team</h3><div class="slots" id="enemy"></div><div class="bans"><span>Bans</span><span style="display:contents" id="eban"></span></div></div>
-      <div class="edge" id="edge"></div>
-      <div class="team" style="--c:var(--good)"><h3>Your team</h3><div class="slots" id="ally"></div><div class="bans"><span>Bans</span><span style="display:contents" id="aban"></span></div></div>
-      <div class="chooser">
-        <h3>Add a hero to</h3>
-        <div class="addto seg" id="addto" role="group" aria-label="Add to"></div>
-        <div class="qrow"><input id="q" type="text" placeholder="Search heroes (just start typing)" autocomplete="off" aria-label="Search heroes"><button class="reset" id="undo" type="button" disabled title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Undo</button></div>
-        <div class="grid" id="grid"></div>
+      <div class="board">
+        <section class="panel" aria-label="The draft">
+          <h2>The draft <small>Click a hero below to add it</small></h2>
+          <div class="team" style="--c: var(--bad)">
+            <h3>Enemy team</h3>
+            <div class="slots" id="enemy"></div>
+            <div class="bans"><span>Bans</span><span style="display: contents" id="eban"></span></div>
+          </div>
+          <div class="edge" id="edge"></div>
+          <div class="team" style="--c: var(--good)">
+            <h3>Your team</h3>
+            <div class="slots" id="ally"></div>
+            <div class="bans"><span>Bans</span><span style="display: contents" id="aban"></span></div>
+          </div>
+          <div class="chooser">
+            <h3>Add a hero to</h3>
+            <div class="addto seg" id="addto" role="group" aria-label="Add to"></div>
+            <div class="qrow">
+              <input
+                id="q"
+                type="text"
+                placeholder="Search heroes (just start typing)"
+                autocomplete="off"
+                aria-label="Search heroes"
+              /><button class="reset" id="undo" type="button" disabled title="Undo (Ctrl+Z)">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  /></svg
+                >Undo
+              </button>
+            </div>
+            <div class="grid" id="grid"></div>
+          </div>
+        </section>
+        <section class="panel" aria-label="Best picks">
+          <h2>
+            <span class="seg kind" id="kind" role="group" aria-label="Show"
+              ><button class="tab" data-kind="pick" aria-pressed="true">Best picks</button
+              ><button class="tab" data-kind="ban" aria-pressed="false">Best bans</button></span
+            ><small id="for"></small>
+          </h2>
+          <div class="seg" id="roles" role="group" aria-label="Role" style="margin-bottom: 12px"></div>
+          <div class="picks" id="picks"></div>
+          <p class="note" id="note"></p>
+        </section>
       </div>
-    </section>
-    <section class="panel" aria-label="Best picks">
-      <h2><span class="seg kind" id="kind" role="group" aria-label="Show"><button class="tab" data-kind="pick" aria-pressed="true">Best picks</button><button class="tab" data-kind="ban" aria-pressed="false">Best bans</button></span><small id="for"></small></h2>
-      <div class="seg" id="roles" role="group" aria-label="Role" style="margin-bottom:12px"></div>
-      <div class="picks" id="picks"></div>
-      <p class="note" id="note"></p>
-    </section>
-  </div>
 
-  <footer>
-    <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
-    <span class="social"><a href="/updates/">Updates</a><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span>
-    <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
-  </footer>
-</div>
+      <footer>
+        <span data-edit="footer_left">© 2026 Jun · junhots.com</span>
+        <span class="social"
+          ><a href="/updates/">Updates</a
+          ><a href="https://www.twitch.tv/junhots_" target="_blank" rel="noopener">Twitch</a
+          ><a href="https://www.youtube.com/@junhots" target="_blank" rel="noopener">YouTube</a
+          ><a href="https://x.com/junhots_" target="_blank" rel="noopener">X</a
+          ><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">Discord</a></span
+        >
+        <span data-edit="footer_right">Not affiliated with Blizzard Entertainment</span>
+      </footer>
+    </div>
 
-<div class="toast" id="toast" role="status"></div>
+    <div class="toast" id="toast" role="status"></div>
 
-<script src="/text.js"></script>
-<script src="/site.js"></script>
-<script src="/map-picker.js"></script>
-<script src="/edge.js"></script>
-<script>
-// Draft helper: an edge between the two teams from my tier list, win rates, counters, synergy and team comp,
-// and the picks and bans that move it most. The draft lives in the link (?m=map&e=enemies&a=allies&eb=&ab=),
-// so a draft can be shared.
-const img = id => `/img/heroes/${id}.webp`;
-const unitImg = id => id === "chogall" ? "/img/heroes/chogall-both.webp" : img(id);
-const unitName = id => id === "chogall" ? "Cho'gall" : byId[id].name;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
-let HEROES = [], byId = {}, TL = null, role = "All";
-const q = new URLSearchParams(location.search);
-const list = k => (q.get(k) || "").split(",").filter(Boolean);
-// enemy/ally = picks, eban/aban = each team's 3 bans
-const SIZE = { enemy: 5, ally: 5, eban: 3, aban: 3 };
-const PARAM = { enemy: "e", ally: "a", eban: "eb", aban: "ab" };
-const draft = { map: q.get("m") || "Overall" };
-for (const k in SIZE) draft[k] = list(PARAM[k]).slice(0, SIZE[k]);
-// Cho'gall is one hero: a pick fills two slots (Cho + Gall), a ban takes one ban slot (stored as Cho).
-// "Cho'gall" stands for both in the chooser and the best picks/bans.
-const PAIR = { chogall: "gall", gall: "chogall" };
-const isPick = k => k === "ally" || k === "enemy";
-const unitOf = id => id === "gall" ? "chogall" : id;   // the one entry Cho'gall is listed as
-const addIds = (k, id) => id === "chogall" && isPick(k) ? ["chogall", "gall"] : [id];
-const roomFor = (k, id) => SIZE[k] - draft[k].length >= addIds(k, id).length;
-const allTaken = () => { const t = new Set(Object.keys(SIZE).flatMap(k => draft[k])); for (const a in PAIR) if (t.has(a)) t.add(PAIR[a]); return t; };
-// A link from before (or by hand) with only Cho or Gall: picks get the other half if there's room, bans keep one Cho'gall
-function fixPairs() {
-  for (const k in SIZE) {
-    const ids = [...new Set(draft[k].map(id => isPick(k) ? id : unitOf(id)))];
-    if (isPick(k) && ids.includes("chogall") !== ids.includes("gall")) {
-      if (ids.length < SIZE[k]) ids.push(ids.includes("chogall") ? "gall" : "chogall"); else ids.splice(ids.findIndex(id => PAIR[id]), 1);
-    }
-    draft[k] = ids;
-  }
-}
+    <script src="/text.js"></script>
+    <script src="/site.js"></script>
+    <script src="/map-picker.js"></script>
+    <script src="/edge.js"></script>
+    <script>
+      // Draft helper: an edge between the two teams from my tier list, win rates, counters, synergy and team comp,
+      // and the picks and bans that move it most. The draft lives in the link (?m=map&e=enemies&a=allies&eb=&ab=),
+      // so a draft can be shared.
+      const img = (id) => `/img/heroes/${id}.webp`;
+      const unitImg = (id) => (id === "chogall" ? "/img/heroes/chogall-both.webp" : img(id));
+      const unitName = (id) => (id === "chogall" ? "Cho'gall" : byId[id].name);
+      const esc = (s) =>
+        String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const norm = (s) =>
+        s
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[^a-z0-9]/g, "");
+      let HEROES = [],
+        byId = {},
+        TL = null,
+        role = "All";
+      const q = new URLSearchParams(location.search);
+      const list = (k) => (q.get(k) || "").split(",").filter(Boolean);
+      // enemy/ally = picks, eban/aban = each team's 3 bans
+      const SIZE = { enemy: 5, ally: 5, eban: 3, aban: 3 };
+      const PARAM = { enemy: "e", ally: "a", eban: "eb", aban: "ab" };
+      const draft = { map: q.get("m") || "Overall" };
+      for (const k in SIZE) draft[k] = list(PARAM[k]).slice(0, SIZE[k]);
+      // Cho'gall is one hero: a pick fills two slots (Cho + Gall), a ban takes one ban slot (stored as Cho).
+      // "Cho'gall" stands for both in the chooser and the best picks/bans.
+      const PAIR = { chogall: "gall", gall: "chogall" };
+      const isPick = (k) => k === "ally" || k === "enemy";
+      const unitOf = (id) => (id === "gall" ? "chogall" : id); // the one entry Cho'gall is listed as
+      const addIds = (k, id) => (id === "chogall" && isPick(k) ? ["chogall", "gall"] : [id]);
+      const roomFor = (k, id) => SIZE[k] - draft[k].length >= addIds(k, id).length;
+      const allTaken = () => {
+        const t = new Set(Object.keys(SIZE).flatMap((k) => draft[k]));
+        for (const a in PAIR) if (t.has(a)) t.add(PAIR[a]);
+        return t;
+      };
+      // A link from before (or by hand) with only Cho or Gall: picks get the other half if there's room, bans keep one Cho'gall
+      function fixPairs() {
+        for (const k in SIZE) {
+          const ids = [...new Set(draft[k].map((id) => (isPick(k) ? id : unitOf(id))))];
+          if (isPick(k) && ids.includes("chogall") !== ids.includes("gall")) {
+            if (ids.length < SIZE[k]) ids.push(ids.includes("chogall") ? "gall" : "chogall");
+            else
+              ids.splice(
+                ids.findIndex((id) => PAIR[id]),
+                1,
+              );
+          }
+          draft[k] = ids;
+        }
+      }
 
-function save() {
-  const p = new URLSearchParams();
-  if (draft.map !== "Overall") p.set("m", draft.map);
-  for (const k in SIZE) if (draft[k].length) p.set(PARAM[k], draft[k].join(","));
-  history.replaceState(null, "", location.pathname + (p.size ? "?" + p.toString().replace(/%2C/g, ",") : ""));
-}
+      function save() {
+        const p = new URLSearchParams();
+        if (draft.map !== "Overall") p.set("m", draft.map);
+        for (const k in SIZE) if (draft[k].length) p.set(PARAM[k], draft[k].join(","));
+        history.replaceState(null, "", location.pathname + (p.size ? "?" + p.toString().replace(/%2C/g, ",") : ""));
+      }
 
-// ---------- The model (public/edge.js) ----------
-// A pick's advantage is how much the edge moves if you take that hero; a ban's is how much it would move toward
-// the enemy if they took it.
-let M = null;
-const tierId = id => M.tierId(id, draft.map), wrOf = id => M.wrOf(id), beats = (a, b) => M.beats(a, b), goodWith = (a, b) => M.goodWith(a, b), comp = t => M.comp(t);
-const edge = (ally, enemy) => M.edge(ally, enemy, draft.map);
-const names = ids => ids.map(id => byId[id].name).join(", ");
-const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1);
+      // ---------- The model (public/edge.js) ----------
+      // A pick's advantage is how much the edge moves if you take that hero; a ban's is how much it would move toward
+      // the enemy if they took it.
+      let M = null;
+      const tierId = (id) => M.tierId(id, draft.map),
+        wrOf = (id) => M.wrOf(id),
+        beats = (a, b) => M.beats(a, b),
+        goodWith = (a, b) => M.goodWith(a, b),
+        comp = (t) => M.comp(t);
+      const edge = (ally, enemy) => M.edge(ally, enemy, draft.map);
+      const names = (ids) => ids.map((id) => byId[id].name).join(", ");
+      const sgn = (v) => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1);
 
-function drawEdge() {
-  const box = document.getElementById("edge");
-  if (!draft.ally.length && !draft.enemy.length) { box.innerHTML = `<div class="row"><span>Add heroes to see which team has the edge.</span></div>`; return; }
-  const { pct, a, e } = edge(draft.ally, draft.enemy), p = M.shown(pct), whys = M.explain(draft.ally, draft.enemy, draft.map).slice(0, 3);
-  const part = (label, k) => { const v = a[k] - e[k]; return Math.abs(v) < 0.05 ? "" : `<span>${label} <i style="color:var(--${v > 0 ? "good" : "bad"})">${sgn(v)}</i></span>`; };
-  box.innerHTML = `<div class="row"><span class="you">Your team <b>${p}%</b></span><span class="them"><b>${100 - p}%</b> Enemy</span></div>
+      function drawEdge() {
+        const box = document.getElementById("edge");
+        if (!draft.ally.length && !draft.enemy.length) {
+          box.innerHTML = `<div class="row"><span>Add heroes to see which team has the edge.</span></div>`;
+          return;
+        }
+        const { pct, a, e } = edge(draft.ally, draft.enemy),
+          p = M.shown(pct),
+          whys = M.explain(draft.ally, draft.enemy, draft.map).slice(0, 3);
+        const part = (label, k) => {
+          const v = a[k] - e[k];
+          return Math.abs(v) < 0.05
+            ? ""
+            : `<span>${label} <i style="color:var(--${v > 0 ? "good" : "bad"})">${sgn(v)}</i></span>`;
+        };
+        box.innerHTML = `<div class="row"><span class="you">Your team <b>${p}%</b></span><span class="them"><b>${100 - p}%</b> Enemy</span></div>
     <div class="bar"><span style="--w:${p}%"></span></div>
     <div class="parts">${[part("Tiers", "tiers"), part("Win rates", "wr"), part("Counters", "counters"), part("Synergy", "synergy"), part("Combos", "combo"), part("Team comp", "comp")].join("")}${whys.length ? `<span class="hint">${matchMedia("(hover: hover)").matches ? "Hover" : "Tap"} for why</span>` : ""}</div>
-    ${whys.length ? `<div class="whys">${whys.map(w => `<span style="--c:var(--${w.v > 0 ? "good" : "bad"})"${w.combo ? ' class="cmb"' : ""}>${esc(w.text)} <small>${sgn(w.v)}</small></span>`).join("")}</div>` : ""}`;
-}
-document.getElementById("edge").addEventListener("click", e => e.currentTarget.classList.toggle("open"));
+    ${whys.length ? `<div class="whys">${whys.map((w) => `<span style="--c:var(--${w.v > 0 ? "good" : "bad"})"${w.combo ? ' class="cmb"' : ""}>${esc(w.text)} <small>${sgn(w.v)}</small></span>`).join("")}</div>` : ""}`;
+      }
+      document.getElementById("edge").addEventListener("click", (e) => e.currentTarget.classList.toggle("open"));
 
-// Why a hero is suggested: the matchups it brings, and the team comp hole it fills
-function reasons(h, team, opp, own) {
-  const why = [];
-  const strong = opp.filter(e => beats(h, e)), weak = opp.filter(e => beats(e, h)), pals = team.filter(a => goodWith(h, a));
-  // Matchups from style tags. The tag is the other hero's ("Strong vs Dive (Genji, Tracer)")
-  // or this hero's own ("Strong vs Genji (weak to Poke)").
-  const has = (list, x) => (list || []).includes(x);
-  const byTag = (ids, f, theirs, why) => {
-    const g = {}, own = [];
-    ids.forEach(x => { const t = f(x); if (!t) return; if (theirs(x, t)) (g[t] ||= []).push(x); else own.push(`${byId[x].name} (${why} ${tagLabel(TL, t)})`); });
-    return [...Object.entries(g).map(([t, xs]) => `${tagLabel(TL, t)} (${names(xs)})`), ...own];
-  };
-  const c = TL.counters || {}, sy = TL.synergy || {}, k = window.tierKey || (x => x);
-  const strongT = byTag(opp.filter(e => !strong.includes(e)), e => M.beatsByTag(h, e), (e, t) => has(c[k(h)], t), "weak to");
-  const weakT = byTag(opp.filter(e => !weak.includes(e)), e => M.beatsByTag(e, h), (e, t) => has(c[k(e)], t) ? false : true, "good vs");
-  const palsT = byTag(team.filter(a => !pals.includes(a)), a => M.withByTag(h, a), (a, t) => has(sy[k(h)], t), "likes");
-  if (strong.length || strongT.length) why.push([own ? "var(--good)" : "var(--bad)", "Strong vs " + [strong.length ? names(strong) : "", ...strongT].filter(Boolean).join(", ")]);
-  if (weak.length || weakT.length) why.push([own ? "var(--bad)" : "var(--good)", "Weak vs " + [weak.length ? names(weak) : "", ...weakT].filter(Boolean).join(", ")]);
-  // Power combo: this hero and one already picked play as a higher tier together
-  const lift = M.comboLift(h, [...team, ...addIds("ally", h)], draft.map);
-  if (lift) why.unshift(["var(--combo)", `Power combo with ${own ? "" : "their "}${lift.partner === "chogall" ? "Cho'gall" : byId[lift.partner]?.name || lift.partner}${lift.tier > 0 ? ` (plays as ${M.tierName(lift.combo.tier)})` : ""}`, "cmb"]);
-  if (pals.length || palsT.length) why.push(["var(--accent)", "Good with " + [pals.length ? names(pals) : "", ...palsT].filter(Boolean).join(", ")]);
-  const fix = comp([...team, ...addIds("ally", h)]) - comp(team), g = byId[h].grole;
-  if (fix > 0.4) why.push(["var(--muted)", `${own ? "Your" : "Their"} team needs a ${g === "Healer" ? "healer" : g === "Tank" ? "tank" : "ranged hero"}`]);
-  return why;
-}
+      // Why a hero is suggested: the matchups it brings, and the team comp hole it fills
+      function reasons(h, team, opp, own) {
+        const why = [];
+        const strong = opp.filter((e) => beats(h, e)),
+          weak = opp.filter((e) => beats(e, h)),
+          pals = team.filter((a) => goodWith(h, a));
+        // Matchups from style tags. The tag is the other hero's ("Strong vs Dive (Genji, Tracer)")
+        // or this hero's own ("Strong vs Genji (weak to Poke)").
+        const has = (list, x) => (list || []).includes(x);
+        const byTag = (ids, f, theirs, why) => {
+          const g = {},
+            own = [];
+          ids.forEach((x) => {
+            const t = f(x);
+            if (!t) return;
+            if (theirs(x, t)) (g[t] ||= []).push(x);
+            else own.push(`${byId[x].name} (${why} ${tagLabel(TL, t)})`);
+          });
+          return [...Object.entries(g).map(([t, xs]) => `${tagLabel(TL, t)} (${names(xs)})`), ...own];
+        };
+        const c = TL.counters || {},
+          sy = TL.synergy || {},
+          k = window.tierKey || ((x) => x);
+        const strongT = byTag(
+          opp.filter((e) => !strong.includes(e)),
+          (e) => M.beatsByTag(h, e),
+          (e, t) => has(c[k(h)], t),
+          "weak to",
+        );
+        const weakT = byTag(
+          opp.filter((e) => !weak.includes(e)),
+          (e) => M.beatsByTag(e, h),
+          (e, t) => (has(c[k(e)], t) ? false : true),
+          "good vs",
+        );
+        const palsT = byTag(
+          team.filter((a) => !pals.includes(a)),
+          (a) => M.withByTag(h, a),
+          (a, t) => has(sy[k(h)], t),
+          "likes",
+        );
+        if (strong.length || strongT.length)
+          why.push([
+            own ? "var(--good)" : "var(--bad)",
+            "Strong vs " + [strong.length ? names(strong) : "", ...strongT].filter(Boolean).join(", "),
+          ]);
+        if (weak.length || weakT.length)
+          why.push([
+            own ? "var(--bad)" : "var(--good)",
+            "Weak vs " + [weak.length ? names(weak) : "", ...weakT].filter(Boolean).join(", "),
+          ]);
+        // Power combo: this hero and one already picked play as a higher tier together
+        const lift = M.comboLift(h, [...team, ...addIds("ally", h)], draft.map);
+        if (lift)
+          why.unshift([
+            "var(--combo)",
+            `Power combo with ${own ? "" : "their "}${lift.partner === "chogall" ? "Cho'gall" : byId[lift.partner]?.name || lift.partner}${lift.tier > 0 ? ` (plays as ${M.tierName(lift.combo.tier)})` : ""}`,
+            "cmb",
+          ]);
+        if (pals.length || palsT.length)
+          why.push([
+            "var(--accent)",
+            "Good with " + [pals.length ? names(pals) : "", ...palsT].filter(Boolean).join(", "),
+          ]);
+        const fix = comp([...team, ...addIds("ally", h)]) - comp(team),
+          g = byId[h].grole;
+        if (fix > 0.4)
+          why.push([
+            "var(--muted)",
+            `${own ? "Your" : "Their"} team needs a ${g === "Healer" ? "healer" : g === "Tank" ? "tank" : "ranged hero"}`,
+          ]);
+        return why;
+      }
 
-function drawPicks() {
-  const taken = allTaken(), ban = kind === "ban";
-  const full = ban ? draft.aban.length >= 3 : draft.ally.length >= 5;
-  const now = edge(draft.ally, draft.enemy).pct;
-  // Cho'gall needs two open slots on the team that would pick it
-  const list = HEROES.filter(h => h.id !== "gall" && !taken.has(h.id) && (role === "All" || h.grole === role) && roomFor(ban ? "enemy" : "ally", h.id)).map(h => {
-    // pick: how much your edge goes up with this hero; ban: how much it would go down if the enemy took it
-    const add = addIds("ally", h.id), team = ban ? [...draft.enemy, ...add] : [...draft.ally, ...add];
-    const after = ban ? 100 - edge(draft.ally, team).pct : edge(team, draft.enemy).pct;
-    return { id: h.id, adv: after, after: M.shown(after), t: tierId(h.id), wr: wrOf(h.id), lift: M.comboLift(h.id, team, draft.map), why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true) };
-  }).sort((x, y) => y.adv - x.adv);
-  const top = list.slice(0, ban ? 6 : 8);
-  document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
-  document.getElementById("note").textContent = ban
-    ? `The heroes that would help the enemy most against your team, with the enemy's edge if they picked one (now ${100 - Math.round(now)}%).`
-    : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
-  const done = full ? (ban ? "Your 3 bans are in." : "Your team is full.") : ban && draft.enemy.length >= 5 ? "The enemy team is full, so there's nothing left to ban." : "";
-  document.getElementById("picks").innerHTML = done ? `<div class="empty">${done}</div>` : top.length ? top.map(p => {
-    const t = TL.tiers.find(x => x.id === p.t), h = byId[p.id];
-    return `<div class="pick" role="button" tabindex="0" data-add="${p.id}" aria-label="${ban ? "Ban" : "Pick"} ${esc(unitName(p.id))}"><img src="${unitImg(p.id)}" alt="">
+      function drawPicks() {
+        const taken = allTaken(),
+          ban = kind === "ban";
+        const full = ban ? draft.aban.length >= 3 : draft.ally.length >= 5;
+        const now = edge(draft.ally, draft.enemy).pct;
+        // Cho'gall needs two open slots on the team that would pick it
+        const list = HEROES.filter(
+          (h) =>
+            h.id !== "gall" &&
+            !taken.has(h.id) &&
+            (role === "All" || h.grole === role) &&
+            roomFor(ban ? "enemy" : "ally", h.id),
+        )
+          .map((h) => {
+            // pick: how much your edge goes up with this hero; ban: how much it would go down if the enemy took it
+            const add = addIds("ally", h.id),
+              team = ban ? [...draft.enemy, ...add] : [...draft.ally, ...add];
+            const after = ban ? 100 - edge(draft.ally, team).pct : edge(team, draft.enemy).pct;
+            return {
+              id: h.id,
+              adv: after,
+              after: M.shown(after),
+              t: tierId(h.id),
+              wr: wrOf(h.id),
+              lift: M.comboLift(h.id, team, draft.map),
+              why: ban ? reasons(h.id, draft.enemy, draft.ally, false) : reasons(h.id, draft.ally, draft.enemy, true),
+            };
+          })
+          .sort((x, y) => y.adv - x.adv);
+        const top = list.slice(0, ban ? 6 : 8);
+        document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
+        document.getElementById("note").textContent = ban
+          ? `The heroes that would help the enemy most against your team, with the enemy's edge if they picked one (now ${100 - Math.round(now)}%).`
+          : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
+        const done = full
+          ? ban
+            ? "Your 3 bans are in."
+            : "Your team is full."
+          : ban && draft.enemy.length >= 5
+            ? "The enemy team is full, so there's nothing left to ban."
+            : "";
+        document.getElementById("picks").innerHTML = done
+          ? `<div class="empty">${done}</div>`
+          : top.length
+            ? top
+                .map((p) => {
+                  const t = TL.tiers.find((x) => x.id === p.t),
+                    h = byId[p.id];
+                  return `<div class="pick" role="button" tabindex="0" data-add="${p.id}" aria-label="${ban ? "Ban" : "Pick"} ${esc(unitName(p.id))}"><img src="${unitImg(p.id)}" alt="">
       <span class="top"><b>${esc(unitName(p.id))}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.lift?.tier > 0 ? ` <i class="up">→ ${esc(M.tierName(p.lift.combo.tier))}</i>` : ""}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}</span></span>
       <span class="why">${p.why.length ? p.why.map(([c, w, cls]) => `<span style="--c:${c}"${cls ? ` class="${cls}"` : ""}>${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small><span class="act">${ban ? "Click to ban" : "Click to pick"}</span></span><a class="bl" href="/builds/${p.id}">Builds ›</a></div>`;
-  }).join("") : '<div class="empty">No heroes left for this role.</div>';
-  document.querySelectorAll(".why .ri").forEach(s => { s.style.width = s.style.height = "12px"; s.style.verticalAlign = "-2px"; });
-}
+                })
+                .join("")
+            : '<div class="empty">No heroes left for this role.</div>';
+        document.querySelectorAll(".why .ri").forEach((s) => {
+          s.style.width = s.style.height = "12px";
+          s.style.verticalAlign = "-2px";
+        });
+      }
 
-function drawSlots() {
-  const slot = (side, i) => {
-    // A pick shows Cho and Gall in their own slots (two players); a ban shows Cho'gall
-    const id = draft[side][i], nm = id && (isPick(side) ? byId[id].name : unitName(id)), pic = id && (isPick(side) ? img(id) : unitImg(id));
-    return id ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(nm)}" aria-label="Remove ${esc(nm)}"><img src="${pic}" alt=""><span class="nm">${esc(nm)}</span></button>`
-      : `<button class="slot${side === target && i === draft[side].length ? " next" : ""}" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
-  };
-  for (const k in SIZE) document.getElementById(k).innerHTML = [...Array(SIZE[k]).keys()].map(i => slot(k, i)).join("");
-}
-const LABEL = { enemy: "Add to the enemy team", ally: "Add to your team", eban: "Enemy ban", aban: "Your team's ban" };
-const ROWS = [["enemy", "Enemy", "bad"], ["eban", "Enemy bans", "bad"], ["ally", "Your team", "good"], ["aban", "Your bans", "good"]];
-let kind = "pick";
-document.getElementById("kind").addEventListener("click", e => {
-  const b = e.target.closest("[data-kind]");
-  if (!b) return;
-  kind = b.dataset.kind;
-  document.querySelectorAll("#kind .tab").forEach(x => x.setAttribute("aria-pressed", x === b));
-  drawPicks();
-});
+      function drawSlots() {
+        const slot = (side, i) => {
+          // A pick shows Cho and Gall in their own slots (two players); a ban shows Cho'gall
+          const id = draft[side][i],
+            nm = id && (isPick(side) ? byId[id].name : unitName(id)),
+            pic = id && (isPick(side) ? img(id) : unitImg(id));
+          return id
+            ? `<button class="slot full" data-side="${side}" data-i="${i}" title="${esc(nm)}" aria-label="Remove ${esc(nm)}"><img src="${pic}" alt=""><span class="nm">${esc(nm)}</span></button>`
+            : `<button class="slot${side === target && i === draft[side].length ? " next" : ""}" data-side="${side}" data-i="${i}" aria-label="${LABEL[side]}">+</button>`;
+        };
+        for (const k in SIZE)
+          document.getElementById(k).innerHTML = [...Array(SIZE[k]).keys()].map((i) => slot(k, i)).join("");
+      }
+      const LABEL = {
+        enemy: "Add to the enemy team",
+        ally: "Add to your team",
+        eban: "Enemy ban",
+        aban: "Your team's ban",
+      };
+      const ROWS = [
+        ["enemy", "Enemy", "bad"],
+        ["eban", "Enemy bans", "bad"],
+        ["ally", "Your team", "good"],
+        ["aban", "Your bans", "good"],
+      ];
+      let kind = "pick";
+      document.getElementById("kind").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-kind]");
+        if (!b) return;
+        kind = b.dataset.kind;
+        document.querySelectorAll("#kind .tab").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        drawPicks();
+      });
 
-function draw() { drawSlots(); drawEdge(); drawPicks(); drawAddTo(); drawGrid(); save(); }
+      function draw() {
+        drawSlots();
+        drawEdge();
+        drawPicks();
+        drawAddTo();
+        drawGrid();
+        save();
+      }
 
-// Hero picker: always open under the draft. A click adds the hero to the row picked in "Add to"
-// (tapping an empty slot picks its row too). When that row fills up, it moves on to its partner row.
-const qbox = document.getElementById("q"), undoBtn = document.getElementById("undo"), toast = document.getElementById("toast");
-let target = "enemy", undos = [], toastT = 0;
-function drawAddTo() {
-  document.getElementById("addto").innerHTML = ROWS.map(([k, label, c]) =>
-    `<button class="tab" data-to="${k}" style="--c:var(--${c})" aria-pressed="${k === target}">${label} <small>${draft[k].length}/${SIZE[k]}</small></button>`).join("");
-}
-function drawGrid() {
-  const taken = allTaken(), k = norm(qbox.value);
-  // One Cho'gall tile (found by "cho", "gall" or "chogall"); it needs two open slots for a pick
-  const list = HEROES.filter(h => h.id !== "gall" && (!k || norm(unitName(h.id)).includes(k) || (h.id === "chogall" && "gall".includes(k))));
-  let first = true;
-  document.getElementById("grid").innerHTML = list.map(h => { const off = taken.has(h.id) || !roomFor(target, h.id), nm = unitName(h.id);
-    const tip = taken.has(h.id) ? `${nm} (taken)` : off ? (draft[target].length >= SIZE[target] ? `${nm} (row is full)` : "Cho'gall needs two open slots") : nm;
-    const cls = k && !off && first ? (first = false, " first") : "";
-    return `<button class="hc${cls}" data-pick="${h.id}"${off ? " disabled" : ""} aria-label="${esc(tip)}"><img src="${unitImg(h.id)}" alt="" loading="lazy"><span class="tip">${esc(tip)}</span></button>`; }).join("") || '<div class="empty">No hero by that name.</div>';
-}
-function add(side, id) {
-  if (allTaken().has(id) || !roomFor(side, id)) return false;
-  undos.push(JSON.stringify(draft));
-  draft[side].push(...addIds(side, id));
-  // A full row hands over to its partner row (enemy <-> your team, enemy bans <-> your bans), then any row with room
-  const NEXT = { enemy: "ally", ally: "enemy", eban: "aban", aban: "eban" };
-  if (draft[side].length >= SIZE[side] && side === target) target = [NEXT[side], ...ROWS.map(r => r[0])].find(k => draft[k].length < SIZE[k]) || target;
-  undoBtn.disabled = false;
-  const where = { enemy: "the enemy team", ally: "your team", eban: "the enemy bans", aban: "your bans" }[side];
-  toast.innerHTML = `<span>${esc(unitName(id))} added to ${where}</span><button type="button" data-undo>Undo</button>`;
-  toast.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove("on"), 3500);
-  return true;
-}
-function undo() {
-  if (!undos.length) return;
-  Object.assign(draft, JSON.parse(undos.pop()));
-  undoBtn.disabled = !undos.length;
-  toast.classList.remove("on");
-  draw();
-}
-undoBtn.addEventListener("click", undo);
-toast.addEventListener("click", e => { if (e.target.closest("[data-undo]")) undo(); });
-document.getElementById("addto").addEventListener("click", e => {
-  const b = e.target.closest("[data-to]");
-  if (!b) return;
-  target = b.dataset.to;
-  draw();
-});
-qbox.addEventListener("input", drawGrid);
-qbox.addEventListener("keydown", e => {
-  if (e.key === "Enter") document.querySelector(".hc.first")?.click();   // only with something typed
-  if (e.key === "Escape") { qbox.value = ""; drawGrid(); qbox.blur(); }
-});
-document.getElementById("grid").addEventListener("click", e => {
-  const b = e.target.closest("[data-pick]");
-  if (!b || b.disabled) return;
-  if (add(target, b.dataset.pick)) { qbox.value = ""; draw(); if (document.activeElement !== qbox && matchMedia("(hover: hover)").matches) qbox.focus({ preventScroll: true }); }
-});
-// A suggested hero: Best picks adds it to your team, Best bans to your bans. "Builds ›" still opens its builds.
-const fromSuggestion = card => {
-  const id = card.dataset.add;
-  if (add(kind === "ban" ? "aban" : "ally", id)) draw();
-};
-document.getElementById("picks").addEventListener("click", e => {
-  if (e.target.closest("a")) return;
-  const c = e.target.closest("[data-add]");
-  if (c) fromSuggestion(c);
-});
-document.getElementById("picks").addEventListener("keydown", e => {
-  const c = e.target.closest("[data-add]");
-  if (c && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); fromSuggestion(c); }
-});
-document.addEventListener("click", e => {
-  const s = e.target.closest(".slot[data-side]");
-  if (!s) return;
-  const side = s.dataset.side;
-  // Removing Cho or Gall removes both. An empty slot makes its row the one the picker adds to.
-  if (s.classList.contains("full")) { undos.push(JSON.stringify(draft)); undoBtn.disabled = false; const id = draft[side][+s.dataset.i]; draft[side] = draft[side].filter(x => x !== id && x !== PAIR[id]); }
-  else target = side;
-  draw();
-});
-// Start typing anywhere to search (desktop); Ctrl+Z undoes the last change (in the search box only while it's empty)
-document.addEventListener("keydown", e => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && (document.activeElement !== qbox || !qbox.value)) { e.preventDefault(); undo(); return; }
-  if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || !/\p{L}/u.test(e.key)) return;
-  const el = document.activeElement;
-  if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-  qbox.focus({ preventScroll: true });
-});
-document.getElementById("clear").addEventListener("click", () => { undos.push(JSON.stringify(draft)); undoBtn.disabled = false; for (const k in SIZE) draft[k] = []; target = "enemy"; draw(); });
+      // Hero picker: always open under the draft. A click adds the hero to the row picked in "Add to"
+      // (tapping an empty slot picks its row too). When that row fills up, it moves on to its partner row.
+      const qbox = document.getElementById("q"),
+        undoBtn = document.getElementById("undo"),
+        toast = document.getElementById("toast");
+      let target = "enemy",
+        undos = [],
+        toastT = 0;
+      function drawAddTo() {
+        document.getElementById("addto").innerHTML = ROWS.map(
+          ([k, label, c]) =>
+            `<button class="tab" data-to="${k}" style="--c:var(--${c})" aria-pressed="${k === target}">${label} <small>${draft[k].length}/${SIZE[k]}</small></button>`,
+        ).join("");
+      }
+      function drawGrid() {
+        const taken = allTaken(),
+          k = norm(qbox.value);
+        // One Cho'gall tile (found by "cho", "gall" or "chogall"); it needs two open slots for a pick
+        const list = HEROES.filter(
+          (h) =>
+            h.id !== "gall" && (!k || norm(unitName(h.id)).includes(k) || (h.id === "chogall" && "gall".includes(k))),
+        );
+        let first = true;
+        document.getElementById("grid").innerHTML =
+          list
+            .map((h) => {
+              const off = taken.has(h.id) || !roomFor(target, h.id),
+                nm = unitName(h.id);
+              const tip = taken.has(h.id)
+                ? `${nm} (taken)`
+                : off
+                  ? draft[target].length >= SIZE[target]
+                    ? `${nm} (row is full)`
+                    : "Cho'gall needs two open slots"
+                  : nm;
+              const cls = k && !off && first ? ((first = false), " first") : "";
+              return `<button class="hc${cls}" data-pick="${h.id}"${off ? " disabled" : ""} aria-label="${esc(tip)}"><img src="${unitImg(h.id)}" alt="" loading="lazy"><span class="tip">${esc(tip)}</span></button>`;
+            })
+            .join("") || '<div class="empty">No hero by that name.</div>';
+      }
+      function add(side, id) {
+        if (allTaken().has(id) || !roomFor(side, id)) return false;
+        undos.push(JSON.stringify(draft));
+        draft[side].push(...addIds(side, id));
+        // A full row hands over to its partner row (enemy <-> your team, enemy bans <-> your bans), then any row with room
+        const NEXT = { enemy: "ally", ally: "enemy", eban: "aban", aban: "eban" };
+        if (draft[side].length >= SIZE[side] && side === target)
+          target = [NEXT[side], ...ROWS.map((r) => r[0])].find((k) => draft[k].length < SIZE[k]) || target;
+        undoBtn.disabled = false;
+        const where = { enemy: "the enemy team", ally: "your team", eban: "the enemy bans", aban: "your bans" }[side];
+        toast.innerHTML = `<span>${esc(unitName(id))} added to ${where}</span><button type="button" data-undo>Undo</button>`;
+        toast.classList.add("on");
+        clearTimeout(toastT);
+        toastT = setTimeout(() => toast.classList.remove("on"), 3500);
+        return true;
+      }
+      function undo() {
+        if (!undos.length) return;
+        Object.assign(draft, JSON.parse(undos.pop()));
+        undoBtn.disabled = !undos.length;
+        toast.classList.remove("on");
+        draw();
+      }
+      undoBtn.addEventListener("click", undo);
+      toast.addEventListener("click", (e) => {
+        if (e.target.closest("[data-undo]")) undo();
+      });
+      document.getElementById("addto").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-to]");
+        if (!b) return;
+        target = b.dataset.to;
+        draw();
+      });
+      qbox.addEventListener("input", drawGrid);
+      qbox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.querySelector(".hc.first")?.click(); // only with something typed
+        if (e.key === "Escape") {
+          qbox.value = "";
+          drawGrid();
+          qbox.blur();
+        }
+      });
+      document.getElementById("grid").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-pick]");
+        if (!b || b.disabled) return;
+        if (add(target, b.dataset.pick)) {
+          qbox.value = "";
+          draw();
+          if (document.activeElement !== qbox && matchMedia("(hover: hover)").matches)
+            qbox.focus({ preventScroll: true });
+        }
+      });
+      // A suggested hero: Best picks adds it to your team, Best bans to your bans. "Builds ›" still opens its builds.
+      const fromSuggestion = (card) => {
+        const id = card.dataset.add;
+        if (add(kind === "ban" ? "aban" : "ally", id)) draw();
+      };
+      document.getElementById("picks").addEventListener("click", (e) => {
+        if (e.target.closest("a")) return;
+        const c = e.target.closest("[data-add]");
+        if (c) fromSuggestion(c);
+      });
+      document.getElementById("picks").addEventListener("keydown", (e) => {
+        const c = e.target.closest("[data-add]");
+        if (c && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          fromSuggestion(c);
+        }
+      });
+      document.addEventListener("click", (e) => {
+        const s = e.target.closest(".slot[data-side]");
+        if (!s) return;
+        const side = s.dataset.side;
+        // Removing Cho or Gall removes both. An empty slot makes its row the one the picker adds to.
+        if (s.classList.contains("full")) {
+          undos.push(JSON.stringify(draft));
+          undoBtn.disabled = false;
+          const id = draft[side][+s.dataset.i];
+          draft[side] = draft[side].filter((x) => x !== id && x !== PAIR[id]);
+        } else target = side;
+        draw();
+      });
+      // Start typing anywhere to search (desktop); Ctrl+Z undoes the last change (in the search box only while it's empty)
+      document.addEventListener("keydown", (e) => {
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          e.key.toLowerCase() === "z" &&
+          (document.activeElement !== qbox || !qbox.value)
+        ) {
+          e.preventDefault();
+          undo();
+          return;
+        }
+        if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || !/\p{L}/u.test(e.key)) return;
+        const el = document.activeElement;
+        if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+        qbox.focus({ preventScroll: true });
+      });
+      document.getElementById("clear").addEventListener("click", () => {
+        undos.push(JSON.stringify(draft));
+        undoBtn.disabled = false;
+        for (const k in SIZE) draft[k] = [];
+        target = "enemy";
+        draw();
+      });
 
-if (!MAPS.includes(draft.map)) draft.map = "Overall";
-mapPicker(document.getElementById("map"), { value: draft.map, overall: "Any map", onChange: m => { draft.map = m; draw(); } });
-document.getElementById("roles").innerHTML = ["All", ...ROLES].map(r => `<button class="tab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${r === "All" ? "" : roleIcon(r)}${r === "All" ? "All" : ROLE_SHORT(r)}</button>`).join("");
-document.getElementById("roles").addEventListener("click", e => {
-  const b = e.target.closest("[data-role]");
-  if (!b) return;
-  role = b.dataset.role;
-  document.querySelectorAll("#roles .tab").forEach(x => x.setAttribute("aria-pressed", x === b));
-  drawPicks();
-});
+      if (!MAPS.includes(draft.map)) draft.map = "Overall";
+      mapPicker(document.getElementById("map"), {
+        value: draft.map,
+        overall: "Any map",
+        onChange: (m) => {
+          draft.map = m;
+          draw();
+        },
+      });
+      document.getElementById("roles").innerHTML = ["All", ...ROLES]
+        .map(
+          (r) =>
+            `<button class="tab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${r === "All" ? "" : roleIcon(r)}${r === "All" ? "All" : ROLE_SHORT(r)}</button>`,
+        )
+        .join("");
+      document.getElementById("roles").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-role]");
+        if (!b) return;
+        role = b.dataset.role;
+        document.querySelectorAll("#roles .tab").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        drawPicks();
+      });
 
-Promise.all([fetch("/data/heroes.json").then(r => r.json()), loadTierlist()]).then(([heroes, tl]) => {
-  HEROES = heroes.map(([id, name, r, g]) => ({ id, name, grole: g })).sort((a, b) => a.name.localeCompare(b.name));
-  HEROES.forEach(h => byId[h.id] = h);
-  TL = tl;
-  M = draftModel(TL, HEROES);
-  const seen = new Set();   // drop unknown heroes and any hero listed twice
-  for (const k in SIZE) draft[k] = draft[k].filter(id => byId[id] && !seen.has(id) && seen.add(id));
-  fixPairs();
-  target = ROWS.map(r => r[0]).find(k => draft[k].length < SIZE[k]) || "enemy";
-  draw();
-}).catch(() => { document.getElementById("picks").innerHTML = '<div class="empty">The tier list couldn\'t load. Refresh the page to try again.</div>'; });
-</script>
-</body>
+      Promise.all([fetch("/data/heroes.json").then((r) => r.json()), loadTierlist()])
+        .then(([heroes, tl]) => {
+          HEROES = heroes
+            .map(([id, name, r, g]) => ({ id, name, grole: g }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          HEROES.forEach((h) => (byId[h.id] = h));
+          TL = tl;
+          M = draftModel(TL, HEROES);
+          const seen = new Set(); // drop unknown heroes and any hero listed twice
+          for (const k in SIZE) draft[k] = draft[k].filter((id) => byId[id] && !seen.has(id) && seen.add(id));
+          fixPairs();
+          target = ROWS.map((r) => r[0]).find((k) => draft[k].length < SIZE[k]) || "enemy";
+          draw();
+        })
+        .catch(() => {
+          document.getElementById("picks").innerHTML =
+            '<div class="empty">The tier list couldn\'t load. Refresh the page to try again.</div>';
+        });
+    </script>
+  </body>
 </html>

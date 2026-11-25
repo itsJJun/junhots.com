@@ -31,17 +31,32 @@
   tab.setAttribute("aria-expanded", "false");
 
   const items = [
-    ["/tierlist-maker/", "Tier list", "Rank every hero and share it", '<path d="M4 5h16M4 12h11M4 19h6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>'],
-    ["/builds/?make", "Build", "Pick a hero, make a talent build", '<path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/>'],
+    [
+      "/tierlist-maker/",
+      "Tier list",
+      "Rank every hero and share it",
+      '<path d="M4 5h16M4 12h11M4 19h6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+    ],
+    [
+      "/builds/?make",
+      "Build",
+      "Pick a hero, make a talent build",
+      '<path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/>',
+    ],
   ];
   const menu = document.createElement("div");
   menu.className = "mk-menu";
   menu.hidden = true;
-  menu.innerHTML = items.map(([href, name, sub, ic], i) => `<a href="${href}"${i === here ? ' aria-current="page"' : ""}><span class="mk-ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ic}</svg></span><b>${name}</b><small>${sub}</small></a>`).join("");
+  menu.innerHTML = items
+    .map(
+      ([href, name, sub, ic], i) =>
+        `<a href="${href}"${i === here ? ' aria-current="page"' : ""}><span class="mk-ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ic}</svg></span><b>${name}</b><small>${sub}</small></a>`,
+    )
+    .join("");
   document.body.append(menu);
 
   let shut;
-  const open = on => {
+  const open = (on) => {
     clearTimeout(shut);
     menu.hidden = !on;
     tab.setAttribute("aria-expanded", on);
@@ -52,17 +67,33 @@
   };
   // Mouse: opens on hover, and a click keeps it open. Touch: tap to open or close, tap outside to close.
   let hovering = false;
-  tab.addEventListener("click", e => { e.preventDefault(); open(hovering || menu.hidden); });
+  tab.addEventListener("click", (e) => {
+    e.preventDefault();
+    open(hovering || menu.hidden);
+  });
   if (matchMedia("(hover: hover)").matches) {
-    tab.addEventListener("mouseenter", () => { hovering = true; });
-    tab.addEventListener("mouseleave", () => { hovering = false; });
+    tab.addEventListener("mouseenter", () => {
+      hovering = true;
+    });
+    tab.addEventListener("mouseleave", () => {
+      hovering = false;
+    });
     for (const el of [tab, menu]) {
       el.addEventListener("mouseenter", () => open(true));
-      el.addEventListener("mouseleave", () => { shut = setTimeout(() => open(false), 180); });
+      el.addEventListener("mouseleave", () => {
+        shut = setTimeout(() => open(false), 180);
+      });
     }
   }
-  document.addEventListener("click", e => { if (!menu.hidden && !tab.contains(e.target) && !menu.contains(e.target)) open(false); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { open(false); tab.focus(); } });
+  document.addEventListener("click", (e) => {
+    if (!menu.hidden && !tab.contains(e.target) && !menu.contains(e.target)) open(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu.hidden) {
+      open(false);
+      tab.focus();
+    }
+  });
   addEventListener("scroll", () => open(false), { passive: true });
   addEventListener("resize", () => open(false));
 })();
@@ -114,7 +145,8 @@
   document.head.append(css);
 
   const mac = /Mac|iPhone|iPad/.test(navigator.platform);
-  const glass = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  const glass =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   const btn = document.createElement("button");
   btn.className = "qk";
   btn.type = "button";
@@ -123,69 +155,150 @@
   live.before(btn);
 
   const PAGES = [
-    ["Home", "/", "Start page"], ["Tier list", "/tierlist/", "Jun's ranked tier list"], ["Builds", "/builds/", "Talent builds for every hero"], ["Draft helper", "/draft/", "Best picks against the enemy team"], ["Match history", "/games/", "My recent ranked games"], ["Stream schedule", "/schedule/", "When I'm live, in your time zone"],
-    ["Make a tier list", "/tierlist-maker/", "Rank every hero and share it"], ["Make a build", "/builds/?make", "Pick a hero, make a talent build"], ["Overlay", "/overlay/", "The stream overlay"],
+    ["Home", "/", "Start page"],
+    ["Tier list", "/tierlist/", "Jun's ranked tier list"],
+    ["Builds", "/builds/", "Talent builds for every hero"],
+    ["Draft helper", "/draft/", "Best picks against the enemy team"],
+    ["Match history", "/games/", "My recent ranked games"],
+    ["Stream schedule", "/schedule/", "When I'm live, in your time zone"],
+    ["Make a tier list", "/tierlist-maker/", "Rank every hero and share it"],
+    ["Make a build", "/builds/?make", "Pick a hero, make a talent build"],
+    ["Overlay", "/overlay/", "The stream overlay"],
   ];
-  const pageIc = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
-  let heroes = null, box = null, rows = [], at = 0;
-  const load = () => heroes ? Promise.resolve(heroes) : fetch("/data/heroes.json").then(r => r.json()).then(list => heroes = list.map(([id, name, , grole]) => ({ id, name, grole, key: norm(name), words: name.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean) })).sort((a, b) => a.name.localeCompare(b.name))).catch(() => heroes = []);
+  const pageIc =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const esc = (s) =>
+    String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const norm = (s) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[^a-z0-9]/g, "");
+  let heroes = null,
+    box = null,
+    rows = [],
+    at = 0;
+  const load = () =>
+    heroes
+      ? Promise.resolve(heroes)
+      : fetch("/data/heroes.json")
+          .then((r) => r.json())
+          .then(
+            (list) =>
+              (heroes = list
+                .map(([id, name, , grole]) => ({
+                  id,
+                  name,
+                  grole,
+                  key: norm(name),
+                  words: name
+                    .toLowerCase()
+                    .split(/[^a-z0-9]+/)
+                    .filter(Boolean),
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name))),
+          )
+          .catch(() => (heroes = []));
 
   // Hero names take turns in the button ("Search Abathur", "Search Valla"...), in a random order, every few seconds.
   // Home already cycles names in its headline, so there the button just says "Search heroes".
   const home = location.pathname === "/" || location.pathname === "/index.html";
   if (home) btn.querySelector("i").textContent = "heroes";
-  else if (!matchMedia("(prefers-reduced-motion: reduce)").matches) load().then(list => {
-    const names = list.map(h => h.name);
-    for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
-    const el = btn.querySelector("i");
-    if (!el || !names.length) return;
-    let k = 0;
-    el.textContent = names[0];
-    setInterval(() => {
-      if (document.hidden || box) return;
-      el.classList.add("out");
-      setTimeout(() => {
-        el.textContent = names[k = (k + 1) % names.length];
-        el.classList.replace("out", "in");
-        el.offsetWidth;   // place it below before it rises
-        el.classList.remove("in");
-      }, 250);
-    }, 2600);
-  });
+  else if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    load().then((list) => {
+      const names = list.map((h) => h.name);
+      for (let i = names.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [names[i], names[j]] = [names[j], names[i]];
+      }
+      const el = btn.querySelector("i");
+      if (!el || !names.length) return;
+      let k = 0;
+      el.textContent = names[0];
+      setInterval(() => {
+        if (document.hidden || box) return;
+        el.classList.add("out");
+        setTimeout(() => {
+          el.textContent = names[(k = (k + 1) % names.length)];
+          el.classList.replace("out", "in");
+          el.offsetWidth; // place it below before it rises
+          el.classList.remove("in");
+        }, 250);
+      }, 2600);
+    });
 
   // Style tags from the tier list ("dive" lists the dive heroes). Loaded the first time the box opens.
   let TL = null;
-  const loadTags = () => TL || !window.loadTierlist ? Promise.resolve() : loadTierlist().then(t => { TL = t; }).catch(() => {});
+  const loadTags = () =>
+    TL || !window.loadTierlist
+      ? Promise.resolve()
+      : loadTierlist()
+          .then((t) => {
+            TL = t;
+          })
+          .catch(() => {});
   function find(q) {
     const k = norm(q);
-    const hs = !k ? [] : (heroes || []).map(h => [h, h.key.startsWith(k) || h.id.startsWith(k) ? 0 : h.words.some(w => w.startsWith(k)) ? 1 : h.key.includes(k) ? 2 : 9]).filter(x => x[1] < 9).sort((a, b) => a[1] - b[1]).map(x => x[0]).slice(0, 8);
-    const tag = k.length >= 3 && TL ? Object.keys(TL.tagNames || {}).find(t => norm(TL.tagNames[t]).startsWith(k)) : null;
-    const ts = tag ? (heroes || []).filter(h => !hs.includes(h) && h.id !== "gall" && tagsOf(TL, h.id).includes(tag)) : [];
-    const ps = PAGES.filter(p => !k || norm(p[0]).includes(k) || norm(p[2]).includes(k));
+    const hs = !k
+      ? []
+      : (heroes || [])
+          .map((h) => [
+            h,
+            h.key.startsWith(k) || h.id.startsWith(k)
+              ? 0
+              : h.words.some((w) => w.startsWith(k))
+                ? 1
+                : h.key.includes(k)
+                  ? 2
+                  : 9,
+          ])
+          .filter((x) => x[1] < 9)
+          .sort((a, b) => a[1] - b[1])
+          .map((x) => x[0])
+          .slice(0, 8);
+    const tag =
+      k.length >= 3 && TL ? Object.keys(TL.tagNames || {}).find((t) => norm(TL.tagNames[t]).startsWith(k)) : null;
+    const ts = tag
+      ? (heroes || []).filter((h) => !hs.includes(h) && h.id !== "gall" && tagsOf(TL, h.id).includes(tag))
+      : [];
+    const ps = PAGES.filter((p) => !k || norm(p[0]).includes(k) || norm(p[2]).includes(k));
     return { hs, tag, ts, ps };
   }
   function draw() {
-    const q = box.querySelector("input").value, { hs: named, tag, ts, ps } = find(q), hs = [...named, ...ts];
-    rows = [...hs.map(h => ["/builds/#" + h.id, h]), ...ps.map(p => [p[1], p])];
+    const q = box.querySelector("input").value,
+      { hs: named, tag, ts, ps } = find(q),
+      hs = [...named, ...ts];
+    rows = [...hs.map((h) => ["/builds/#" + h.id, h]), ...ps.map((p) => [p[1], p])];
     at = Math.min(at, Math.max(0, rows.length - 1));
     const list = box.querySelector(".qk-list");
-    const heroRow = (h, i) => `<div class="qk-row" role="option" data-i="${i}" data-href="/builds/#${h.id}"><img src="/img/heroes/${h.id}.webp" alt=""><span><b>${esc(h.name)}</b><br><small>${window.roleIcon ? roleIcon(h.grole) : ""}${esc(h.grole)}</small></span><span class="qk-go"><a href="/builds/#${h.id}" tabindex="-1">Builds</a><a href="/tierlist/#${h.id}" tabindex="-1">Tier list</a></span></div>`;
-    list.innerHTML = (named.length ? `<div class="qk-sec">Heroes</div>` + named.map(heroRow).join("") : "")
-      + (ts.length ? `<div class="qk-sec">${tagIcon(TL, tag, "qk-ti")} ${esc(TL.tagNames[tag])} heroes</div>` + ts.map((h, j) => heroRow(h, named.length + j)).join("") : "")
-      + (ps.length ? `<div class="qk-sec">Pages</div>` + ps.map((p, j) => `<div class="qk-row" role="option" data-i="${hs.length + j}" data-href="${p[1]}"><span class="qk-ic">${pageIc}</span><span><b>${esc(p[0])}</b><br><small>${esc(p[2])}</small></span></div>`).join("") : "")
-      || `<div class="qk-none">No hero or page called “${esc(q)}”</div>`;
+    const heroRow = (h, i) =>
+      `<div class="qk-row" role="option" data-i="${i}" data-href="/builds/#${h.id}"><img src="/img/heroes/${h.id}.webp" alt=""><span><b>${esc(h.name)}</b><br><small>${window.roleIcon ? roleIcon(h.grole) : ""}${esc(h.grole)}</small></span><span class="qk-go"><a href="/builds/#${h.id}" tabindex="-1">Builds</a><a href="/tierlist/#${h.id}" tabindex="-1">Tier list</a></span></div>`;
+    list.innerHTML =
+      (named.length ? `<div class="qk-sec">Heroes</div>` + named.map(heroRow).join("") : "") +
+        (ts.length
+          ? `<div class="qk-sec">${tagIcon(TL, tag, "qk-ti")} ${esc(TL.tagNames[tag])} heroes</div>` +
+            ts.map((h, j) => heroRow(h, named.length + j)).join("")
+          : "") +
+        (ps.length
+          ? `<div class="qk-sec">Pages</div>` +
+            ps
+              .map(
+                (p, j) =>
+                  `<div class="qk-row" role="option" data-i="${hs.length + j}" data-href="${p[1]}"><span class="qk-ic">${pageIc}</span><span><b>${esc(p[0])}</b><br><small>${esc(p[2])}</small></span></div>`,
+              )
+              .join("")
+          : "") || `<div class="qk-none">No hero or page called “${esc(q)}”</div>`;
     mark();
   }
   function mark() {
-    box.querySelectorAll(".qk-row").forEach(r => r.setAttribute("aria-selected", +r.dataset.i === at));
+    box.querySelectorAll(".qk-row").forEach((r) => r.setAttribute("aria-selected", +r.dataset.i === at));
     box.querySelector(`.qk-row[data-i="${at}"]`)?.scrollIntoView({ block: "nearest" });
   }
   function go(href) {
     close();
     const u = new URL(href, location.href);
-    if (u.pathname === location.pathname && u.search === location.search && u.hash) location.hash = u.hash;   // same page: just switch hero
+    if (u.pathname === location.pathname && u.search === location.search && u.hash)
+      location.hash = u.hash; // same page: just switch hero
     else location.href = href;
   }
   function open() {
@@ -199,24 +312,57 @@
     at = 0;
     draw();
     input.focus();
-    input.addEventListener("input", () => { at = 0; draw(); });
-    input.addEventListener("keydown", e => {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); at = (at + (e.key === "ArrowDown" ? 1 : -1) + rows.length) % Math.max(1, rows.length); mark(); }
-      else if (e.key === "Enter" && rows[at]) { e.preventDefault(); const [href, item] = rows[at]; go(e.shiftKey && item.id ? "/tierlist/#" + item.id : href); }
+    input.addEventListener("input", () => {
+      at = 0;
+      draw();
     });
-    box.addEventListener("mousemove", e => { const r = e.target.closest(".qk-row"); if (r && +r.dataset.i !== at) { at = +r.dataset.i; mark(); } });
-    box.addEventListener("click", e => {
-      const a = e.target.closest(".qk-go a"), r = e.target.closest(".qk-row");
-      if (a || r) { e.preventDefault(); go(a ? a.getAttribute("href") : r.dataset.href); return; }
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        at = (at + (e.key === "ArrowDown" ? 1 : -1) + rows.length) % Math.max(1, rows.length);
+        mark();
+      } else if (e.key === "Enter" && rows[at]) {
+        e.preventDefault();
+        const [href, item] = rows[at];
+        go(e.shiftKey && item.id ? "/tierlist/#" + item.id : href);
+      }
+    });
+    box.addEventListener("mousemove", (e) => {
+      const r = e.target.closest(".qk-row");
+      if (r && +r.dataset.i !== at) {
+        at = +r.dataset.i;
+        mark();
+      }
+    });
+    box.addEventListener("click", (e) => {
+      const a = e.target.closest(".qk-go a"),
+        r = e.target.closest(".qk-row");
+      if (a || r) {
+        e.preventDefault();
+        go(a ? a.getAttribute("href") : r.dataset.href);
+        return;
+      }
       if (!e.target.closest(".qk-panel")) close();
     });
   }
-  function close() { box?.remove(); box = null; }
+  function close() {
+    box?.remove();
+    box = null;
+  }
   btn.addEventListener("click", open);
-  document.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); box ? close() : open(); }
-    else if (e.key === "/" && !box && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) && !document.activeElement?.isContentEditable) { e.preventDefault(); open(); }
-    else if (e.key === "Escape" && box) close();
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      box ? close() : open();
+    } else if (
+      e.key === "/" &&
+      !box &&
+      !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) &&
+      !document.activeElement?.isContentEditable
+    ) {
+      e.preventDefault();
+      open();
+    } else if (e.key === "Escape" && box) close();
   });
 })();
 
@@ -228,7 +374,7 @@
   const ind = document.querySelector(".tabs .tab-ind");
   if (!ind) return;
   const tabs = ind.parentNode;
-  const place = a => {
+  const place = (a) => {
     a = a || tabs.querySelector('a[aria-current="page"]');
     ind.hidden = !a;
     if (a) ind.style.cssText = `left:${a.offsetLeft}px;width:${a.offsetWidth}px`;
@@ -236,14 +382,14 @@
   place();
   document.fonts?.ready.then(() => place());
   addEventListener("resize", () => place());
-  const go = a => {
+  const go = (a) => {
     if (!a || a.getAttribute("aria-current") === "page") return;
     ind.classList.add("moving");
     place(a);
     tabs.querySelector('a[aria-current="page"]')?.classList.add("leaving");
     a.classList.add("going");
   };
-  document.addEventListener("click", e => {
+  document.addEventListener("click", (e) => {
     if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest("a[href]");
     if (!a || a.target === "_blank" || a.origin !== location.origin) return;
@@ -251,7 +397,13 @@
     else if (a.closest(".mk-menu")) go(tabs.querySelector('a[aria-haspopup="true"]'));
   });
   // Back/forward from the cache: put the line back where it belongs
-  addEventListener("pageshow", e => { if (e.persisted) { ind.classList.remove("moving"); tabs.querySelectorAll(".going, .leaving").forEach(x => x.classList.remove("going", "leaving")); place(); } });
+  addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      ind.classList.remove("moving");
+      tabs.querySelectorAll(".going, .leaving").forEach((x) => x.classList.remove("going", "leaving"));
+      place();
+    }
+  });
 })();
 
 // Get the next page ready while the mouse is still on its link (Chrome and Edge: "prerender"), so clicking
@@ -260,10 +412,20 @@
   if (!HTMLScriptElement.supports?.("speculationrules")) return;
   const s = document.createElement("script");
   s.type = "speculationrules";
-  s.textContent = JSON.stringify({ prerender: [{
-    where: { and: [{ href_matches: "/*" }, { not: { href_matches: "/api/*" } }, { not: { selector_matches: "[target=_blank]" } }] },
-    eagerness: "moderate",
-  }] });
+  s.textContent = JSON.stringify({
+    prerender: [
+      {
+        where: {
+          and: [
+            { href_matches: "/*" },
+            { not: { href_matches: "/api/*" } },
+            { not: { selector_matches: "[target=_blank]" } },
+          ],
+        },
+        eagerness: "moderate",
+      },
+    ],
+  });
   document.head.append(s);
 })();
 
@@ -326,22 +488,58 @@
 @media (prefers-reduced-motion: reduce) { .fb-panel, .fb-done .fb-ok svg { animation: none; stroke-dashoffset: 0; } }`;
   document.head.append(css);
 
-  const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ic = (d) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const BUBBLE = ic('<path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4 20.5l1.4-4.6A7.5 7.5 0 1 1 20 12.5Z"/>');
   const TYPES = [
-    ["bug", "Bug", ic('<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4.5 8.5 7 10M19.5 8.5 17 10M4.5 18.5 7 17M19.5 18.5 17 17"/>'), "What happened, and what did you expect?"],
-    ["idea", "Idea", ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>'), "What would make the site better for you?"],
-    ["info", "Wrong info", ic('<path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17h.01"/>'), "Which hero, build or tier looks wrong, and why?"],
+    [
+      "bug",
+      "Bug",
+      ic(
+        '<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4.5 8.5 7 10M19.5 8.5 17 10M4.5 18.5 7 17M19.5 18.5 17 17"/>',
+      ),
+      "What happened, and what did you expect?",
+    ],
+    [
+      "idea",
+      "Idea",
+      ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>'),
+      "What would make the site better for you?",
+    ],
+    [
+      "info",
+      "Wrong info",
+      ic('<path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17h.01"/>'),
+      "Which hero, build or tier looks wrong, and why?",
+    ],
     ["other", "Other", BUBBLE, "Anything else you want Jun to know."],
   ];
   const where = () => {
-    const p = location.pathname, hero = p.match(/^\/builds\/([a-z0-9]+)/)?.[1] || location.hash.slice(1).split("?")[0];
-    const name = { "/": "Home", "/tierlist/": "Tier list", "/tierlist-maker/": "Tier list maker", "/draft/": "Draft helper", "/games/": "Match history", "/patch-notes/": "Patch notes", "/overlay/": "Overlay", "/updates/": "Updates", "/schedule/": "Schedule" }[p];
+    const p = location.pathname,
+      hero = p.match(/^\/builds\/([a-z0-9]+)/)?.[1] || location.hash.slice(1).split("?")[0];
+    const name = {
+      "/": "Home",
+      "/tierlist/": "Tier list",
+      "/tierlist-maker/": "Tier list maker",
+      "/draft/": "Draft helper",
+      "/games/": "Match history",
+      "/patch-notes/": "Patch notes",
+      "/overlay/": "Overlay",
+      "/updates/": "Updates",
+      "/schedule/": "Schedule",
+    }[p];
     if (p.startsWith("/builds")) return hero ? "Builds · " + hero.charAt(0).toUpperCase() + hero.slice(1) : "Builds";
     return name || p;
   };
-  let DRAFT = {}; try { DRAFT = JSON.parse(localStorage.getItem("junhots_feedback") || "{}"); } catch {}
-  const keep = () => { try { localStorage.setItem("junhots_feedback", JSON.stringify(DRAFT)); } catch {} };
+  let DRAFT = {};
+  try {
+    DRAFT = JSON.parse(localStorage.getItem("junhots_feedback") || "{}");
+  } catch {}
+  const keep = () => {
+    try {
+      localStorage.setItem("junhots_feedback", JSON.stringify(DRAFT));
+    } catch {}
+  };
 
   const btn = document.createElement("button");
   btn.className = "fb-btn";
@@ -353,11 +551,16 @@
   // Also in the footer, next to Updates (plus a Schedule link after Updates on every page)
   const social = document.querySelector("footer .social");
   const upd = social?.querySelector('a[href="/updates/"]');
-  if (upd && !social.querySelector('a[href="/schedule/"]')) upd.insertAdjacentHTML("afterend", '<a href="/schedule/">Schedule</a>');
+  if (upd && !social.querySelector('a[href="/schedule/"]'))
+    upd.insertAdjacentHTML("afterend", '<a href="/schedule/">Schedule</a>');
   if (social) {
     const a = document.createElement("a");
-    a.href = "#feedback"; a.textContent = "Feedback";
-    a.addEventListener("click", e => { e.preventDefault(); open(); });
+    a.href = "#feedback";
+    a.textContent = "Feedback";
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      open();
+    });
     social.prepend(a);
   }
 
@@ -377,7 +580,7 @@
       <div class="fb-inbox-slot"></div>
       <form class="fb-body" novalidate>
         <div class="fb-types" role="group" aria-label="Type">${TYPES.map(([k, n, svg]) => `<button type="button" data-t="${k}" aria-pressed="${k === type}">${svg}${n}</button>`).join("")}</div>
-        <textarea name="text" maxlength="1500" aria-label="Your message" placeholder="${TYPES.find(t => t[0] === type)[3]}">${(DRAFT.text || "").replace(/</g, "&lt;")}</textarea>
+        <textarea name="text" maxlength="1500" aria-label="Your message" placeholder="${TYPES.find((t) => t[0] === type)[3]}">${(DRAFT.text || "").replace(/</g, "&lt;")}</textarea>
         <div class="fb-meta"><span>From <b>${where()}</b></span><span class="fb-count"></span></div>
         <input type="text" name="name" maxlength="60" autocomplete="nickname" placeholder="Your name or Discord (optional, if you want a reply)" value="${(DRAFT.name || "").replace(/"/g, "&quot;")}">
         <input class="fb-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -385,30 +588,68 @@
         <p class="fb-err" hidden></p>
         <div class="fb-foot"><a href="https://discord.gg/72sNc5a88b" target="_blank" rel="noopener">${BUBBLE}Rather chat? Discord</a><button class="fb-send" type="submit">Send</button></div>
       </form>`;
-    const f = panel.querySelector("form"), ta = f.text, send = f.querySelector(".fb-send"), count = f.querySelector(".fb-count");
-    const sync = () => { const n = ta.value.trim().length; send.disabled = n < 3; count.textContent = n > 1200 ? `${1500 - ta.value.length} left` : ""; };
+    const f = panel.querySelector("form"),
+      ta = f.text,
+      send = f.querySelector(".fb-send"),
+      count = f.querySelector(".fb-count");
+    const sync = () => {
+      const n = ta.value.trim().length;
+      send.disabled = n < 3;
+      count.textContent = n > 1200 ? `${1500 - ta.value.length} left` : "";
+    };
     sync();
-    ta.addEventListener("input", () => { DRAFT.text = ta.value; keep(); sync(); });
-    f.name.addEventListener("input", () => { DRAFT.name = f.name.value; keep(); });
-    f.querySelectorAll(".fb-types button").forEach(b => b.addEventListener("click", () => {
-      DRAFT.type = b.dataset.t; keep();
-      f.querySelectorAll(".fb-types button").forEach(x => x.setAttribute("aria-pressed", x === b));
-      ta.placeholder = TYPES.find(t => t[0] === b.dataset.t)[3];
-      ta.focus();
-    }));
-    ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !send.disabled) f.requestSubmit(); });
+    ta.addEventListener("input", () => {
+      DRAFT.text = ta.value;
+      keep();
+      sync();
+    });
+    f.name.addEventListener("input", () => {
+      DRAFT.name = f.name.value;
+      keep();
+    });
+    f.querySelectorAll(".fb-types button").forEach((b) =>
+      b.addEventListener("click", () => {
+        DRAFT.type = b.dataset.t;
+        keep();
+        f.querySelectorAll(".fb-types button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        ta.placeholder = TYPES.find((t) => t[0] === b.dataset.t)[3];
+        ta.focus();
+      }),
+    );
+    ta.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !send.disabled) f.requestSubmit();
+    });
     panel.querySelector(".fb-x").addEventListener("click", close);
-    f.addEventListener("submit", async e => {
+    f.addEventListener("submit", async (e) => {
       e.preventDefault();
       const err = f.querySelector(".fb-err");
-      send.disabled = true; send.textContent = "Sending…"; err.hidden = true;
-      const r = await fetch("/api/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-        type: DRAFT.type || "idea", text: ta.value, name: f.name.value, page: location.pathname + location.hash, hp: f.website.value, ms: Date.now() - openedAt, token: human.token(),
-      }) }).catch(() => null);
-      const data = r && await r.json().catch(() => ({}));
-      if (r?.ok) { DRAFT = { name: DRAFT.name }; keep(); thanks(); return; }
+      send.disabled = true;
+      send.textContent = "Sending…";
+      err.hidden = true;
+      const r = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          type: DRAFT.type || "idea",
+          text: ta.value,
+          name: f.name.value,
+          page: location.pathname + location.hash,
+          hp: f.website.value,
+          ms: Date.now() - openedAt,
+          token: human.token(),
+        }),
+      }).catch(() => null);
+      const data = r && (await r.json().catch(() => ({})));
+      if (r?.ok) {
+        DRAFT = { name: DRAFT.name };
+        keep();
+        thanks();
+        return;
+      }
       err.textContent = data?.error || "Couldn't send. Check your connection and try again.";
-      err.hidden = false; send.textContent = "Send"; send.disabled = false;
+      err.hidden = false;
+      send.textContent = "Send";
+      send.disabled = false;
       human.reset();
     });
     human.mount(panel.querySelector(".fb-human"));
@@ -417,28 +658,47 @@
   // Cloudflare Turnstile (only when Jun has set it up): checks quietly in the background and only asks for a click
   // when it isn't sure. The script loads the first time the form opens, not on every page.
   const human = (() => {
-    let id = null, conf;
-    const site = () => conf ??= fetch("/api/feedback?config").then(r => r.json()).then(c => c.sitekey || "").catch(() => "");
-    const script = () => window.turnstile ? Promise.resolve() : new Promise(res => {
-      const el = document.createElement("script");
-      el.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      el.onload = res; el.onerror = res;
-      document.head.append(el);
-    });
+    let id = null,
+      conf;
+    const site = () =>
+      (conf ??= fetch("/api/feedback?config")
+        .then((r) => r.json())
+        .then((c) => c.sitekey || "")
+        .catch(() => ""));
+    const script = () =>
+      window.turnstile
+        ? Promise.resolve()
+        : new Promise((res) => {
+            const el = document.createElement("script");
+            el.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+            el.onload = res;
+            el.onerror = res;
+            document.head.append(el);
+          });
     return {
       async mount(slot) {
         id = null;
         const key = await site();
         if (!key || !slot) return;
         await script();
-        if (window.turnstile && slot.isConnected) id = turnstile.render(slot, { sitekey: key, theme: "dark", appearance: "interaction-only", size: "flexible" });
+        if (window.turnstile && slot.isConnected)
+          id = turnstile.render(slot, {
+            sitekey: key,
+            theme: "dark",
+            appearance: "interaction-only",
+            size: "flexible",
+          });
       },
       token: () => (id != null && window.turnstile?.getResponse(id)) || "",
-      reset: () => { if (id != null) window.turnstile?.reset(id); },
+      reset: () => {
+        if (id != null) window.turnstile?.reset(id);
+      },
     };
   })();
   function thanks() {
-    const auto = setTimeout(() => { if (panel.querySelector(".fb-done")) close(); }, 3000);
+    const auto = setTimeout(() => {
+      if (panel.querySelector(".fb-done")) close();
+    }, 3000);
     panel.addEventListener("pointerdown", () => clearTimeout(auto), { once: true });
     panel.innerHTML = `<div class="fb-done"><span class="fb-ok">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}</span><h2>Thanks!</h2><p>Jun reads every message.</p><button type="button">Close</button></div>`;
     panel.querySelector("button").addEventListener("click", close);
@@ -449,28 +709,41 @@
     const n = await newCount();
     if (n == null) return;
     const slot = panel.querySelector(".fb-inbox-slot");
-    if (slot) slot.innerHTML = `<a class="fb-inbox" href="/inbox/">${ic('<path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6l2-8Z"/>').replace("<svg", '<svg width="15" height="15"')}Your inbox · <b>${n} new</b></a>`;
+    if (slot)
+      slot.innerHTML = `<a class="fb-inbox" href="/inbox/">${ic('<path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6l2-8Z"/>').replace("<svg", '<svg width="15" height="15"')}Your inbox · <b>${n} new</b></a>`;
   }
   // Jun only (logged in): how many messages are new, at most one check a minute while browsing.
   // The inbox page writes the exact number here after every Done/Delete, so the badge follows at once (in every tab).
   async function newCount() {
-    let pw = "", cached; try { pw = localStorage.getItem("junhots_admin") || ""; cached = JSON.parse(localStorage.getItem("junhots_fbnew") || "null"); } catch {}
+    let pw = "",
+      cached;
+    try {
+      pw = localStorage.getItem("junhots_admin") || "";
+      cached = JSON.parse(localStorage.getItem("junhots_fbnew") || "null");
+    } catch {}
     if (!pw) return null;
     if (cached && Date.now() - cached.t < 60e3) return cached.n;
     const r = await fetch("/api/feedback?count=1", { headers: { authorization: "Bearer " + pw } }).catch(() => null);
     if (!r?.ok) return null;
     const n = (await r.json()).new;
-    try { localStorage.setItem("junhots_fbnew", JSON.stringify({ n, t: Date.now() })); } catch {}
+    try {
+      localStorage.setItem("junhots_fbnew", JSON.stringify({ n, t: Date.now() }));
+    } catch {}
     return n;
   }
-  const badge = n => {
+  const badge = (n) => {
     btn.querySelector("b")?.remove();
     if (n) btn.insertAdjacentHTML("beforeend", `<b title="${n} new in your inbox">${n}</b>`);
     const link = panel.querySelector(".fb-inbox b");
     if (link) link.textContent = n + " new";
   };
   newCount().then(badge);
-  addEventListener("storage", e => { if (e.key === "junhots_fbnew") try { badge(JSON.parse(e.newValue)?.n || 0); } catch {} });
+  addEventListener("storage", (e) => {
+    if (e.key === "junhots_fbnew")
+      try {
+        badge(JSON.parse(e.newValue)?.n || 0);
+      } catch {}
+  });
   function open() {
     if (!panel.hidden) return;
     form();
@@ -488,19 +761,45 @@
   btn.addEventListener("click", open);
   // Sit above a bar stuck to the bottom of the page (the "Your build" bar on Builds) instead of covering its buttons
   const lift = () => {
-    const bar = document.querySelector(".mine"), r = bar?.getBoundingClientRect();
-    btn.style.setProperty("--fb-lift", r && r.height && r.top < innerHeight && r.bottom >= innerHeight - 2 ? innerHeight - r.top + "px" : "0px");
+    const bar = document.querySelector(".mine"),
+      r = bar?.getBoundingClientRect();
+    btn.style.setProperty(
+      "--fb-lift",
+      r && r.height && r.top < innerHeight && r.bottom >= innerHeight - 2 ? innerHeight - r.top + "px" : "0px",
+    );
   };
   // Phones: tuck the button away while scrolling down through content, bring it back when scrolling up
   let lastY = scrollY;
-  addEventListener("scroll", () => {
-    const y = scrollY, small = innerWidth <= 640, atEnd = innerHeight + y >= document.documentElement.scrollHeight - 40;
-    if (Math.abs(y - lastY) > 8) { btn.classList.toggle("away", small && y > lastY && y > 120 && !atEnd); lastY = y; }
-  }, { passive: true });
-  addEventListener("scroll", lift, { passive: true }); addEventListener("resize", lift); addEventListener("click", () => setTimeout(lift, 50)); lift();
+  addEventListener(
+    "scroll",
+    () => {
+      const y = scrollY,
+        small = innerWidth <= 640,
+        atEnd = innerHeight + y >= document.documentElement.scrollHeight - 40;
+      if (Math.abs(y - lastY) > 8) {
+        btn.classList.toggle("away", small && y > lastY && y > 120 && !atEnd);
+        lastY = y;
+      }
+    },
+    { passive: true },
+  );
+  addEventListener("scroll", lift, { passive: true });
+  addEventListener("resize", lift);
+  addEventListener("click", () => setTimeout(lift, 50));
+  lift();
   if (location.hash === "#feedback") open();
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) close(); });
-  document.addEventListener("pointerdown", e => { if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target) && !e.target.closest('a[href="#feedback"]')) close(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) close();
+  });
+  document.addEventListener("pointerdown", (e) => {
+    if (
+      !panel.hidden &&
+      !panel.contains(e.target) &&
+      !btn.contains(e.target) &&
+      !e.target.closest('a[href="#feedback"]')
+    )
+      close();
+  });
 })();
 
 // Live or not, on every page: the red dot by "Twitch" only pulses while I'm live (/api/media). While live, a slim
@@ -529,81 +828,149 @@
 .tabs a .newdot { position: absolute; top: calc(50% - 10px); right: -7px; width: 6px; height: 6px; border-radius: 50%; background: var(--brand, #f26a4b); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .livebar { animation: none; } }`;
   document.head.append(css);
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const esc = (s) =>
+    String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
   // Until /api/media answers, the dot holds still (no "live" pulse that might be wrong)
   const dot = live.querySelector(".dot");
   if (!home) dot?.classList.add("off");
-  window.jhLive = fetch("/api/media").then(r => r.ok ? r.json() : null).then(m => !!m?.twitch?.live && m.twitch).catch(() => false);
-  if (!home) window.jhLive.then(async tw => {
-    if (!tw) { live.title = "Follow me on Twitch"; return; }
-    dot?.classList.remove("off");
-    live.classList.add("on");
-    live.lastChild.textContent = "Live now";
-    let shut = false; try { shut = sessionStorage.getItem("junhots_livebar") === "x"; } catch {}
-    const nav = document.querySelector("nav");
-    // Builds pages stay about builds: a hero page says "playing her right now" itself when that's true (builds/index.html)
-    if (shut || !nav || document.querySelector(".livebar") || location.pathname.startsWith("/builds")) return;
-    // The game I'm in right now (the overlay tells /api/now at each loading screen), else the stream title
-    const now = await fetch("/api/now").then(r => r.ok ? r.json() : {}).catch(() => ({}));
-    let name = "";
-    if (now?.hero) name = await fetch("/data/heroes.json").then(r => r.json()).then(l => now.hero === "chogall" ? "Cho'gall" : (l.find(h => h[0] === now.hero) || [])[1] || "").catch(() => "");
-    const tier = location.pathname.startsWith("/tierlist");
-    const what = tier ? `<span class="pl">Type </span><b>!tierlist</b> in chat<span class="pl"> to see it on stream</span>`
-      : name ? `<img src="/img/heroes/${esc(now.hero)}.webp" alt=""><span class="pl">Playing </span><b>${esc(name)}</b>${now.map ? `<span class="on"> on ${esc(now.map)}</span>` : ""}`
-      : esc(tw.title || "Ranked Heroes of the Storm");
-    nav.insertAdjacentHTML("afterend", `<div class="livebar" role="status"><span class="lt"><span class="dot"></span>Live now</span><span class="sep" aria-hidden="true">·</span><span class="what">${what}</span>
-      <a class="go" href="https://www.twitch.tv/${esc(tw.channel || "junhots_")}" target="_blank" rel="noopener">Watch<span class="long"> on Twitch</span></a><button class="x" type="button" aria-label="Hide">×</button></div>`);
-    document.querySelector(".livebar .x").onclick = e => { e.currentTarget.parentNode.remove(); try { sessionStorage.setItem("junhots_livebar", "x"); } catch {} };
-  });
+  window.jhLive = fetch("/api/media")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((m) => !!m?.twitch?.live && m.twitch)
+    .catch(() => false);
+  if (!home)
+    window.jhLive.then(async (tw) => {
+      if (!tw) {
+        live.title = "Follow me on Twitch";
+        return;
+      }
+      dot?.classList.remove("off");
+      live.classList.add("on");
+      live.lastChild.textContent = "Live now";
+      let shut = false;
+      try {
+        shut = sessionStorage.getItem("junhots_livebar") === "x";
+      } catch {}
+      const nav = document.querySelector("nav");
+      // Builds pages stay about builds: a hero page says "playing her right now" itself when that's true (builds/index.html)
+      if (shut || !nav || document.querySelector(".livebar") || location.pathname.startsWith("/builds")) return;
+      // The game I'm in right now (the overlay tells /api/now at each loading screen), else the stream title
+      const now = await fetch("/api/now")
+        .then((r) => (r.ok ? r.json() : {}))
+        .catch(() => ({}));
+      let name = "";
+      if (now?.hero)
+        name = await fetch("/data/heroes.json")
+          .then((r) => r.json())
+          .then((l) => (now.hero === "chogall" ? "Cho'gall" : (l.find((h) => h[0] === now.hero) || [])[1] || ""))
+          .catch(() => "");
+      const tier = location.pathname.startsWith("/tierlist");
+      const what = tier
+        ? `<span class="pl">Type </span><b>!tierlist</b> in chat<span class="pl"> to see it on stream</span>`
+        : name
+          ? `<img src="/img/heroes/${esc(now.hero)}.webp" alt=""><span class="pl">Playing </span><b>${esc(name)}</b>${now.map ? `<span class="on"> on ${esc(now.map)}</span>` : ""}`
+          : esc(tw.title || "Ranked Heroes of the Storm");
+      nav.insertAdjacentHTML(
+        "afterend",
+        `<div class="livebar" role="status"><span class="lt"><span class="dot"></span>Live now</span><span class="sep" aria-hidden="true">·</span><span class="what">${what}</span>
+      <a class="go" href="https://www.twitch.tv/${esc(tw.channel || "junhots_")}" target="_blank" rel="noopener">Watch<span class="long"> on Twitch</span></a><button class="x" type="button" aria-label="Hide">×</button></div>`,
+      );
+      document.querySelector(".livebar .x").onclick = (e) => {
+        e.currentTarget.parentNode.remove();
+        try {
+          sessionStorage.setItem("junhots_livebar", "x");
+        } catch {}
+      };
+    });
 
   // Tier list tab: a dot when my list was saved after the visitor's last look at the Tier list page (tierlist page stores it)
   const tlTab = document.querySelector('.tabs a[href="/tierlist/"]');
-  let seen = 0; try { seen = +localStorage.getItem("junhots_tl_seen") || 0; } catch {}
+  let seen = 0;
+  try {
+    seen = +localStorage.getItem("junhots_tl_seen") || 0;
+  } catch {}
   if (tlTab && seen && !location.pathname.startsWith("/tierlist"))
-    fetch("/api/tierlist?meta").then(r => r.ok ? r.json() : null).then(m => {
-      if (m?.updated > seen) { tlTab.insertAdjacentHTML("beforeend", '<span class="newdot" aria-hidden="true"></span>'); tlTab.title = "Updated since your last visit"; }
-    }).catch(() => {});
+    fetch("/api/tierlist?meta")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => {
+        if (m?.updated > seen) {
+          tlTab.insertAdjacentHTML("beforeend", '<span class="newdot" aria-hidden="true"></span>');
+          tlTab.title = "Updated since your last visit";
+        }
+      })
+      .catch(() => {});
 })();
 
 // Visit counts for my /stats/ page (src/stats.js). No cookies, no ids: each page view says only which page it was,
 // a click on Twitch/Discord/YouTube/X says which page it came from, and once a day a visitor counts as new or returning
 // (this browser remembers its own first visit day). Skipped for "Do not track" browsers and for me (logged in).
 (() => {
-  let ok = true, first = "", lastDay = "";
+  let ok = true,
+    first = "",
+    lastDay = "";
   const today = new Date().toISOString().slice(0, 10);
   try {
-    if (localStorage.getItem("junhots_admin") || navigator.doNotTrack === "1" || navigator.globalPrivacyControl) ok = false;
+    if (localStorage.getItem("junhots_admin") || navigator.doNotTrack === "1" || navigator.globalPrivacyControl)
+      ok = false;
     first = localStorage.getItem("junhots_first") || "";
     lastDay = localStorage.getItem("junhots_day") || "";
-    if (!first) localStorage.setItem("junhots_first", first = today);
+    if (!first) localStorage.setItem("junhots_first", (first = today));
     localStorage.setItem("junhots_day", today);
-  } catch { first = today; }
+  } catch {
+    first = today;
+  }
   const ret = first < today ? 1 : 0;
   const page = () => {
     const p = location.pathname;
     if (p === "/") return "home";
-    if (p.startsWith("/builds")) return new URLSearchParams(location.search).has("make") ? "make-build" : location.hash.length > 1 ? "hero" : "builds";
+    if (p.startsWith("/builds"))
+      return new URLSearchParams(location.search).has("make")
+        ? "make-build"
+        : location.hash.length > 1
+          ? "hero"
+          : "builds";
     if (p.startsWith("/tierlist-maker")) return "maker";
     const s = p.split("/")[1];
     return ["tierlist", "draft", "patch-notes", "schedule", "games", "overlay", "updates"].includes(s) ? s : "other";
   };
-  const hit = (k, t = "") => { if (ok) try { navigator.sendBeacon("/api/hit", JSON.stringify({ k, p: page(), t, r: ret })); } catch {} };
+  const hit = (k, t = "") => {
+    if (ok)
+      try {
+        navigator.sendBeacon("/api/hit", JSON.stringify({ k, p: page(), t, r: ret }));
+      } catch {}
+  };
   window.jhHit = hit;
   if (location.pathname.startsWith("/inbox") || location.pathname.startsWith("/stats")) return;
   if (lastDay !== today) hit("visit");
   hit("view");
   // Builds is one page for every hero: count opening a hero (or going back to the list) as a page view too
   let was = page();
-  addEventListener("hashchange", () => { const now = page(); if (now !== was || now === "hero") hit("view"); was = now; });
+  addEventListener("hashchange", () => {
+    const now = page();
+    if (now !== was || now === "hero") hit("view");
+    was = now;
+  });
   let isLive = false;
-  window.jhLive?.then(tw => isLive = !!tw);
-  document.addEventListener("click", e => {
-    const a = e.target.closest?.("a[href]");
-    if (!a) return;
-    const h = a.href;
-    const t = /twitch\.tv\/(?!activate)/.test(h) ? (isLive ? "twitch-live" : "twitch") : /discord\.(gg|com)/.test(h) ? "discord"
-      : /youtube\.com|youtu\.be/.test(h) ? "youtube" : /\/\/(x|twitter)\.com/.test(h) ? "x" : "";
-    if (t) hit("click", t);
-  }, true);
+  window.jhLive?.then((tw) => (isLive = !!tw));
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target.closest?.("a[href]");
+      if (!a) return;
+      const h = a.href;
+      const t = /twitch\.tv\/(?!activate)/.test(h)
+        ? isLive
+          ? "twitch-live"
+          : "twitch"
+        : /discord\.(gg|com)/.test(h)
+          ? "discord"
+          : /youtube\.com|youtu\.be/.test(h)
+            ? "youtube"
+            : /\/\/(x|twitter)\.com/.test(h)
+              ? "x"
+              : "";
+      if (t) hit("click", t);
+    },
+    true,
+  );
 })();
