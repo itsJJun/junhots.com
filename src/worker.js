@@ -24,6 +24,7 @@
 //   GET/POST /api/community -> the community tier list from the tier list maker (src/community.js)
 //   GET  /api/vods     -> everyone: my Twitch VODs of the last 60 days, for "Watch this game" (src/vods.js)
 //   POST /api/hit, GET /api/stats -> anonymous visit and click counts for Jun's /stats/ page (src/stats.js)
+//   GET/POST /api/backup -> Jun only (password): daily backups of builds, tier list, games... for /backups/ (src/backup.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
@@ -35,6 +36,7 @@ import { schedule, scheduleAdmin, keepTwitchAlive } from "./schedule.js";
 import { community } from "./community.js";
 import { refreshVods, vodList } from "./vods.js";
 import { stats } from "./stats.js";
+import { backup, makeBackup } from "./backup.js";
 export { Stats } from "./stats.js";
 
 const KEY = "builds";
@@ -360,6 +362,7 @@ export default {
     if (url.pathname === "/api/community") return community(request, env);
     if (url.pathname === "/api/vods" && request.method === "GET") return vodList(env);
     if (url.pathname === "/api/hit" || url.pathname === "/api/stats") return stats(request, env, passwordOk);
+    if (url.pathname === "/api/backup") return backup(request, env, passwordOk);
 
     if (url.pathname === "/api/now") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
@@ -513,12 +516,15 @@ export default {
 
     return env.ASSETS.fetch(request);
   },
-  // Daily (wrangler.jsonc "triggers"): keep the Twitch login for the schedule editor fresh
-  // Daily: keep the Twitch login alive. Hourly: my VOD list for "Watch this game" (src/vods.js).
+  // Daily: keep the Twitch login alive and back up the site's data (src/backup.js). Hourly: my VOD list for
+  // "Watch this game" (src/vods.js).
   async scheduled(event, env, ctx) {
     ctx.waitUntil(
       (async () => {
-        if (event.cron === "17 9 * * *") await keepTwitchAlive(env).catch(() => {});
+        if (event.cron === "17 9 * * *") {
+          await makeBackup(env).catch(() => {});
+          await keepTwitchAlive(env).catch(() => {});
+        }
         await refreshVods(env, false).catch(() => {});
       })(),
     );

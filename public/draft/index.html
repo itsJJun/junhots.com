@@ -494,6 +494,10 @@
         color: var(--muted);
         white-space: nowrap;
       }
+      .pick .meta i.me {
+        color: var(--accent);
+        font-style: normal;
+      }
       .pick .meta i {
         font-style: normal;
         font-family: var(--mono);
@@ -896,7 +900,19 @@
               ><button class="tab" data-kind="ban" aria-pressed="false">Best bans</button></span
             ><small id="for"></small>
           </h2>
-          <div class="seg" id="roles" role="group" aria-label="Role" style="margin-bottom: 12px"></div>
+          <div class="controls" style="margin-bottom: 12px">
+            <div class="seg" id="roles" role="group" aria-label="Role"></div>
+            <div class="seg" id="mineSeg" hidden>
+              <button
+                class="tab"
+                id="mineTog"
+                aria-pressed="false"
+                title="Only heroes I've played 5+ times in ranked, ranked by draft edge plus my own win rate on them"
+              >
+                Heroes I play
+              </button>
+            </div>
+          </div>
           <div class="picks" id="picks"></div>
           <p class="note" id="note"></p>
         </section>
@@ -1093,6 +1109,7 @@
       function drawPicks() {
         const taken = allTaken(),
           ban = kind === "ban";
+        const mine = !ban && mineOn && !!MINE;
         const full = ban ? draft.aban.length >= 3 : draft.ally.length >= 5;
         const now = edge(draft.ally, draft.enemy).pct;
         // Cho'gall needs two open slots on the team that would pick it
@@ -1101,6 +1118,7 @@
             h.id !== "gall" &&
             !taken.has(h.id) &&
             (role === "All" || h.grole === role) &&
+            (!mine || (MINE[h.id]?.[0] || 0) >= MINE_MIN) &&
             roomFor(ban ? "enemy" : "ally", h.id),
         )
           .map((h) => {
@@ -1110,7 +1128,8 @@
             const after = ban ? 100 - edge(draft.ally, team).pct : edge(team, draft.enemy).pct;
             return {
               id: h.id,
-              adv: after,
+              // With "Heroes I play" on: half a point of edge for each point my win rate on the hero beats my usual one
+              adv: mine ? after + 50 * (myRate(h.id) - mineBase) : after,
               after: M.shown(after),
               t: tierId(h.id),
               wr: wrOf(h.id),
@@ -1120,10 +1139,16 @@
           })
           .sort((x, y) => y.adv - x.adv);
         const top = list.slice(0, ban ? 6 : 8);
+        const myRec = (id) =>
+          mine && MINE[id]
+            ? ` · <i class="me" title="My ranked games on this hero">me ${MINE[id][1]}–${MINE[id][0] - MINE[id][1]}</i>`
+            : "";
         document.getElementById("for").textContent = draft.map === "Overall" ? "Any map" : draft.map;
         document.getElementById("note").textContent = ban
           ? `The heroes that would help the enemy most against your team, with the enemy's edge if they picked one (now ${100 - Math.round(now)}%).`
-          : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
+          : mine
+            ? `Heroes I've played ${MINE_MIN}+ times in ranked, ranked by your team's edge with each (now ${Math.round(now)}%) plus how well I do on them.`
+            : `Your team's edge with each hero (now ${Math.round(now)}%), from my tiers (per map), win rates, counters, "good with", power combos and team comp. A guide, not a promise: play what you're good at.`;
         const done = full
           ? ban
             ? "Your 3 bans are in."
@@ -1139,11 +1164,11 @@
                   const t = TL.tiers.find((x) => x.id === p.t),
                     h = byId[p.id];
                   return `<div class="pick" role="button" tabindex="0" data-add="${p.id}" aria-label="${ban ? "Ban" : "Pick"} ${esc(unitName(p.id))}"><img src="${unitImg(p.id)}" alt="">
-      <span class="top"><b>${esc(unitName(p.id))}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.lift?.tier > 0 ? ` <i class="up">→ ${esc(M.tierName(p.lift.combo.tier))}</i>` : ""}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}</span></span>
+      <span class="top"><b>${esc(unitName(p.id))}</b><span class="meta">${t ? esc(t.name) + " tier" : "Not ranked"}${p.lift?.tier > 0 ? ` <i class="up">→ ${esc(M.tierName(p.lift.combo.tier))}</i>` : ""}${p.wr != null ? ` · <i>${p.wr.toFixed(1)}%</i>` : ""}${myRec(p.id)}</span></span>
       <span class="why">${p.why.length ? p.why.map(([c, w, cls]) => `<span style="--c:${c}"${cls ? ` class="${cls}"` : ""}>${esc(w)}</span>`).join("") : `<span>${roleIcon(h.grole)} ${esc(h.grole)}</span>`}</span><span class="adv${ban ? " ban" : p.after < 50 ? " low" : ""}" title="${ban ? "The enemy's edge if they pick it" : "Your team's edge with this hero"}">${p.after}%<small>${ban ? "their edge" : "your edge"}</small><span class="act">${ban ? "Click to ban" : "Click to pick"}</span></span><a class="bl" href="/builds/${p.id}">Builds ›</a></div>`;
                 })
                 .join("")
-            : '<div class="empty">No heroes left for this role.</div>';
+            : `<div class="empty">${mine ? "None of the heroes I play fit here. Switch off Heroes I play to see all." : "No heroes left for this role."}</div>`;
         document.querySelectorAll(".why .ri").forEach((s) => {
           s.style.width = s.style.height = "12px";
           s.style.verticalAlign = "-2px";
@@ -1175,6 +1200,45 @@
         ["ally", "Your team", "good"],
         ["aban", "Your bans", "good"],
       ];
+      // "Heroes I play": only heroes I've played MINE_MIN+ times (my uploaded ranked games), ranked by the draft edge
+      // plus my own win rate on them (pulled toward my usual win rate when it's from few games).
+      const MINE_MIN = 5;
+      let MINE = null,
+        mineBase = 0.5,
+        mineOn = false;
+      try {
+        mineOn = localStorage.getItem("junhots_draft_mine") === "1";
+      } catch {}
+      fetch("/api/games?all=1")
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => {
+          const games = (d.games || []).filter((g) => g.result === "win" || g.result === "loss");
+          if (!games.length) return;
+          MINE = {};
+          for (const g of games) {
+            const s = (MINE[g.hero === "gall" ? "chogall" : g.hero] ||= [0, 0]);
+            s[0]++;
+            s[1] += g.result === "win";
+          }
+          mineBase = games.filter((g) => g.result === "win").length / games.length;
+          document.getElementById("mineSeg").hidden = false;
+          document.getElementById("mineTog").setAttribute("aria-pressed", mineOn);
+          if (mineOn && M) drawPicks();
+        })
+        .catch(() => {});
+      const myRate = (id) => {
+        const [n, w] = MINE?.[id] || [0, 0];
+        return (w + 10 * mineBase) / (n + 10);
+      };
+      document.getElementById("mineTog").addEventListener("click", (e) => {
+        mineOn = !mineOn;
+        e.currentTarget.setAttribute("aria-pressed", mineOn);
+        try {
+          localStorage.setItem("junhots_draft_mine", mineOn ? "1" : "0");
+        } catch {}
+        drawPicks();
+      });
+
       let kind = "pick";
       document.getElementById("kind").addEventListener("click", (e) => {
         const b = e.target.closest("[data-kind]");
