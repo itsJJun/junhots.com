@@ -8,6 +8,7 @@ window.SITE_TEXT = {
   title3: "live on Twitch",
   intro: "Ranked games, talent picks and drafts explained as they happen. My tier list is the same one the stream overlay uses, so it updates when I change it on stream.",
   twitch_button: "Watch on Twitch",
+  twitch_follow_button: "Follow on Twitch",   // the same button while I'm offline
 
   // Home page: what the Twitch and YouTube buttons say when there's something new
   media_live_button: "Live now",

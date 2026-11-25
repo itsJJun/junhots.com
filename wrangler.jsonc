@@ -17,8 +17,14 @@
   "ratelimits": [
     { "name": "FEEDBACK_LIMIT", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } },
     // Community tier list (src/community.js): the tier list maker sends a visitor's list at most a few times a minute
-    { "name": "COMMUNITY_LIMIT", "namespace_id": "1002", "simple": { "limit": 6, "period": 60 } }
+    { "name": "COMMUNITY_LIMIT", "namespace_id": "1002", "simple": { "limit": 6, "period": 60 } },
+    // Visit and click counts (src/stats.js): a visitor sends one per page view or click, so a few dozen a minute is plenty
+    { "name": "HIT_LIMIT", "namespace_id": "1003", "simple": { "limit": 60, "period": 60 } }
   ],
+  // Visit and click counts for Jun's /stats/ page live in one Durable Object with a small SQLite table (src/stats.js).
+  // Cloudflare makes it on the next deploy by itself; nothing to set up in the dashboard.
+  "durable_objects": { "bindings": [{ "name": "STATS", "class_name": "Stats" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Stats"] }],
   // Once a day: refresh the Twitch login the schedule editor uses (src/schedule.js), so it never runs out
   "triggers": { "crons": ["17 9 * * *", "41 * * * *"] },
   "kv_namespaces": [

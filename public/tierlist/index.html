@@ -136,6 +136,7 @@
 .moved:empty { display: none; }
 .moved .when { margin-right: 4px; }
 .moved .when b { color: var(--text); font-weight: 500; }
+.moved .when.since b:last-child { color: var(--accent); }
 .moved .chip { gap: 6px; padding-right: 9px; }
 .moved .chip .to { font: 500 12px var(--mono); color: var(--muted); }
 .moved .chip .to b { font-weight: 600; }
@@ -216,9 +217,13 @@ const goodWith = id => { const s = TL.synergy || {}; return [...new Set([...(s[i
 const WEEK = 7 * 864e5;
 const tierIdx = id => TL.tiers.findIndex(t => t.id === id);
 const tierName = id => TL.tiers.find(t => t.id === id)?.name ?? "";
+// Back since my last save: show what moved since the visitor's last look (the server keeps 2 weeks of changes),
+// instead of "this week". The visit is remembered here, and nav.js shows a dot on the Tier list tab when there's news.
+let SEEN = 0; try { SEEN = +localStorage.getItem("junhots_tl_seen") || 0; } catch {}
+const sinceVisit = () => SEEN && TL.updated > SEEN;
 function moveOf(id) {
   const c = TL.changes?.[id];
-  if (!c || Date.now() - c.at > WEEK) return null;
+  if (!c || (sinceVisit() ? c.at <= SEEN : Date.now() - c.at > WEEK)) return null;
   const a = tierIdx(c.from), b = tierIdx(c.to);
   return { ...c, up: b >= 0 && (a < 0 || b < a) };
 }
@@ -227,7 +232,9 @@ const fmtDay = t => new Date(t).toLocaleDateString("en", { month: "short", day: 
 function drawMoved() {
   const box = document.getElementById("moved");
   const list = Object.keys(TL.changes || {}).filter(id => byId[id] && moveOf(id)).sort((a, b) => TL.changes[b].at - TL.changes[a].at);
-  const when = TL.updated ? `<span class="when">Updated <b>${fmtDay(TL.updated)}</b>${list.length ? " · moved this week:" : ""}</span>` : "";
+  const since = sinceVisit() && list.length;
+  const when = TL.updated ? `<span class="when${since ? " since" : ""}">Updated <b>${fmtDay(TL.updated)}</b>${since ? " · <b>new since your last visit:</b>" : list.length ? " · moved this week:" : ""}</span>` : "";
+  try { if (TL.updated) localStorage.setItem("junhots_tl_seen", TL.updated); } catch {}
   box.innerHTML = when + list.map(id => { const m = moveOf(id);
     return `<button class="chip" data-hero="${id}"><img src="${img(id)}" alt="">${esc(byId[id].name)}<span class="to">${m.from ? esc(tierName(m.from)) : "new"} ${arrow(m.up)} <b class="${m.up ? "up" : "down"}">${m.to ? esc(tierName(m.to)) : "out"}</b></span></button>`; }).join("");
 }
