@@ -159,6 +159,23 @@ a.hlink { text-decoration: none; }
 .tlink .k { margin-left: 4px; padding: 0 4px; border-radius: 4px; border: 1px solid #3d3531; font: 600 10px/15px var(--mono); color: var(--muted); vertical-align: 1px; }
 .tip .hname .ht { margin-left: 8px; font-weight: 500; color: var(--muted); }
 .tip .hname .ht b { font-weight: 700; }
+/* The stream in the hero header (drawStream): one slim pill, only when it fits this hero */
+.sxw:empty { display: none; }
+.sxw { margin-top: 14px; }
+.streamx { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 30px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid rgba(145, 70, 255, .45); background: rgba(145, 70, 255, .1); color: var(--muted); font-size: 12.5px; text-decoration: none; white-space: nowrap; transition: border-color .15s, background .15s; }
+.streamx:hover { border-color: rgba(145, 70, 255, .85); background: rgba(145, 70, 255, .18); color: var(--text); }
+.streamx svg { width: 14px; height: 14px; flex: none; color: #b98bff; }
+.streamx .dot { width: 7px; height: 7px; }
+.streamx b { color: var(--text); font-weight: 500; }
+.streamx .w { color: var(--good); } .streamx .l { color: var(--bad); }
+.streamx .sx-t { overflow: hidden; text-overflow: ellipsis; }
+.streamx .sx-go { color: #b98bff; font-weight: 500; }
+/* "Your heroes": the ones this visitor opened lately, above the hero list */
+.recent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 16px; }
+.recent .rl { font-size: 13px; color: var(--muted); margin-right: 4px; }
+.recent a { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px 0 4px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-size: 13px; text-decoration: none; }
+.recent a:hover { background: var(--surface-2); border-color: #4a413c; }
+.recent img { width: 26px; height: 26px; border-radius: 6px; }
 .none { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; }
 
 #tiers { scroll-margin-top: 60px; }
@@ -269,7 +286,7 @@ a.hlink { text-decoration: none; }
 /* Wide screens: matchups fill the empty space between the hero name and the hero art */
 @media (min-width: 900px) {
   .top { display: grid; grid-template-columns: auto 1fr; column-gap: 0; }
-  .top > .who, .top > .abrow { grid-column: 1; }
+  .top > .who, .top > .abrow, .top > .sxw { grid-column: 1; }
   .top > .abinfo { grid-column: 1 / -1; }
   .top > .mu { grid-column: 2; grid-row: 1 / span 2; align-self: center; flex-direction: column; gap: 14px; margin: 0 0 0 56px; padding-left: 28px; border-left: 1px solid var(--line); max-width: 300px; }
   .top > .mu .ps { flex-wrap: nowrap; }
@@ -378,6 +395,7 @@ dialog .row-btns { display: flex; gap: 8px; justify-content: flex-end; margin-to
 <script src="/text.js"></script>
 <script src="/site.js"></script>
 <script src="/patch-changes.js"></script>
+<script src="/games.js"></script>
 <script>
 // Hero data: /data/heroes/<id>.json (talents and abilities from the game files, made by tools/update_builds_data.py).
 // Jun's builds: /api/builds (saved in Cloudflare by Jun's editor, see src/worker.js), falling back to /data/builds.json. "picks" = which talent was taken on each row, counting from 1 (0 = none).
@@ -417,6 +435,7 @@ function renderList() {
       <div class="seg" role="group" aria-label="Role">${["All", ...ROLES].map(r => `<button class="rtab" data-role="${r}" aria-pressed="${r === role}" title="${r}">${roleIcon(r)}${ROLE_SHORT(r)}</button>`).join("")}</div>
       <input type="search" id="q" placeholder="Search heroes" aria-label="Search heroes">
     </div>
+    ${(r => r.length ? `<div class="recent"><span class="rl">Your heroes</span>${r.map(id => `<a href="#${id}"><img src="${portrait(id)}" alt="">${esc(byId[id].name)}</a>`).join("")}</div>` : "")(getRecent())}
     <div class="grid" id="grid"></div>`;
   applyText();
   const draw = () => {
@@ -449,6 +468,7 @@ async function openHero(id, state) {
       <img class="art" src="/img/art/${id}.webp" alt="" onerror="this.remove()">
       <div class="who"><img src="${portrait(id)}" alt=""><h1>${esc(hero.name)}</h1><div class="title">${esc(hero.title)}</div><div class="role">${roleIcon(byId[id].grole)} ${esc(byId[id].grole)}<span id="tierx"></span></div></div>
       <div class="abrow">${hero.abilities.map((a, i) => [a, i]).sort((x, y) => ORDER.indexOf(x[0].key) - ORDER.indexOf(y[0].key)).map(([a, i]) => `<button class="ab" data-ab="${i}" data-tip="a-${i}" aria-expanded="false" aria-label="${esc(a.name)}"><img src="${icon(a.icon)}" alt="">${a.key}</button>`).join("")}</div>
+      <div class="sxw" id="streamx"></div>
       <div class="abinfo" id="abinfo" hidden></div>
       <div class="mu" id="mu"></div>
     </section>
@@ -472,6 +492,8 @@ async function openHero(id, state) {
   drawMine();
   drawMatchups();
   drawPatch();
+  drawStream();
+  saveRecent(id);
 }
 // Tier, win rate, counters and synergy from Jun's tier list (same data as the Tier list page). Loads after the page, never holds it up.
 let TL = null;
@@ -482,7 +504,7 @@ let GAMES = null, gamesFor = "";
 function loadGames(id) {
   if (gamesFor === id) return;
   gamesFor = id; GAMES = null;
-  fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) drawMatchups(); } }).catch(() => {});
+  fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) { drawMatchups(); drawStream(); } } }).catch(() => {});
 }
 // What Blizzard's patches changed on this hero (/api/patch-notes?hero=…, newest first), shown under the header.
 // Builds that take a talent the last patch changed get a small note, so an old build is easy to spot.
@@ -716,9 +738,46 @@ const noAlt = () => ["", "", "", "", "", "", ""];
 const alts = s => [...String(s || "")].map(Number).filter(Boolean);
 // In-game build code: paste it in the game chat, e.g. [T1311132,Varian]
 const code = picks => `[T${picks.join("")},${hero.gameId}]`;
+// In the hero header, only when it fits this hero: "playing her right now" while I'm live on this hero,
+// else my latest game on this hero that Twitch still has as a VOD (games.js finds the moment in the VOD).
+// Nothing otherwise, so build pages stay about builds.
+const TW = "https://www.twitch.tv/junhots_";
+// Asked once, the first time a hero page draws (nav.js, which knows if I'm live, runs after this script starts)
+let liveInfo = null, KIT = null;
+const getLive = () => liveInfo ||= (window.jhLive || fetch("/api/media").then(r => r.json()).then(m => !!m?.twitch?.live && m.twitch)).catch(() => false).then(async tw => {
+  if (!tw) return { live: false };
+  const now = await fetch("/api/now").then(r => r.ok ? r.json() : {}).catch(() => ({}));
+  return { live: true, hero: now?.hero || "" };
+});
+function drawStream() {
+  const box = document.getElementById("streamx");
+  if (!box || !hero) return;
+  const h = hero, wantFor = h.id;
+  getLive().then(async n => {
+    const here = () => hero && hero.id === wantFor && document.getElementById("streamx");
+    if (!here()) return;
+    const same = n.live && (n.hero === h.id || (n.hero === "chogall" && (h.id === "cho" || h.id === "gall")));
+    const pill = (ic, text, href, go) => `<a class="streamx" href="${href}" target="_blank" rel="noopener">${ic}<span class="sx-t">${text}</span><span class="sx-go">${go} ›</span></a>`;
+    if (same) { box.innerHTML = pill('<span class="dot"></span>', `<b>Live now</b> · playing ${esc(h.name)} on stream`, TW, "Watch"); return; }
+    // Latest game on this hero with a VOD (games come newest first; GAMES fills in a moment after the page opens)
+    if (!GAMES?.length || !window.gameKit) { box.innerHTML = ""; return; }
+    KIT ||= gameKit(HEROES.map(x => [x.id, x.name, x.role, x.grole]), null);
+    await KIT.loadVods();
+    if (!here()) return;
+    const g = GAMES.find(x => KIT.vod(x)), v = g && KIT.vod(g);
+    if (!v) { box.innerHTML = ""; return; }
+    const won = g.result === "win";
+    box.innerHTML = pill(KIT.TWITCH_ICON, `<b>My last ${esc(h.name)} game</b> · <span class="${won ? "w" : "l"}">${won ? "Win" : "Loss"}</span>${g.map ? ` on ${esc(g.map)}` : ""} · ${KIT.ago(g.at)}`, v.url, "VOD");
+  });
+}
+// Heroes this visitor opened lately, for the "Your heroes" row on the hero list (this browser only)
+const RECENT_KEY = "junhots_recent";
+const getRecent = () => { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]").filter(id => byId[id]); } catch { return []; } };
+function saveRecent(id) { try { localStorage.setItem(RECENT_KEY, JSON.stringify([id, ...getRecent().filter(x => x !== id)].slice(0, 8))); } catch {} }
 function copyCode(picks) {
   const c = code(picks);
   navigator.clipboard?.writeText(c).then(() => toast(`Copied ${c}. Paste it in the in-game chat.`), () => prompt("Copy this build code:", c));
+  window.jhHit?.("copy", "build");
 }
 function drawMine() {
   const box = document.getElementById("mine");

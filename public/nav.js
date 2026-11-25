@@ -502,3 +502,108 @@
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) close(); });
   document.addEventListener("pointerdown", e => { if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target) && !e.target.closest('a[href="#feedback"]')) close(); });
 })();
+
+// Live or not, on every page: the red dot by "Twitch" only pulses while I'm live (/api/media). While live, a slim
+// "Live now" bar sits under the top bar on every page but Home (Home has its own line) and Builds, with the hero I'm playing.
+// Plus a small dot on the Tier list tab when my tier list changed since the visitor last looked at it.
+(() => {
+  const live = document.querySelector("nav .nav-live");
+  if (!live) return;
+  const home = location.pathname === "/";
+  const css = document.createElement("style");
+  css.textContent = `
+.dot.off { background: #8a807a; animation: none; box-shadow: none; }
+.nav-live.on { color: var(--text, #f4efec); }
+.livebar { display: flex; align-items: center; gap: 10px; margin: 14px 0 -6px; padding: 8px 8px 8px 14px; border-radius: 10px; border: 1px solid rgba(145, 70, 255, .45); background: linear-gradient(90deg, rgba(145, 70, 255, .16), rgba(145, 70, 255, .04) 70%); font-size: 13.5px; color: var(--muted, #a89f99); animation: lb-in .3s cubic-bezier(.22, 1, .36, 1); }
+@keyframes lb-in { from { opacity: 0; transform: translateY(-4px); } }
+.livebar .lt { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--text, #f4efec); white-space: nowrap; }
+.livebar .what { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.livebar .what img { width: 22px; height: 22px; border-radius: 6px; margin-right: 8px; vertical-align: middle; }
+.livebar .what b { color: var(--text, #f4efec); font-weight: 500; }
+.livebar .go { margin-left: auto; flex: none; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 7px; background: var(--twitch, #9146ff); color: #fff; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.livebar .go:hover { background: #9a5cf5; }
+.livebar .x { flex: none; width: 28px; height: 28px; border: 0; border-radius: 7px; background: none; color: var(--muted, #a89f99); font-size: 17px; line-height: 1; cursor: pointer; }
+.livebar .x:hover { color: var(--text, #f4efec); background: rgba(255, 255, 255, .06); }
+@media (max-width: 640px) { .livebar .sep, .livebar .on, .livebar .pl, .livebar .long { display: none; } .livebar { gap: 8px; } }
+.tabs a:has(.newdot) { position: relative; }
+.tabs a .newdot { position: absolute; top: calc(50% - 10px); right: -7px; width: 6px; height: 6px; border-radius: 50%; background: var(--brand, #f26a4b); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .livebar { animation: none; } }`;
+  document.head.append(css);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  // Until /api/media answers, the dot holds still (no "live" pulse that might be wrong)
+  const dot = live.querySelector(".dot");
+  if (!home) dot?.classList.add("off");
+  window.jhLive = fetch("/api/media").then(r => r.ok ? r.json() : null).then(m => !!m?.twitch?.live && m.twitch).catch(() => false);
+  if (!home) window.jhLive.then(async tw => {
+    if (!tw) { live.title = "Follow me on Twitch"; return; }
+    dot?.classList.remove("off");
+    live.classList.add("on");
+    live.lastChild.textContent = "Live now";
+    let shut = false; try { shut = sessionStorage.getItem("junhots_livebar") === "x"; } catch {}
+    const nav = document.querySelector("nav");
+    // Builds pages stay about builds: a hero page says "playing her right now" itself when that's true (builds/index.html)
+    if (shut || !nav || document.querySelector(".livebar") || location.pathname.startsWith("/builds")) return;
+    // The game I'm in right now (the overlay tells /api/now at each loading screen), else the stream title
+    const now = await fetch("/api/now").then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    let name = "";
+    if (now?.hero) name = await fetch("/data/heroes.json").then(r => r.json()).then(l => now.hero === "chogall" ? "Cho'gall" : (l.find(h => h[0] === now.hero) || [])[1] || "").catch(() => "");
+    const tier = location.pathname.startsWith("/tierlist");
+    const what = tier ? `<span class="pl">Type </span><b>!tierlist</b> in chat<span class="pl"> to see it on stream</span>`
+      : name ? `<img src="/img/heroes/${esc(now.hero)}.webp" alt=""><span class="pl">Playing </span><b>${esc(name)}</b>${now.map ? `<span class="on"> on ${esc(now.map)}</span>` : ""}`
+      : esc(tw.title || "Ranked Heroes of the Storm");
+    nav.insertAdjacentHTML("afterend", `<div class="livebar" role="status"><span class="lt"><span class="dot"></span>Live now</span><span class="sep" aria-hidden="true">·</span><span class="what">${what}</span>
+      <a class="go" href="https://www.twitch.tv/${esc(tw.channel || "junhots_")}" target="_blank" rel="noopener">Watch<span class="long"> on Twitch</span></a><button class="x" type="button" aria-label="Hide">×</button></div>`);
+    document.querySelector(".livebar .x").onclick = e => { e.currentTarget.parentNode.remove(); try { sessionStorage.setItem("junhots_livebar", "x"); } catch {} };
+  });
+
+  // Tier list tab: a dot when my list was saved after the visitor's last look at the Tier list page (tierlist page stores it)
+  const tlTab = document.querySelector('.tabs a[href="/tierlist/"]');
+  let seen = 0; try { seen = +localStorage.getItem("junhots_tl_seen") || 0; } catch {}
+  if (tlTab && seen && !location.pathname.startsWith("/tierlist"))
+    fetch("/api/tierlist?meta").then(r => r.ok ? r.json() : null).then(m => {
+      if (m?.updated > seen) { tlTab.insertAdjacentHTML("beforeend", '<span class="newdot" aria-hidden="true"></span>'); tlTab.title = "Updated since your last visit"; }
+    }).catch(() => {});
+})();
+
+// Visit counts for my /stats/ page (src/stats.js). No cookies, no ids: each page view says only which page it was,
+// a click on Twitch/Discord/YouTube/X says which page it came from, and once a day a visitor counts as new or returning
+// (this browser remembers its own first visit day). Skipped for "Do not track" browsers and for me (logged in).
+(() => {
+  let ok = true, first = "", lastDay = "";
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    if (localStorage.getItem("junhots_admin") || navigator.doNotTrack === "1" || navigator.globalPrivacyControl) ok = false;
+    first = localStorage.getItem("junhots_first") || "";
+    lastDay = localStorage.getItem("junhots_day") || "";
+    if (!first) localStorage.setItem("junhots_first", first = today);
+    localStorage.setItem("junhots_day", today);
+  } catch { first = today; }
+  const ret = first < today ? 1 : 0;
+  const page = () => {
+    const p = location.pathname;
+    if (p === "/") return "home";
+    if (p.startsWith("/builds")) return new URLSearchParams(location.search).has("make") ? "make-build" : location.hash.length > 1 ? "hero" : "builds";
+    if (p.startsWith("/tierlist-maker")) return "maker";
+    const s = p.split("/")[1];
+    return ["tierlist", "draft", "patch-notes", "schedule", "games", "overlay", "updates"].includes(s) ? s : "other";
+  };
+  const hit = (k, t = "") => { if (ok) try { navigator.sendBeacon("/api/hit", JSON.stringify({ k, p: page(), t, r: ret })); } catch {} };
+  window.jhHit = hit;
+  if (location.pathname.startsWith("/inbox") || location.pathname.startsWith("/stats")) return;
+  if (lastDay !== today) hit("visit");
+  hit("view");
+  // Builds is one page for every hero: count opening a hero (or going back to the list) as a page view too
+  let was = page();
+  addEventListener("hashchange", () => { const now = page(); if (now !== was || now === "hero") hit("view"); was = now; });
+  let isLive = false;
+  window.jhLive?.then(tw => isLive = !!tw);
+  document.addEventListener("click", e => {
+    const a = e.target.closest?.("a[href]");
+    if (!a) return;
+    const h = a.href;
+    const t = /twitch\.tv\/(?!activate)/.test(h) ? (isLive ? "twitch-live" : "twitch") : /discord\.(gg|com)/.test(h) ? "discord"
+      : /youtube\.com|youtu\.be/.test(h) ? "youtube" : /\/\/(x|twitter)\.com/.test(h) ? "x" : "";
+    if (t) hit("click", t);
+  }, true);
+})();

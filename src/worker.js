@@ -23,6 +23,7 @@
 //                         a game sent to POST /api/games clears it too
 //   GET/POST /api/community -> the community tier list from the tier list maker (src/community.js)
 //   GET  /api/vods     -> everyone: my Twitch VODs of the last 60 days, for "Watch this game" (src/vods.js)
+//   POST /api/hit, GET /api/stats -> anonymous visit and click counts for Jun's /stats/ page (src/stats.js)
 // It also serves /builds/<hero> (share links) as the Builds page with that hero's link preview picture,
 // and /sitemap.xml (every page and hero, so Google finds them).
 // Needs in Cloudflare: KV binding BUILDS (see wrangler.jsonc) and the secret ADMIN_PASSWORD.
@@ -33,6 +34,8 @@ import { feedback } from "./feedback.js";
 import { schedule, scheduleAdmin, keepTwitchAlive } from "./schedule.js";
 import { community } from "./community.js";
 import { refreshVods, vodList } from "./vods.js";
+import { stats } from "./stats.js";
+export { Stats } from "./stats.js";
 
 const KEY = "builds";
 const MAX_BYTES = 300_000;
@@ -270,6 +273,7 @@ export default {
     if (url.pathname === "/api/feedback") return feedback(request, env, ctx, passwordOk);
     if (url.pathname === "/api/community") return community(request, env);
     if (url.pathname === "/api/vods" && request.method === "GET") return vodList(env);
+    if (url.pathname === "/api/hit" || url.pathname === "/api/stats") return stats(request, env, passwordOk);
 
     if (url.pathname === "/api/now") {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
@@ -312,6 +316,12 @@ export default {
       if (!env.BUILDS) return json({ error: "storage not set up" }, 503);
       if (request.method === "GET") {
         const saved = await env.BUILDS.get(TIER_KEY);
+        // ?meta: only when it was last saved, for the "new since your last visit" dot on the Tier list tab (nav.js)
+        if (url.searchParams.has("meta")) {
+          let updated = 0;
+          try { updated = JSON.parse(saved || "{}").updated || 0; } catch {}
+          return new Response(JSON.stringify({ updated }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=300" } });
+        }
         return saved ? new Response(saved, { headers: { "content-type": "application/json", "cache-control": "no-store" } }) : json({ error: "not uploaded yet" }, 404);
       }
       if (request.method === "PUT") {

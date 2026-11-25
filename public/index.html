@@ -38,7 +38,11 @@ h1 em.out { transform: translateY(-0.35em); opacity: 0; filter: blur(6px); trans
 h1 em.in { transform: translateY(0.35em); opacity: 0; filter: blur(6px); transition: none; }
 .fan > a.cued { transform: translateX(var(--x)) rotate(calc(var(--r) * .4)) translateY(calc(var(--y) - 18px)) scale(1.04); border-color: var(--brand); }
 .lead { margin: 0; max-width: 56ch; color: var(--muted); font-size: 17px; }
-.cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.cta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+/* One main ask: Twitch is the big button; YouTube, X and Discord sit quietly beside it (they still fill coral on hover) */
+.cta .btn.live { height: 46px; padding: 0 22px; font-size: 15px; }
+.cta .btn.hb { height: 38px; padding: 0 12px; background: transparent; border-color: transparent; color: var(--muted); }
+.cta .btn.hb:hover, .cta .btn.hb:focus-visible { color: var(--text); }
 
 /* Numbers under the buttons; they count up when the page opens */
 .stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
@@ -553,6 +557,8 @@ for (const c of document.querySelectorAll("a.card")) c.addEventListener("pointer
         <span class="t"><small>${esc(T.media_live || "Live now on Twitch")}</small><b>${esc(m.twitch.title || "Come say hi")}</b></span></a>`);
     } else {
       document.querySelectorAll(".cta .dot, .nav-live .dot").forEach(d => d.classList.add("off"));
+      // Offline: ask for the follow (Twitch tells followers when I go live) instead of "Watch" on an empty channel
+      tw.querySelector("[data-edit]").textContent = T.twitch_follow_button || "Follow on Twitch";
     }
   }).catch(() => {});
 })();
