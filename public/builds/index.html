@@ -186,6 +186,15 @@ a.hlink { text-decoration: none; }
 .talw { position: relative; display: grid; }
 .altbtn { all: unset; box-sizing: border-box; cursor: pointer; position: absolute; top: -9px; right: 12px; height: 19px; padding: 0 8px; border-radius: 10px; font: 600 10.5px/17px var(--sans); color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
 .altbtn:hover { color: var(--sit); border-color: var(--sit); }
+/* How often Jun picks this talent in his ranked games (sent by the stream overlay) and his win rate with it.
+   A pill on the card's bottom edge; its fill shows the pick rate. */
+.mys { position: absolute; bottom: -9px; left: 12px; height: 19px; padding: 0 8px; border-radius: 10px; font: 500 10.5px/17px var(--sans); color: var(--muted); white-space: nowrap; pointer-events: none;
+       background: linear-gradient(90deg, color-mix(in srgb, var(--brand) 26%, var(--bg)) var(--p), var(--bg) var(--p)); border: 1px solid var(--line); }
+.mys b { font-weight: 700; color: var(--text); }
+.mys .g { color: var(--good); } .mys .r { color: var(--bad); }
+.mys.zero { opacity: .55; background: var(--bg); }
+.talw:has(.mys) .tal { padding-bottom: 20px; }
+.mysnote { color: var(--muted); }
 .altbtn[aria-pressed="true"] { color: #1a1300; background: var(--sit); border-color: var(--sit); }
 .tal.isalt { border-color: var(--sit); box-shadow: 0 0 0 1px var(--sit), 0 0 18px rgba(240, 180, 41, 0.15); }
 .tal { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; align-content: start; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); transition: border-color .12s, box-shadow .12s; }
@@ -477,7 +486,7 @@ async function openHero(id, state) {
     ${MAKE ? (jun.length ? `<details class="junfold"><summary>Jun's builds <small>${jun.length} for ${esc(hero.name)}, tap to look or start from one</small></summary>${junHtml}</details>` : "") : `<h2 class="sec">Jun's builds</h2>${junHtml}`}
     ${!MAKE || you.length ? youHtml : ""}
 
-    <h2 class="sec"><span>${MAKE ? "Make your build" : "Talents"}</span> <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.</small></h2>
+    <h2 class="sec"><span>${MAKE ? "Make your build" : "Talents"}</span> <small>Click one talent per level to make your build. Tap <span class="sitkey">Situational</span> on other talents in the same level to mark them as swaps. Light blue numbers grow with level.<span class="mysnote" id="mysnote"></span></small></h2>
     <div id="tiers">${LEVELS.map((L, r) => `
       <div class="tier" data-tier="${r}"><div class="lvl">Level<b>${L}</b></div><div class="cards">${(hero.talents[L] || []).map((t, i) => `<div class="talw">${card(t, `data-row="${r}" data-i="${i + 1}" aria-pressed="false"`, "button", i + 1)}<button class="altbtn" data-alt="${r}-${i + 1}" aria-pressed="false" title="Situational: take this instead of your pick when the game calls for it" hidden>Situational</button></div>`).join("")}</div></div>`).join("")}</div>
 
@@ -492,6 +501,7 @@ async function openHero(id, state) {
   drawMine();
   drawMatchups();
   drawPatch();
+  drawMyStats();
   drawStream();
   saveRecent(id);
 }
@@ -504,7 +514,34 @@ let GAMES = null, gamesFor = "";
 function loadGames(id) {
   if (gamesFor === id) return;
   gamesFor = id; GAMES = null;
-  fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) { drawMatchups(); drawStream(); } } }).catch(() => {});
+  fetch(`/api/games?hero=${encodeURIComponent(id)}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => { if (gamesFor === id) { GAMES = d.games || []; if (hero) { drawMatchups(); drawMyStats(); drawStream(); } } }).catch(() => {});
+}
+// My talent picks on this hero: per level, how often I took each talent and how often I won with it.
+// Uses the games whose replay had my talents (me.t = talent number per level, "3311333"). Needs 5+ games.
+const MYSTATS_MIN = 5;
+function drawMyStats() {
+  document.querySelectorAll(".mys").forEach(x => x.remove());
+  const note = document.getElementById("mysnote");
+  if (!hero || !GAMES) return;
+  const list = GAMES.filter(g => g.hero === hero.id && g.me?.t && (g.result === "win" || g.result === "loss"));
+  if (note) note.textContent = list.length >= MYSTATS_MIN ? ` Bottom of each talent: how often Jun picks it in his ${list.length} ranked games on ${hero.name}, and his win rate with it.` : "";
+  if (list.length < MYSTATS_MIN) return;
+  LEVELS.forEach((L, r) => {
+    const n = (hero.talents[L] || []).length, picks = Array.from({ length: n + 1 }, () => [0, 0]);
+    let total = 0;
+    for (const g of list) { const i = +g.me.t[r] || 0; if (i >= 1 && i <= n) { picks[i][0]++; picks[i][1] += g.result === "win"; total++; } }
+    if (!total) return;
+    for (let i = 1; i <= n; i++) {
+      const w = document.querySelector(`.tal[data-row="${r}"][data-i="${i}"]`)?.parentNode;
+      if (!w) continue;
+      const [k, won] = picks[i], pr = Math.round(k / total * 100), el = document.createElement("span");
+      el.className = "mys" + (k ? "" : " zero");
+      el.style.setProperty("--p", pr + "%");
+      el.title = k ? `Jun took this in ${k} of ${total} games and won ${won}` : `Jun hasn't taken this in his ${total} games`;
+      el.innerHTML = !k ? "Jun: never picked" : `Jun picks <b>${pr}%</b>` + (k >= 3 ? ` · won <b class="${won / k >= 0.5 ? "g" : "r"}">${Math.round(won / k * 100)}%</b>` : ` · ${won}–${k - won}`);
+      w.append(el);
+    }
+  });
 }
 // What Blizzard's patches changed on this hero (/api/patch-notes?hero=…, newest first), shown under the header.
 // Builds that take a talent the last patch changed get a small note, so an old build is easy to spot.
