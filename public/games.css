@@ -382,9 +382,6 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
-.gc-sbr td.srt {
-  background: color-mix(in srgb, var(--text) 3%, transparent);
-}
 /* Sorted: "By hero damage, high to low · Reset" on the right of the first team's heading */
 .gc-sbt .gc-sbl {
   display: flex;

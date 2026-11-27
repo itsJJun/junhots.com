@@ -327,7 +327,7 @@
           const aw = award(g, m);
           return `<tr class="gc-sbr${id === on ? " on" : ""}${id === g.hero ? " me" : ""}" data-h="${id}" tabindex="0">
             <th scope="row"><span class="gc-sbh">${face(id)}<b>${esc(byId[id]?.name || id)}</b>${aw && awIcon(aw) ? `<img class="gc-sbaw" src="${awIcon(aw)}" alt="${esc(aw)}" title="${esc(aw)}">` : ""}</span></th>
-            ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}${sort?.k === k ? " srt" : ""}">${cell(k, m[k])}</td>`).join("")}
+            ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}">${cell(k, m[k])}</td>`).join("")}
             <td><span class="gc-ics sm" data-hero="${id}" data-code="${code(g, m)}">${TIERS.map(() => "<i></i>").join("")}</span></td></tr>`;
         };
         const head = (label, ids, lvl, c, win, note = "") =>
