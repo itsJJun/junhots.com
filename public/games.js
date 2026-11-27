@@ -320,22 +320,66 @@
               : v
                 ? num(v)
                 : "–";
-        const on = root.querySelector(".gc-p.on")?.dataset.h;
         const row = (id) => {
-          const m = pl[id];
+          const m = pl[id],
+            on = root.querySelector(".gc-p.on")?.dataset.h;
           if (!m) return "";
           const aw = award(g, m);
           return `<tr class="gc-sbr${id === on ? " on" : ""}${id === g.hero ? " me" : ""}" data-h="${id}" tabindex="0">
             <th scope="row"><span class="gc-sbh">${face(id)}<b>${esc(byId[id]?.name || id)}</b>${aw && awIcon(aw) ? `<img class="gc-sbaw" src="${awIcon(aw)}" alt="${esc(aw)}" title="${esc(aw)}">` : ""}</span></th>
-            ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}">${cell(k, m[k])}</td>`).join("")}
+            ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}${sort?.k === k ? " srt" : ""}">${cell(k, m[k])}</td>`).join("")}
             <td><span class="gc-ics sm" data-hero="${id}" data-code="${code(g, m)}">${TIERS.map(() => "<i></i>").join("")}</span></td></tr>`;
         };
-        const head = (label, ids, lvl, c, win) =>
-          `<tr class="gc-sbt" style="--c:var(--${c})"><th scope="colgroup" colspan="${cols.length + 2}">${label} <span>${win ? "Win" : "Loss"}${lvl ? ` · Lvl ${lvl}` : ""}</span></th></tr>${ids.map(row).join("")}`;
+        const head = (label, ids, lvl, c, win, note = "") =>
+          `<tr class="gc-sbt" style="--c:var(--${c})"><th scope="colgroup" colspan="${cols.length + 2}"><span class="gc-sbl">${label} <span>${win ? "Win" : "Loss"}${lvl ? ` · Lvl ${lvl}` : ""}</span>${note}</span></th></tr>${ids.map((id) => row(id)).join("")}`;
         const win = g.result === "win";
-        box.innerHTML = `<div class="gc-sbw"><table>
-          <thead><tr><th scope="col">Hero</th>${cols.map(([, s, t]) => `<th scope="col" title="${t}">${s}</th>`).join("")}<th scope="col">Talents</th></tr></thead>
-          <tbody>${head("Your team", g.ally, g.lvl?.[0], "good", win)}${head("Enemy", g.enemy, g.lvl?.[1], "bad", !win)}</tbody></table></div>`;
+        // Click a column heading to sort each team by it (high to low first, click again to flip);
+        // Reset puts the players back in draft order.
+        let sort = null; // { k, up }
+        const name = (id) => byId[id]?.name || id;
+        const ARROW = (up) =>
+          `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${up ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        const th = (k, label, title) => {
+          const s = sort?.k === k;
+          return `<th scope="col"${s ? ` aria-sort="${sort.up ? "ascending" : "descending"}" class="srt"` : ""}><button type="button" class="gc-sbs" data-k="${k}" title="Sort by ${title.toLowerCase()}">${label}${s ? ARROW(sort.up) : ""}</button></th>`;
+        };
+        const render = () => {
+          // Sorted or not, each team keeps its own heading; sorting orders the players inside each team
+          let order = (ids) => ids;
+          let note = "";
+          if (sort) {
+            const val = (id) => (sort.k === "name" ? name(id) : pl[id]?.[sort.k] || 0);
+            order = (ids) =>
+              [...ids].sort((a, b) => {
+                const x = val(a),
+                  y = val(b),
+                  d = typeof x === "string" ? x.localeCompare(y) : x - y;
+                return sort.up ? d : -d;
+              });
+            const what = sort.k === "name" ? "hero name" : COLS.find(([k]) => k === sort.k)[2].toLowerCase();
+            const dir = sort.k === "name" ? (sort.up ? "A to Z" : "Z to A") : sort.up ? "low to high" : "high to low";
+            note = `<span class="gc-sbn"><span>By ${what}, ${dir}</span><button type="button" class="gc-sbx">Reset</button></span>`;
+          }
+          const body = `${head("Your team", order(g.ally), g.lvl?.[0], "good", win, note)}${head("Enemy", order(g.enemy), g.lvl?.[1], "bad", !win)}`;
+          box.innerHTML = `<div class="gc-sbw"><table>
+          <thead><tr>${th("name", "Hero", "Hero name")}${cols.map(([k, s, t]) => th(k, s, t)).join("")}<th scope="col">Talents</th></tr></thead>
+          <tbody>${body}</tbody></table></div>`;
+          for (const ics of box.querySelectorAll(".gc-ics")) icons(ics.parentElement);
+        };
+        render();
+        box.addEventListener("click", (e) => {
+          const b = e.target.closest(".gc-sbs");
+          if (b) {
+            const k = b.dataset.k;
+            // Numbers start high to low, hero names A to Z; the same heading again flips it
+            sort = sort?.k === k ? { k, up: !sort.up } : { k, up: k === "name" };
+          } else if (e.target.closest(".gc-sbx")) sort = null;
+          else return;
+          const x = box.querySelector(".gc-sbw").scrollLeft;
+          render();
+          box.querySelector(".gc-sbw").scrollLeft = x; // phones: stay on the column you sorted
+          box.querySelector(b ? `.gc-sbs[data-k="${b.dataset.k}"]` : ".gc-sbs")?.focus({ preventScroll: true });
+        });
         box.addEventListener("keydown", (e) => {
           const r = e.target.closest(".gc-sbr");
           if (r && (e.key === "Enter" || e.key === " ")) {
@@ -343,7 +387,6 @@
             show(root, g, r.dataset.h);
           }
         });
-        for (const ics of box.querySelectorAll(".gc-ics")) icons(ics.parentElement);
       }
       box.hidden = false;
     }
