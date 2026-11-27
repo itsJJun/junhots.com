@@ -135,6 +135,8 @@
       .catch(() => null));
 
   // heroes: /data/heroes.json rows; TL: the tier list (for the draft edge), or null
+  const CHEV =
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const GAMES = new Map(); // game id -> game, for the cards whose heroes can be clicked
 
   window.gameKit = (heroes, TL) => {
@@ -193,7 +195,8 @@
         b = best(g, m, hero),
         aw = award(g, m),
         c = code(g, m);
-      const meta = [g.map, g.len ? len(g.len) : "", ago(g.at)].filter(Boolean).map(esc).join(" · ");
+      const party = g.party ? ["", "Solo", "Duo", "Trio", "Party of 4", "Party of 5"][g.party] : "";
+      const meta = [g.map, g.len ? len(g.len) : "", ago(g.at), g.patch ? `Patch ${g.patch}` : "", party].filter(Boolean).map(esc).join(" · ");
       const stats = m
         ? `<div class="gc-stats">${kda(m)}<small>K / D / A</small>${b ? `<span><b>${num(b[0])}</b> ${b[1]}</span>` : ""}${aw ? `<span class="gc-aw${awIcon(aw) ? " ic" : ""}">${awIcon(aw) ? `<img src="${awIcon(aw)}" alt="">` : ""}${esc(aw)}</span>` : ""}</div>`
         : "";
@@ -223,7 +226,7 @@
           : "";
       const teams =
         g.ally?.length || g.enemy?.length
-          ? `<div class="gc-teams">${team("Your team", g.ally, g.aban, g.lvl?.[0], "good", g.hero, pick)}${edgeRow}${team("Enemy", g.enemy, g.eban, g.lvl?.[1], "bad", "", pick)}${pick ? `<p class="gc-hint"><span>Click any hero to see their build</span><button type="button" class="gc-sbtn" aria-expanded="false">Scoreboard<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></p>` : ""}</div>${pick ? `<div class="gc-sb" hidden></div>` : ""}`
+          ? `<div class="gc-teams">${team("Your team", g.ally, g.aban, g.lvl?.[0], "good", g.hero, pick)}${edgeRow}${team("Enemy", g.enemy, g.eban, g.lvl?.[1], "bad", "", pick)}${pick ? `<p class="gc-hint"><span>Click any hero to see their build</span><span class="gc-sbtns">${g.htl ? `<button type="button" class="gc-sbtn" data-v="tl" aria-expanded="false">Timeline${CHEV}</button>` : ""}<button type="button" class="gc-sbtn" data-v="sb" aria-expanded="false">Scoreboard${CHEV}</button></span></p>` : ""}</div>${pick ? `<div class="gc-sb" hidden></div>` : ""}`
           : "";
       const art = MAP_ART.has(g.map) ? `;--art:url(${mapArt(g.map)})` : "";
       return `<div class="gc${teams ? "" : " solo"}${art ? " art" : ""}"${pick ? ` data-gid="${esc(g.id)}"` : ""} style="--c:var(--${win ? "good" : "bad"})${art}">
@@ -253,19 +256,21 @@
         root.addEventListener("click", (ev) => {
           const b = ev.target.closest(".gc-p, .gc-back, .gc-sbr");
           if (b) return show(root, g, b.dataset.h);
-          if (ev.target.closest(".gc-sbtn")) board(root, g);
+          const t = ev.target.closest(".gc-sbtn");
+          if (t) panel(root, g, t.dataset.v);
         });
       }
       await icons(el);
     }
 
     // Shows one player of game g on the card's left side (their line comes from the server on the first click)
-    const lines = {}; // game id -> promise of { hero: line }, all ten players
-    const linesOf = (g) =>
-      (lines[g.id] ||= fetch(`/api/games?players=${encodeURIComponent(g.id)}`)
+    const extra = {}; // game id -> promise of { pl: { hero: line } (all ten players), tl: timeline or null }
+    const extraOf = (g) =>
+      (extra[g.id] ||= fetch(`/api/games?players=${encodeURIComponent(g.id)}`)
         .then((r) => (r.ok ? r.json() : {}))
-        .then((d) => d.pl || {})
-        .catch(() => ({})));
+        .then((d) => ({ pl: d.pl || {}, tl: d.tl || null }))
+        .catch(() => ({ pl: {}, tl: null })));
+    const linesOf = (g) => extraOf(g).then((d) => d.pl);
     async function show(root, g, hero) {
       const cur = root.querySelector(".gc-p.on");
       if (cur?.dataset.h === hero) return;
@@ -284,7 +289,26 @@
       await icons(root);
     }
 
-    // The full scoreboard: all ten players like the game's score screen, the best number in each column lit up.
+    // Under the card: the Scoreboard (all ten players like the game's score screen) or the Timeline. Clicking the
+    // open one's button closes it.
+    async function panel(root, g, v) {
+      const box = root.querySelector(".gc-sb"),
+        open = !box.hidden && box.dataset.v === v;
+      for (const b of root.querySelectorAll(".gc-sbtn")) b.setAttribute("aria-expanded", !open && b.dataset.v === v);
+      if (open) return void (box.hidden = true);
+      const d = await extraOf(g);
+      if (v === "tl" ? !d.tl : !Object.keys(d.pl).length) {
+        for (const b of root.querySelectorAll(".gc-sbtn")) b.setAttribute("aria-expanded", false);
+        return;
+      }
+      box.dataset.v = v;
+      if (v === "tl") timeline(box, g, d.tl);
+      else board(root, box, g, d.pl);
+      box.hidden = false;
+    }
+
+    // The scoreboard. Main stats or More stats; the best number in each column lit up; click a heading to sort
+    // each team by it (high to low first, click again to flip), Reset puts the players back in draft order.
     // Click a row to show that player on the left.
     const COLS = [
       ["k", "K", "Kills"],
@@ -297,55 +321,204 @@
       ["xp", "XP", "Experience contribution"],
       ["dead", "Dead", "Time spent dead"],
     ];
+    const MORE = [
+      ["tk", "Takedowns", "Takedowns"],
+      ["streak", "Streak", "Best kill streak"],
+      ["cc", "CC", "Time stunning, rooting or silencing enemy heroes"],
+      ["stun", "Stuns", "Time stunning enemy heroes"],
+      ["selfheal", "Self heal", "Self healing"],
+      ["shield", "Shielding", "Shields given to allies"],
+      ["soak", "Soaked", "Damage soaked"],
+      ["struct", "Structure", "Structure damage"],
+      ["camps", "Camps", "Merc camps taken"],
+      ["esc", "Escapes", "Escapes"],
+    ];
     const LOW = new Set(["d", "dead"]); // lower is better: not lit up
-    async function board(root, g) {
-      const box = root.querySelector(".gc-sb"),
-        btn = root.querySelector(".gc-sbtn"),
-        open = box.hidden;
-      btn.setAttribute("aria-expanded", open);
-      if (!open) return void (box.hidden = true);
-      if (!box.innerHTML) {
-        const pl = await linesOf(g);
-        if (!Object.keys(pl).length) return void btn.setAttribute("aria-expanded", false);
-        const rows = [...g.ally, ...g.enemy].map((id) => pl[id]).filter(Boolean),
-          cols = COLS.filter(([k]) => rows.some((m) => m[k] != null && (m[k] > 0 || k === "d" || k === "k" || k === "a"))),
-          top = Object.fromEntries(cols.map(([k]) => [k, LOW.has(k) ? -1 : Math.max(...rows.map((m) => m[k] || 0))]));
-        const cell = (k, v) =>
-          k === "dead"
-            ? v
-              ? len(v)
-              : "–"
-            : ["k", "d", "a"].includes(k)
-              ? String(v || 0)
-              : v
-                ? num(v)
-                : "–";
-        const on = root.querySelector(".gc-p.on")?.dataset.h;
+    const TIME = new Set(["dead", "cc", "stun"]); // seconds, shown as m:ss
+    const COUNT = new Set(["k", "d", "a", "tk", "streak", "camps", "esc"]); // small numbers, 0 shown as 0
+    function board(root, box, g, pl) {
+      const rows = [...g.ally, ...g.enemy].map((id) => pl[id]).filter(Boolean);
+      const has = (k) => rows.some((m) => m[k] > 0 || (COUNT.has(k) && m[k] != null));
+      const more = MORE.some(([k]) => rows.some((m) => m[k] > 0));
+      let view = "main",
+        sort = null; // { k, up }
+      const name = (id) => byId[id]?.name || id;
+      const cell = (k, v) => (TIME.has(k) ? (v ? len(v) : "–") : COUNT.has(k) ? String(v || 0) : v ? num(v) : "–");
+      const ARROW = (up) =>
+        `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${up ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const render = () => {
+        const cols = (view === "more" ? MORE : COLS).filter(([k]) => has(k)),
+          top = Object.fromEntries(cols.map(([k]) => [k, LOW.has(k) ? -1 : Math.max(...rows.map((m) => m[k] || 0))])),
+          talents = view === "main",
+          span = cols.length + (talents ? 2 : 1),
+          on = root.querySelector(".gc-p.on")?.dataset.h;
         const row = (id) => {
           const m = pl[id];
           if (!m) return "";
           const aw = award(g, m);
           return `<tr class="gc-sbr${id === on ? " on" : ""}${id === g.hero ? " me" : ""}" data-h="${id}" tabindex="0">
-            <th scope="row"><span class="gc-sbh">${face(id)}<b>${esc(byId[id]?.name || id)}</b>${aw && awIcon(aw) ? `<img class="gc-sbaw" src="${awIcon(aw)}" alt="${esc(aw)}" title="${esc(aw)}">` : ""}</span></th>
+            <th scope="row"><span class="gc-sbh">${face(id)}<b>${esc(name(id))}</b>${aw && awIcon(aw) ? `<img class="gc-sbaw" src="${awIcon(aw)}" alt="${esc(aw)}" title="${esc(aw)}">` : ""}</span></th>
             ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}">${cell(k, m[k])}</td>`).join("")}
-            <td><span class="gc-ics sm" data-hero="${id}" data-code="${code(g, m)}">${TIERS.map(() => "<i></i>").join("")}</span></td></tr>`;
+            ${talents ? `<td><span class="gc-ics sm" data-hero="${id}" data-code="${code(g, m)}">${TIERS.map(() => "<i></i>").join("")}</span></td>` : ""}</tr>`;
         };
-        const head = (label, ids, lvl, c, win) =>
-          `<tr class="gc-sbt" style="--c:var(--${c})"><th scope="colgroup" colspan="${cols.length + 2}">${label} <span>${win ? "Win" : "Loss"}${lvl ? ` · Lvl ${lvl}` : ""}</span></th></tr>${ids.map(row).join("")}`;
+        let order = (ids) => ids,
+          note = "";
+        if (sort && cols.some(([k]) => k === sort.k || sort.k === "name")) {
+          const val = (id) => (sort.k === "name" ? name(id) : pl[id]?.[sort.k] || 0);
+          order = (ids) =>
+            [...ids].sort((a, b) => {
+              const x = val(a),
+                y = val(b),
+                d = typeof x === "string" ? x.localeCompare(y) : x - y;
+              return sort.up ? d : -d;
+            });
+          const what = sort.k === "name" ? "hero name" : [...COLS, ...MORE].find(([k]) => k === sort.k)[2].toLowerCase();
+          const dir = sort.k === "name" ? (sort.up ? "A to Z" : "Z to A") : sort.up ? "low to high" : "high to low";
+          note = `<span class="gc-sbn"><span>By ${what}, ${dir}</span><button type="button" class="gc-sbx">Reset</button></span>`;
+        } else sort = null;
         const win = g.result === "win";
-        box.innerHTML = `<div class="gc-sbw"><table>
-          <thead><tr><th scope="col">Hero</th>${cols.map(([, s, t]) => `<th scope="col" title="${t}">${s}</th>`).join("")}<th scope="col">Talents</th></tr></thead>
-          <tbody>${head("Your team", g.ally, g.lvl?.[0], "good", win)}${head("Enemy", g.enemy, g.lvl?.[1], "bad", !win)}</tbody></table></div>`;
-        box.addEventListener("keydown", (e) => {
-          const r = e.target.closest(".gc-sbr");
-          if (r && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault();
-            show(root, g, r.dataset.h);
-          }
-        });
+        const head = (label, ids, lvl, c, w, n = "") =>
+          `<tr class="gc-sbt" style="--c:var(--${c})"><th scope="colgroup" colspan="${span}"><span class="gc-sbl">${label} <span>${w ? "Win" : "Loss"}${lvl ? ` · Lvl ${lvl}` : ""}</span>${n}</span></th></tr>${order(ids).map(row).join("")}`;
+        const th = (k, label, title) => {
+          const s = sort?.k === k;
+          return `<th scope="col"${s ? ` aria-sort="${sort.up ? "ascending" : "descending"}" class="srt"` : ""}><button type="button" class="gc-sbs" data-k="${k}" title="${esc(title)}. Click to sort">${label}${s ? ARROW(sort.up) : ""}</button></th>`;
+        };
+        const x = box.querySelector(".gc-sbw")?.scrollLeft || 0;
+        box.innerHTML = `${more ? `<div class="gc-sbv" role="group" aria-label="Stats"><button type="button" data-view="main" aria-pressed="${view === "main"}">Main stats</button><button type="button" data-view="more" aria-pressed="${view === "more"}">More stats</button></div>` : ""}<div class="gc-sbw"><table>
+          <thead><tr>${th("name", "Hero", "Hero name")}${cols.map(([k, s, t]) => th(k, s, t)).join("")}${talents ? `<th scope="col">Talents</th>` : ""}</tr></thead>
+          <tbody>${head("Your team", g.ally, g.lvl?.[0], "good", win, note)}${head("Enemy", g.enemy, g.lvl?.[1], "bad", !win)}</tbody></table></div>`;
+        box.querySelector(".gc-sbw").scrollLeft = x; // phones: stay on the column you sorted
         for (const ics of box.querySelectorAll(".gc-ics")) icons(ics.parentElement);
-      }
-      box.hidden = false;
+      };
+      render();
+      box.onclick = (e) => {
+        const b = e.target.closest(".gc-sbs"),
+          v = e.target.closest("[data-view]");
+        if (b) {
+          const k = b.dataset.k;
+          // Numbers start high to low, hero names A to Z; the same heading again flips it
+          sort = sort?.k === k ? { k, up: !sort.up } : { k, up: k === "name" };
+        } else if (e.target.closest(".gc-sbx")) sort = null;
+        else if (v) view = v.dataset.view;
+        else return;
+        render();
+        box.querySelector(b ? `.gc-sbs[data-k="${b.dataset.k}"]` : v ? `[data-view="${view}"]` : ".gc-sbs")?.focus({ preventScroll: true });
+      };
+      box.onkeydown = (e) => {
+        const r = e.target.closest(".gc-sbr");
+        if (r && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          show(root, g, r.dataset.h);
+        }
+      };
+    }
+
+    // The timeline: the XP lead over the game (my team above the line in green, theirs below in red), every death
+    // as a hero face (enemy deaths on top, ours at the bottom), forts, keeps and the core falling, merc camps,
+    // and when each team reached levels 10 and 20.
+    function timeline(box, g, tl) {
+      const W = 1000,
+        H = 216,
+        L = 44,
+        R = 12,
+        mid = 104,
+        half = 84;
+      const end = Math.max(tl.end || 0, (tl.xp.length || 1) * 60, ...tl.k.map((k) => k[0]), ...tl.s.map((s) => s[0]));
+      const X = (t) => L + (Math.max(0, t) / end) * (W - L - R);
+      const diffs = tl.xp.map(([a, e]) => a - e),
+        max = Math.max(1000, ...diffs.map(Math.abs)),
+        Y = (d) => mid - (d / max) * half;
+      const pts = [[0, 0], ...diffs.map((d, i) => [(i + 1) * 60, d])];
+      const line = pts.map(([t, d], i) => `${i ? "L" : "M"}${X(t).toFixed(1)},${Y(d).toFixed(1)}`).join("");
+      const area = `${line}L${X(pts.at(-1)[0]).toFixed(1)},${mid}L${X(0)},${mid}Z`;
+      const lv = (s, n) => tl.lv?.[s]?.[n - 1] || 0;
+      const mmss = (t) => len(Math.max(0, Math.round(t)));
+      // Level 10 and 20: a thin line per team, ours from the top, theirs from the bottom
+      const lvMark = (s, n) => {
+        const t = lv(s, n);
+        if (!t) return "";
+        const x = X(t).toFixed(1),
+          top = s === "a";
+        return `<g class="tl-lv ${s}"><line x1="${x}" x2="${x}" y1="${mid - half}" y2="${mid + half}"/><text x="${(+x + 4).toFixed(1)}" y="${top ? mid - half + 10 : mid + half - 3}">${n}</text><title>${s === "a" ? "Your team" : "Enemy"} reached level ${n} at ${mmss(t)}</title></g>`;
+      };
+      const ticks = [];
+      for (let t = 0; t <= end; t += end > 1200 ? 300 : 120)
+        ticks.push(`<text class="tl-x" x="${X(t).toFixed(1)}" y="${H - 2}">${mmss(t)}</text>`);
+      // Deaths: one face per death; 3+ deaths close together (a team fight) become one count badge.
+      // Hover or tap a marker for a tower of who died, when, and who was in on the kill.
+      const lane = (s) => {
+        const list = tl.k.filter((k) => k[2] === s),
+          groups = [];
+        for (const k of list) {
+          const g0 = groups.at(-1);
+          if (g0 && k[0] - g0.at(-1)[0] <= 15) g0.push(k);
+          else groups.push([k]);
+        }
+        // Small groups whose faces would overlap are split back into single faces placed side by side
+        const marks = [];
+        for (const grp of groups) {
+          if (grp.length >= 3) marks.push(grp);
+          else for (const k of grp) marks.push([k]);
+        }
+        let lastX = -99;
+        return marks
+          .map((grp) => {
+            let x = (X(grp[0][0]) + X(grp.at(-1)[0])) / 2;
+            if (x - lastX < 22) x = lastX + 22; // keep faces from touching
+            lastX = x;
+            const many = grp.length >= 3,
+              when = many ? `${mmss(grp[0][0])}–${mmss(grp.at(-1)[0])}` : mmss(grp[0][0]);
+            const rows = grp
+              .map(
+                ([t, h, , by]) =>
+                  `<li><img class="v" src="/img/heroes/${h}.webp" alt=""><span><b>${esc(byId[h]?.name || h)}</b><small>${mmss(t)}</small></span>${by?.length ? `<span class="by" title="In on the kill">${by.map((b) => `<img src="/img/heroes/${b}.webp" alt="${esc(byId[b]?.name || b)}" title="${esc(byId[b]?.name || b)}">`).join("")}</span>` : ""}</li>`,
+              )
+              .join("");
+            const label = many
+              ? `${grp.length} ${s === "e" ? "enemies" : "of us"} died, ${when}`
+              : `${byId[grp[0][1]]?.name || grp[0][1]} died at ${when}`;
+            const edge = x / W < 0.15 ? " l" : x / W > 0.85 ? " r" : ""; // towers near the sides open inward
+            return `<button type="button" class="tl-m ${s}${many ? " n" : ""}${edge}" style="left:${((x / W) * 100).toFixed(2)}%" aria-label="${esc(label)}">${many ? `<span class="tl-n">${grp.length}</span>` : `<img src="/img/heroes/${grp[0][1]}.webp" alt="">`}<span class="tl-tw" role="tooltip"><span class="tl-tw-h">${many ? `${grp.length} ${s === "e" ? "enemies died" : "of us died"} · ${when}` : `${s === "e" ? "Enemy died" : "We lost"} · ${when}`}</span><ul>${rows}</ul></span></button>`;
+          })
+          .join("");
+      };
+      const NAMES = { fort: "Fort", keep: "Keep", core: "Core" };
+      const towers = tl.s
+        .map(([t, k, s]) => {
+          const x = X(t).toFixed(1);
+          return `<g class="tl-s ${s === "e" ? "a" : "e"}"><path d="M${x},${mid - 7}l6,7l-6,7l-6,-7z"/><title>${s === "e" ? "Enemy" : "Our"} ${NAMES[k].toLowerCase()} destroyed at ${mmss(t)}</title></g>`;
+        })
+        .join("");
+      const camps = tl.c
+        .map(([t, s, k]) => `<circle class="tl-c ${s}" cx="${X(t).toFixed(1)}" cy="${mid}" r="3"><title>${s === "a" ? "We" : "Enemy"} took a ${k} camp at ${mmss(t)}</title></circle>`)
+        .join("");
+      // Talent timing line: when each team hit 10 and 20, the biggest lead, the kill count
+      const reach = (n) => {
+        const a = lv("a", n),
+          e = lv("e", n);
+        if (!a && !e) return "";
+        const who = (s, t) => (t ? mmss(t) : `never (${s === "a" ? "Lvl " + (g.lvl?.[0] || tl.lv.a.length) : "Lvl " + (g.lvl?.[1] || tl.lv.e.length)})`);
+        return `<span><b>Level ${n}</b> us ${who("a", a)} · them ${who("e", e)}</span>`;
+      };
+      const best = diffs.reduce((b, d, i) => (Math.abs(d) > Math.abs(b[0]) ? [d, (i + 1) * 60] : b), [0, 0]);
+      const kills = tl.k.filter((k) => k[2] === "e").length,
+        deaths = tl.k.filter((k) => k[2] === "a").length;
+      box.innerHTML = `<div class="tl">
+        <div class="tl-sum">${reach(10)}${reach(20)}${best[0] ? `<span><b>Biggest lead</b> ${best[0] > 0 ? "us" : "them"} by ${num(Math.abs(best[0]))} XP at ${mmss(best[1])}</span>` : ""}<span><b>Kills</b> ${kills} – ${deaths}</span></div>
+        <div class="tl-gw"><div class="tl-lane top">${lane("e")}</div>
+        <svg class="tl-g" viewBox="0 0 ${W} ${H}" role="img" aria-label="Game timeline">
+          <defs><clipPath id="tlc" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+            <clipPath id="tlu"><rect x="0" y="0" width="${W}" height="${mid}"/></clipPath><clipPath id="tld"><rect x="0" y="${mid}" width="${W}" height="${H - mid}"/></clipPath></defs>
+          <text class="tl-y a" x="${L - 8}" y="${mid - half + 4}">+${num(max)}</text><text class="tl-y e" x="${L - 8}" y="${mid + half + 4}">−${num(max)}</text>
+          <path class="tl-area a" d="${area}" clip-path="url(#tlu)"/><path class="tl-area e" d="${area}" clip-path="url(#tld)"/>
+          <line class="tl-0" x1="${L}" x2="${W - R}" y1="${mid}" y2="${mid}"/>
+          <path class="tl-line" d="${line}"/>
+          ${lvMark("a", 10)}${lvMark("a", 20)}${lvMark("e", 10)}${lvMark("e", 20)}
+          ${camps}${towers}
+          ${ticks.join("")}
+        </svg><div class="tl-lane bot">${lane("a")}</div></div>
+        <div class="tl-key"><span><i class="k e"></i>Enemy died (top)</span><span><i class="k a"></i>We died (bottom)</span><span><i class="k n">3</i>3+ deaths together: hover to see who</span><span><i class="s"></i>Fort, keep or core down</span><span><i class="c"></i>Merc camp</span><span><i class="l"></i>Level 10 / 20</span><span class="tl-note">XP lead: above the line = my team ahead</span></div>
+      </div>`;
     }
 
     // Puts the talent icons into the card's talent row, once that hero's talent tree has loaded

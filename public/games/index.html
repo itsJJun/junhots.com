@@ -320,6 +320,48 @@
         color: var(--c);
         text-align: right;
       }
+      /* Patches and parties: rows are buttons that filter the list */
+      button.nr {
+        width: 100%;
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      button.nr:hover {
+        background: #1f1a18;
+      }
+      button.nr[aria-pressed="true"] {
+        background: color-mix(in srgb, var(--brand) 12%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent);
+      }
+      button.nr + button.nr {
+        border-top: 0;
+      }
+      .nr .tg {
+        font: 600 11px var(--mono);
+        color: var(--muted);
+        text-align: center;
+      }
+      .nr .tg.now {
+        color: var(--brand);
+      }
+      .nb .clr {
+        margin-left: auto;
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font: 500 12px var(--sans);
+        padding: 3px 10px;
+        cursor: pointer;
+      }
+      .nb .clr:hover {
+        color: var(--text);
+      }
       .nb .none {
         color: var(--muted);
         font-size: 13px;
@@ -736,6 +778,7 @@
 
       <section class="sum" id="sum" aria-label="Summary"></section>
       <section class="bh" id="byhero" aria-label="By hero" hidden></section>
+      <section class="nb" id="pp" aria-label="Patches and parties" hidden></section>
       <section class="nb" id="nemesis" aria-label="Worst matchups and best allies" hidden></section>
       <div class="filters">
         <div class="heroes" id="heroes" role="group" aria-label="Hero"></div>
@@ -774,9 +817,16 @@
     <script src="/games.js"></script>
     <script>
       // Match history: every game from /api/games as a row; click one for its card (public/games.js).
-      // Filters (hero, map, result) live in the link (?h=chen&m=Cursed+Hollow&r=win), so a filtered list can be shared.
+      // Filters (hero, map, result, patch, party) live in the link (?h=chen&m=Cursed+Hollow&r=win&p=2.57.1&n=1),
+      // so a filtered list can be shared. Party n: 1 = solo, 2 = duo...
       const q = new URLSearchParams(location.search);
-      const F = { h: q.get("h") || "", m: q.get("m") || "", r: q.get("r") || "" };
+      const F = {
+        h: q.get("h") || "",
+        m: q.get("m") || "",
+        r: q.get("r") || "",
+        p: q.get("p") || "",
+        n: q.get("n") || "",
+      };
       const PAGE = 25;
       let GAMES = [],
         kit = null,
@@ -790,7 +840,14 @@
         history.replaceState(null, "", location.pathname + (p.size ? "?" + p : ""));
       }
       const pick = () =>
-        GAMES.filter((g) => (!F.h || g.hero === F.h) && (!F.m || g.map === F.m) && (!F.r || g.result === F.r));
+        GAMES.filter(
+          (g) =>
+            (!F.h || g.hero === F.h) &&
+            (!F.m || g.map === F.m) &&
+            (!F.r || g.result === F.r) &&
+            (!F.p || g.patch === F.p) &&
+            (!F.n || String(g.party || "") === F.n),
+        );
 
       function drawSum(list) {
         const w = list.filter((g) => g.result === "win").length,
@@ -976,6 +1033,67 @@
         box.hidden = false;
       }
 
+      // Patches and parties: my win rate on each recent patch and solo vs with friends, for the chosen hero and map
+      // (not the other filters, so every row stays to pick). Click a row to see only those games.
+      const PARTY = ["", "Solo", "Duo", "Trio", "Party of 4", "Party of 5"];
+      function drawPatchParty() {
+        const box = document.getElementById("pp");
+        const list = GAMES.filter((g) => (!F.h || g.hero === F.h) && (!F.m || g.map === F.m));
+        const tally = (key) => {
+          const d = {};
+          for (const g of list)
+            if (g[key]) {
+              const s = (d[g[key]] ||= { n: 0, w: 0, last: 0 });
+              s.n++;
+              s.w += g.result === "win";
+              s.last = Math.max(s.last, g.at || 0);
+            }
+          return d;
+        };
+        const patches = Object.entries(tally("patch"))
+          .sort((a, b) => b[1].last - a[1].last)
+          .slice(0, 4);
+        const parties = Object.entries(tally("party")).sort((a, b) => a[0] - b[0]);
+        if (
+          patches.length + parties.length === 0 ||
+          (!F.p && !F.n && list.filter((g) => g.patch || g.party).length < 10)
+        ) {
+          box.hidden = true;
+          return;
+        }
+        const base = list.length ? list.filter((g) => g.result === "win").length / list.length : 0.5;
+        const row = (key, value, tag, name, s, now) => {
+          const r = s.w / s.n,
+            c = Math.round(r * 100) >= Math.round(base * 100) ? "good" : "bad";
+          return `<button class="nr" type="button" data-k="${key}" data-v="${kit.esc(value)}" aria-pressed="${F[key] === String(value)}" style="--c:var(--${c})" title="Show only these games">
+    <span class="tg${now ? " now" : ""}">${tag}</span><b>${name}</b><span class="rec">${s.w}–${s.n - s.w}</span>
+    <span class="bar"><i style="width:${Math.round(r * 100)}%"></i><u style="left:${Math.round(base * 100)}%"></u></span><span class="pc">${Math.round(r * 100)}%</span></button>`;
+        };
+        const col = (title, rows) =>
+          rows.length ? `<div><h3 style="--c:var(--accent)"><i></i>${title}</h3>${rows.join("")}</div>` : "";
+        const who = F.h ? ` on ${kit.esc(kit.byId[F.h]?.name || F.h)}` : "";
+        box.innerHTML = `<div class="nb-h"><h2>Patches and parties${who}</h2><p>My usual win rate is <b>${Math.round(base * 100)}%</b> (grey line) · click a row to see those games</p>${F.p || F.n ? '<button class="clr" type="button">Show all</button>' : ""}</div>
+    <div class="nb-cols">${col(
+      "By patch",
+      patches.map(([p, s], i) => row("p", p, i === 0 ? "NOW" : "", kit.esc(p), s, i === 0)),
+    )}${col(
+      "Solo or with friends",
+      parties.map(([n, s]) => row("n", n, n, PARTY[n] || `Party of ${n}`, s)),
+    )}</div>`;
+        box.hidden = false;
+      }
+      document.getElementById("pp").addEventListener("click", (e) => {
+        if (e.target.closest(".clr")) {
+          F.p = F.n = "";
+        } else {
+          const b = e.target.closest("button.nr");
+          if (!b) return;
+          F[b.dataset.k] = F[b.dataset.k] === b.dataset.v ? "" : b.dataset.v;
+        }
+        shown = PAGE;
+        draw();
+      });
+
       function drawHeroes() {
         const count = {};
         for (const g of GAMES) count[g.hero] = (count[g.hero] || 0) + 1;
@@ -1085,6 +1203,7 @@
         const list = pick();
         drawSum(list);
         drawByHero();
+        drawPatchParty();
         drawNemesis();
         document.querySelectorAll("#heroes .hf").forEach((b) => b.setAttribute("aria-pressed", b.dataset.h === F.h));
         document.querySelectorAll("#res button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.r === F.r));
