@@ -1,6 +1,8 @@
 // One of my games as a slim card: my line (K/D/A, best stat, award, talents with "Load this build"), the draft
 // edge, and both teams with their bans. Used by Home's "My recent games" and the Match history page (/games/).
 // Games come from /api/games; the overlay adds teams, bans, length and my score line from the replay.
+// Games with hp: 1 also have the other nine players' lines (/api/games?players=<id>, loaded on the first click):
+// click a hero in the teams and the left side shows that player's K/D/A, stat, award and build instead of mine.
 (() => {
   const esc = (s) =>
     String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -133,6 +135,8 @@
       .catch(() => null));
 
   // heroes: /data/heroes.json rows; TL: the tier list (for the draft edge), or null
+  const GAMES = new Map(); // game id -> game, for the cards whose heroes can be clicked
+
   window.gameKit = (heroes, TL) => {
     const byId = Object.fromEntries(heroes.map(([id, name, role, grole]) => [id, { id, name, grole }]));
     const M = TL && window.draftModel ? draftModel(TL, Object.values(byId)) : null;
@@ -140,17 +144,16 @@
     // The Draft helper's edge for this game's teams, with today's tier list
     const edge = (g) => (M && full(g) ? M.shown(M.edge(g.ally, g.enemy, g.map || "Overall").pct) : null);
     // The stat that says most about the game for the hero's role
-    const best = (g) => {
-      const m = g.me,
-        r = byId[g.hero]?.grole;
+    const best = (g, m = g.me, hero = g.hero) => {
+      const r = byId[hero]?.grole;
       if (!m) return null;
       if ((r === "Healer" || m.heal > m.hd) && m.heal) return [m.heal, "healing"];
       if (r === "Tank" && m.taken) return [m.taken, "damage taken"];
       if (m.hd) return [m.hd, "hero damage"];
       return m.siege ? [m.siege, "siege damage"] : null;
     };
-    const award = (g) => (g.me?.aw || []).map((a) => AWARDS[a.toLowerCase()]).find(Boolean) || "";
-    const code = (g) => (g.me?.t || "").padEnd(7, "0").slice(0, 7);
+    const award = (g, m = g.me) => (m?.aw || []).map((a) => AWARDS[a.toLowerCase()]).find(Boolean) || "";
+    const code = (g, m = g.me) => (m?.t || "").padEnd(7, "0").slice(0, 7);
     const draftLink = (g) => {
       const p = new URLSearchParams();
       if (g.map) p.set("m", g.map);
@@ -169,41 +172,63 @@
         : "";
     const kda = (m) => `<span class="gc-kda"><b>${m.k}</b><i>/</i><b>${m.d}</b><i>/</i><b>${m.a}</b></span>`;
 
-    function team(label, ids, bans, lvl, c, mine) {
+    // With everyone's lines (hp) each face is a button that shows that player on the left
+    function team(label, ids, bans, lvl, c, mine, pick) {
       if (!ids?.length) return "";
+      const one = (id) =>
+        pick && byId[id]
+          ? `<button type="button" class="gc-p${id === mine ? " on" : ""}" data-h="${id}" aria-pressed="${id === mine}" title="${esc(byId[id].name)}: see their build">${face(id, id === mine ? "me" : "")}</button>`
+          : face(id, id === mine ? "me" : "");
       return `<div class="gc-team" style="--c:var(--${c})"><span class="gc-lbl">${label}${lvl ? `<small>Lvl ${lvl}</small>` : ""}</span>
-        <span class="gc-faces">${ids.map((id) => face(id, id === mine ? "me" : "")).join("")}</span>
+        <span class="gc-faces">${ids.map(one).join("")}</span>
         ${bans?.length ? `<span class="gc-bans" title="Bans">${bans.map((id) => face(id)).join("")}</span>` : ""}</div>`;
+    }
+
+    // The left side for one player of the game: me (m = g.me), or anyone else whose line we have
+    function side(g, hero = g.hero, m = g.me) {
+      const h = byId[hero] || { name: hero },
+        mine = hero === g.hero,
+        ally = mine || g.ally?.includes(hero),
+        win = (g.result === "win") === ally,
+        b = best(g, m, hero),
+        aw = award(g, m),
+        c = code(g, m);
+      const meta = [g.map, g.len ? len(g.len) : "", ago(g.at)].filter(Boolean).map(esc).join(" · ");
+      const stats = m
+        ? `<div class="gc-stats">${kda(m)}<small>K / D / A</small>${b ? `<span><b>${num(b[0])}</b> ${b[1]}</span>` : ""}${aw ? `<span class="gc-aw${awIcon(aw) ? " ic" : ""}">${awIcon(aw) ? `<img src="${awIcon(aw)}" alt="">` : ""}${esc(aw)}</span>` : ""}</div>`
+        : "";
+      const who = mine
+        ? ""
+        : `<span class="gc-who" style="--c:var(--${ally ? "good" : "bad"})">${ally ? "My team" : "Enemy"}</span>`;
+      return `<div class="gc-view" style="--c:var(--${win ? "good" : "bad"})">
+          <div class="gc-top">
+            <img class="gc-hero" src="/img/heroes/${hero}.webp" alt="">
+            <div class="gc-head"><div><b>${esc(h.name)}</b><span class="gc-res">${win ? "Win" : "Loss"}</span>${who}</div><span class="gc-meta">${meta}</span></div>
+            ${mine ? "" : `<button type="button" class="gc-back" data-h="${g.hero}">Back to mine</button>`}
+          </div>
+          ${stats}
+          ${/[1-9]/.test(c) ? `<div class="gc-tal" data-hero="${hero}" data-code="${c}"><span class="gc-ics">${TIERS.map(() => "<i></i>").join("")}</span><a class="gc-load" href="/builds/${hero}?b=${c}">Load this build<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : ""}
+        </div>`;
     }
 
     // The card's HTML. Talent icons come in after with fill(), once the hero's talent tree has loaded.
     function card(g) {
-      const h = byId[g.hero],
-        e = edge(g),
-        b = best(g),
-        aw = award(g),
-        win = g.result === "win";
-      const meta = [g.map, g.len ? len(g.len) : "", ago(g.at)].filter(Boolean).map(esc).join(" · ");
-      const stats = g.me
-        ? `<div class="gc-stats">${kda(g.me)}<small>K / D / A</small>${b ? `<span><b>${num(b[0])}</b> ${b[1]}</span>` : ""}${aw ? `<span class="gc-aw${awIcon(aw) ? " ic" : ""}">${awIcon(aw) ? `<img src="${awIcon(aw)}" alt="">` : ""}${esc(aw)}</span>` : ""}</div>`
-        : "";
+      const e = edge(g),
+        win = g.result === "win",
+        pick = !!g.hp && full(g);
+      if (pick) GAMES.set(g.id, g);
       const edgeRow =
         e != null
           ? `<a class="gc-edge" href="${draftLink(g)}" title="Open this draft in the Draft helper"><i style="--w:${e}%"></i><span><b>${e}%</b> draft edge</span></a>`
           : "";
       const teams =
         g.ally?.length || g.enemy?.length
-          ? `<div class="gc-teams">${team("Your team", g.ally, g.aban, g.lvl?.[0], "good", g.hero)}${edgeRow}${team("Enemy", g.enemy, g.eban, g.lvl?.[1], "bad")}</div>`
+          ? `<div class="gc-teams">${team("Your team", g.ally, g.aban, g.lvl?.[0], "good", g.hero, pick)}${edgeRow}${team("Enemy", g.enemy, g.eban, g.lvl?.[1], "bad", "", pick)}${pick ? `<p class="gc-hint"><span>Click any hero to see their build</span><button type="button" class="gc-sbtn" aria-expanded="false">Scoreboard<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></p>` : ""}</div>${pick ? `<div class="gc-sb" hidden></div>` : ""}`
           : "";
       const art = MAP_ART.has(g.map) ? `;--art:url(${mapArt(g.map)})` : "";
-      return `<div class="gc${teams ? "" : " solo"}${art ? " art" : ""}" style="--c:var(--${win ? "good" : "bad"})${art}">
+      return `<div class="gc${teams ? "" : " solo"}${art ? " art" : ""}"${pick ? ` data-gid="${esc(g.id)}"` : ""} style="--c:var(--${win ? "good" : "bad"})${art}">
         <div class="gc-me">
-          <div class="gc-top">
-            <img class="gc-hero" src="/img/heroes/${g.hero}.webp" alt="">
-            <div class="gc-head"><div><b>${esc(h.name)}</b><span class="gc-res">${win ? "Win" : "Loss"}</span></div><span class="gc-meta">${meta}</span></div>
-          </div>
-          ${stats}
-          ${/[1-9]/.test(code(g)) ? `<div class="gc-tal" data-hero="${g.hero}" data-code="${code(g)}"><span class="gc-ics">${TIERS.map(() => "<i></i>").join("")}</span><a class="gc-load" href="/builds/${g.hero}?b=${code(g)}">Load this build<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : ""}
+          ${side(g)}
           <span class="gc-vod" data-start="${startOf(g)}" hidden></span>
         </div>
         ${teams}
@@ -222,11 +247,114 @@
           vb.innerHTML = `<a class="gc-watch" href="${v.url}" target="_blank" rel="noopener">${TWITCH_ICON}Watch this game <small>${v.at} into the stream</small></a>`;
           vb.hidden = false;
         });
-      const box = el.querySelector(".gc-tal");
+      const g = GAMES.get(el.querySelector(".gc[data-gid]")?.dataset.gid || el.dataset?.gid);
+      if (g) {
+        const root = el.matches?.(".gc") ? el : el.querySelector(".gc");
+        root.addEventListener("click", (ev) => {
+          const b = ev.target.closest(".gc-p, .gc-back, .gc-sbr");
+          if (b) return show(root, g, b.dataset.h);
+          if (ev.target.closest(".gc-sbtn")) board(root, g);
+        });
+      }
+      await icons(el);
+    }
+
+    // Shows one player of game g on the card's left side (their line comes from the server on the first click)
+    const lines = {}; // game id -> promise of { hero: line }, all ten players
+    const linesOf = (g) =>
+      (lines[g.id] ||= fetch(`/api/games?players=${encodeURIComponent(g.id)}`)
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((d) => d.pl || {})
+        .catch(() => ({})));
+    async function show(root, g, hero) {
+      const cur = root.querySelector(".gc-p.on");
+      if (cur?.dataset.h === hero) return;
+      let m = g.me;
+      if (hero !== g.hero) {
+        m = (await linesOf(g))[hero];
+        if (!m) return;
+      }
+      for (const p of root.querySelectorAll(".gc-p, .gc-sbr")) {
+        const on = p.dataset.h === hero;
+        p.classList.toggle("on", on);
+        if (p.matches(".gc-p")) p.setAttribute("aria-pressed", on);
+      }
+      const view = root.querySelector(".gc-view");
+      view.outerHTML = side(g, hero, m);
+      await icons(root);
+    }
+
+    // The full scoreboard: all ten players like the game's score screen, the best number in each column lit up.
+    // Click a row to show that player on the left.
+    const COLS = [
+      ["k", "K", "Kills"],
+      ["d", "D", "Deaths"],
+      ["a", "A", "Assists"],
+      ["hd", "Hero dmg", "Hero damage"],
+      ["siege", "Siege", "Siege damage"],
+      ["heal", "Healing", "Healing"],
+      ["taken", "Taken", "Damage taken"],
+      ["xp", "XP", "Experience contribution"],
+      ["dead", "Dead", "Time spent dead"],
+    ];
+    const LOW = new Set(["d", "dead"]); // lower is better: not lit up
+    async function board(root, g) {
+      const box = root.querySelector(".gc-sb"),
+        btn = root.querySelector(".gc-sbtn"),
+        open = box.hidden;
+      btn.setAttribute("aria-expanded", open);
+      if (!open) return void (box.hidden = true);
+      if (!box.innerHTML) {
+        const pl = await linesOf(g);
+        if (!Object.keys(pl).length) return void btn.setAttribute("aria-expanded", false);
+        const rows = [...g.ally, ...g.enemy].map((id) => pl[id]).filter(Boolean),
+          cols = COLS.filter(([k]) => rows.some((m) => m[k] != null && (m[k] > 0 || k === "d" || k === "k" || k === "a"))),
+          top = Object.fromEntries(cols.map(([k]) => [k, LOW.has(k) ? -1 : Math.max(...rows.map((m) => m[k] || 0))]));
+        const cell = (k, v) =>
+          k === "dead"
+            ? v
+              ? len(v)
+              : "–"
+            : ["k", "d", "a"].includes(k)
+              ? String(v || 0)
+              : v
+                ? num(v)
+                : "–";
+        const on = root.querySelector(".gc-p.on")?.dataset.h;
+        const row = (id) => {
+          const m = pl[id];
+          if (!m) return "";
+          const aw = award(g, m);
+          return `<tr class="gc-sbr${id === on ? " on" : ""}${id === g.hero ? " me" : ""}" data-h="${id}" tabindex="0">
+            <th scope="row"><span class="gc-sbh">${face(id)}<b>${esc(byId[id]?.name || id)}</b>${aw && awIcon(aw) ? `<img class="gc-sbaw" src="${awIcon(aw)}" alt="${esc(aw)}" title="${esc(aw)}">` : ""}</span></th>
+            ${cols.map(([k]) => `<td class="${top[k] > 0 && m[k] === top[k] ? "top" : ""}">${cell(k, m[k])}</td>`).join("")}
+            <td><span class="gc-ics sm" data-hero="${id}" data-code="${code(g, m)}">${TIERS.map(() => "<i></i>").join("")}</span></td></tr>`;
+        };
+        const head = (label, ids, lvl, c, win) =>
+          `<tr class="gc-sbt" style="--c:var(--${c})"><th scope="colgroup" colspan="${cols.length + 2}">${label} <span>${win ? "Win" : "Loss"}${lvl ? ` · Lvl ${lvl}` : ""}</span></th></tr>${ids.map(row).join("")}`;
+        const win = g.result === "win";
+        box.innerHTML = `<div class="gc-sbw"><table>
+          <thead><tr><th scope="col">Hero</th>${cols.map(([, s, t]) => `<th scope="col" title="${t}">${s}</th>`).join("")}<th scope="col">Talents</th></tr></thead>
+          <tbody>${head("Your team", g.ally, g.lvl?.[0], "good", win)}${head("Enemy", g.enemy, g.lvl?.[1], "bad", !win)}</tbody></table></div>`;
+        box.addEventListener("keydown", (e) => {
+          const r = e.target.closest(".gc-sbr");
+          if (r && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            show(root, g, r.dataset.h);
+          }
+        });
+        for (const ics of box.querySelectorAll(".gc-ics")) icons(ics.parentElement);
+      }
+      box.hidden = false;
+    }
+
+    // Puts the talent icons into the card's talent row, once that hero's talent tree has loaded
+    async function icons(el) {
+      const box = el.querySelector(".gc-tal, .gc-ics[data-hero]");
       if (!box) return;
       const tree = await treeOf(box.dataset.hero);
       if (!tree) return;
-      box.querySelector(".gc-ics").innerHTML = TIERS.map((lvl, i) => {
+      (box.matches(".gc-ics") ? box : box.querySelector(".gc-ics")).innerHTML = TIERS.map((lvl, i) => {
         const n = +box.dataset.code[i],
           t = n && tree[lvl]?.[n - 1];
         return t

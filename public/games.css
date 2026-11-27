@@ -34,8 +34,23 @@
   align-content: start;
   gap: 12px;
 }
+.gc-view {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+/* Another player shown on the left (click a hero in the teams): a soft swap */
+.gc[data-gid] .gc-view {
+  animation: gc-in 0.18s ease-out;
+}
+@keyframes gc-in {
+  from {
+    opacity: 0.35;
+  }
+}
 .gc-top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -57,6 +72,7 @@
 }
 .gc-head > div {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 10px;
 }
@@ -68,6 +84,35 @@
   font-weight: 600;
   font-size: 13px;
   color: var(--c);
+}
+.gc-who {
+  align-self: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--c);
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+}
+.gc-back {
+  align-self: flex-start;
+  margin-left: auto;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.gc-back::before {
+  content: "‹ ";
+}
+.gc-back:hover {
+  color: var(--text);
 }
 .gc-meta {
   font-size: 13px;
@@ -211,6 +256,189 @@
     0 0 0 2px var(--bg),
     0 0 0 3.5px var(--brand);
 }
+/* Clickable faces (games with everyone's builds): the ring marks whose line is on the left */
+.gc-p {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.gc-p img.me {
+  box-shadow: none;
+}
+.gc-p:hover {
+  transform: translateY(-2px);
+}
+.gc-p:hover img {
+  filter: brightness(1.15);
+}
+.gc-p.on img {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 3.5px var(--brand);
+}
+.gc-p:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.gc-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #7d736d;
+}
+.gc-sbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+.gc-sbtn:hover {
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--line));
+}
+.gc-sbtn svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.15s;
+}
+.gc-sbtn[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+/* The full scoreboard (all ten players), under the whole card */
+.gc-sb {
+  grid-column: 1 / -1;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.gc-sbw {
+  overflow-x: auto;
+}
+.gc-sb table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.gc-sb thead th {
+  padding: 0 10px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-align: right;
+}
+.gc-sb thead th:first-child {
+  text-align: left;
+  padding-left: 6px;
+}
+.gc-sb thead th:last-child {
+  text-align: left;
+}
+.gc-sbt th {
+  padding: 12px 6px 6px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c);
+}
+.gc-sbt span {
+  font-weight: 400;
+  color: var(--muted);
+}
+.gc-sbr {
+  cursor: pointer;
+}
+.gc-sbr > * {
+  padding: 4px 10px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+.gc-sbr td {
+  text-align: right;
+  font: 500 13px var(--mono);
+  color: color-mix(in srgb, var(--text) 82%, transparent);
+}
+.gc-sbr td.top {
+  color: #f3d48a;
+  font-weight: 600;
+}
+.gc-sbr td:last-child {
+  text-align: left;
+}
+.gc-sbr:hover > *,
+.gc-sbr:focus-visible > * {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+.gc-sbr:focus-visible {
+  outline: none;
+}
+.gc-sbr.me > * {
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+}
+.gc-sbr.on > th {
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+.gc-sbr th {
+  padding-left: 6px;
+  text-align: left;
+  font-weight: 500;
+}
+.gc-sbh {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.gc-sbh img:first-child {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+.gc-sbh b {
+  font-weight: 500;
+}
+.gc-sbaw {
+  width: 22px;
+  height: 22px;
+  margin-left: -3px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+.gc-ics.sm {
+  gap: 3px;
+}
+.gc-ics.sm > * {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+}
+/* Phones: the hero column stays put while the numbers scroll sideways */
+@media (max-width: 700px) {
+  .gc-sbr th,
+  .gc-sb thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg);
+  }
+  .gc-sbh b {
+    display: none;
+  }
+}
 .gc-bans {
   display: flex;
   gap: 3px;
@@ -284,6 +512,13 @@
   .gc {
     padding: 14px;
   }
+  /* "Back to mine" as a small line above the player instead of squeezing the name */
+  .gc-back {
+    order: -1;
+    flex-basis: 100%;
+    margin: -4px 0 -6px;
+    text-align: left;
+  }
   .gc-team {
     grid-template-columns: 1fr auto;
     row-gap: 6px;
@@ -313,8 +548,12 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .gc-load svg,
-  .gc-edge i::before {
+  .gc-edge i::before,
+  .gc-p {
     transition: none;
+  }
+  .gc[data-gid] .gc-view {
+    animation: none;
   }
 }
 /* "Watch this game": jumps to the game in my Twitch VOD (only while Twitch keeps it) */
