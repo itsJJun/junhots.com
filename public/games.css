@@ -660,3 +660,323 @@
   font-size: 12px;
   font-weight: 400;
 }
+/* Scoreboard / Timeline buttons under the teams */
+.gc-sbtns {
+  display: inline-flex;
+  gap: 6px;
+}
+.gc-sbtn[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
+}
+/* Main stats / More stats */
+.gc-sbv {
+  display: inline-flex;
+  margin: 0 0 10px 6px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.gc-sbv button {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.gc-sbv button[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--text);
+}
+/* The timeline: XP lead area, deaths as faces, forts/keeps/core, merc camps, level 10/20 */
+.tl {
+  display: grid;
+  gap: 10px;
+}
+.tl-sum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  padding-left: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.tl-sum b {
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--text);
+}
+.tl-g {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tl-area.a {
+  fill: color-mix(in srgb, var(--good) 28%, transparent);
+}
+.tl-area.e {
+  fill: color-mix(in srgb, var(--bad) 28%, transparent);
+}
+.tl-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text) 75%, transparent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.tl-0 {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.tl-x,
+.tl-y {
+  font: 11px var(--mono);
+  fill: var(--muted);
+  text-anchor: middle;
+}
+.tl-y {
+  text-anchor: end;
+}
+.tl-lv line {
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.tl-lv text {
+  font: 600 11px var(--mono);
+}
+.tl-lv.a line {
+  stroke: color-mix(in srgb, var(--good) 70%, transparent);
+}
+.tl-lv.a text {
+  fill: var(--good);
+}
+.tl-lv.e line {
+  stroke: color-mix(in srgb, var(--bad) 70%, transparent);
+}
+.tl-lv.e text {
+  fill: var(--bad);
+}
+/* Deaths above (enemies) and below (us) the graph: a face, or a count for 3+ close together.
+   Hover or tap one for a tower: who died, when, and the heroes in on the kill. */
+.tl-gw {
+  position: relative;
+}
+.tl-lane {
+  position: relative;
+  height: 28px;
+}
+.tl-m {
+  position: absolute;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1.5px var(--c);
+  cursor: pointer;
+}
+.tl-m.e {
+  --c: var(--good); /* an enemy died: good for us */
+}
+.tl-m.a {
+  --c: var(--bad);
+}
+.tl-m > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.tl-m.n {
+  background: color-mix(in srgb, var(--c) 22%, var(--bg));
+}
+.tl-n {
+  font: 700 12px var(--mono);
+  color: var(--text);
+}
+.tl-m:hover,
+.tl-m:focus-visible {
+  z-index: 3;
+  box-shadow: 0 0 0 2.5px var(--c);
+  outline: none;
+}
+.tl-tw {
+  position: absolute;
+  left: 50%;
+  z-index: 5;
+  display: none;
+  min-width: 210px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+  text-align: left;
+  cursor: default;
+}
+.tl-m.l .tl-tw {
+  left: -6px;
+  transform: none;
+}
+.tl-m.r .tl-tw {
+  left: auto;
+  right: -6px;
+  transform: none;
+}
+.tl-lane.top .tl-tw {
+  top: 32px; /* opens downward over the graph */
+}
+.tl-lane.bot .tl-tw {
+  bottom: 32px; /* opens upward */
+}
+.tl-m:hover .tl-tw,
+.tl-m:focus .tl-tw {
+  display: block;
+}
+.tl-tw-h {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c);
+  white-space: nowrap;
+}
+.tl-tw ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tl-tw li {
+  display: grid;
+  grid-template-columns: 28px auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+.tl-tw .v {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1.5px var(--c);
+}
+.tl-tw li > span:nth-child(2) {
+  display: grid;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.tl-tw b {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.tl-tw small {
+  font: 11px var(--mono);
+  color: var(--muted);
+}
+.tl-tw .by {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+.tl-tw .by img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+.tl-s path {
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+.tl-s.a path {
+  fill: var(--good);
+}
+.tl-s.e path {
+  fill: var(--bad);
+}
+.tl-c {
+  stroke: var(--bg);
+  stroke-width: 1;
+}
+.tl-c.a {
+  fill: color-mix(in srgb, var(--good) 75%, #fff);
+}
+.tl-c.e {
+  fill: color-mix(in srgb, var(--bad) 75%, #fff);
+}
+.tl-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-left: 6px;
+  font-size: 12px;
+  color: #7d736d;
+}
+.tl-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tl-key i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.tl-key .k.e {
+  border: 1.5px solid var(--good);
+}
+.tl-key .k.a {
+  border: 1.5px solid var(--bad);
+}
+.tl-key .k.n {
+  width: 14px;
+  height: 14px;
+  display: inline-grid;
+  place-items: center;
+  font: 700 9px var(--mono);
+  font-style: normal;
+  color: var(--text);
+  border: 1.5px solid var(--good);
+  background: color-mix(in srgb, var(--good) 22%, var(--bg));
+}
+.tl-key .s {
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: var(--good);
+}
+.tl-key .c {
+  width: 6px;
+  height: 6px;
+  background: color-mix(in srgb, var(--good) 75%, #fff);
+}
+.tl-key .l {
+  width: 0;
+  height: 12px;
+  border-radius: 0;
+  border-left: 1px dashed var(--good);
+}
+.tl-note {
+  margin-left: auto;
+}
+@media (max-width: 700px) {
+  .tl-g {
+    min-width: 640px;
+  }
+  .tl {
+    overflow-x: auto;
+  }
+  .tl-note {
+    margin-left: 0;
+  }
+}

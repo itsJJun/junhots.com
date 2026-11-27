@@ -46,7 +46,15 @@ const MAX_BYTES = 300_000;
 const TIER_KEY = "tierlist";
 const TIER_FIELDS = ["version", "tiers", "overall", "maps", "counters", "synergy", "winrates", "tags", "combos"];
 const GAMES_KEY = "games";
-const PLAYERS_KEY = "gameplayers"; // game id -> { hero: score line } of all ten players (not backed up: re-import rebuilds it)
+// A game's extras live in one KV key per month ("gx:2026-11" -> { game id: { pl, tl } }), so opening a game card
+// reads only that month: pl = { hero: score line } of all ten players, tl = the timeline (team XP each minute,
+// levels, deaths, forts, camps). Not backed up: "Import old replays" rebuilds them.
+const EXTRAS_PREFIX = "gx:";
+const OLD_PLAYERS_KEY = "gameplayers"; // before monthly keys: every game's pl in one key (moved over on the next POST)
+const extrasKey = (id) => {
+  const sec = Number(String(id).split("-")[0]);
+  return EXTRAS_PREFIX + (sec > 1e9 && sec < 1e10 ? new Date(sec * 1000).toISOString().slice(0, 7) : "other");
+};
 const NOW_KEY = "now";
 const NOW_FOR = 45 * 60e3; // a game in progress counts as "now" this long
 const MAX_GAMES = 5000;
@@ -71,7 +79,21 @@ function sameGame(a, b) {
 // Which copy of one game to keep: the one with my score line (from the replay), then the one with everyone's
 // builds, then the earlier time (the first import dated games one game length too late).
 const better = (a, b) =>
-  !!a.me !== !!b.me ? (a.me ? a : b) : !!a.hp !== !!b.hp ? (a.hp ? a : b) : a.at <= b.at ? a : b;
+  !!a.me !== !!b.me
+    ? a.me
+      ? a
+      : b
+    : !!a.hp !== !!b.hp
+      ? a.hp
+        ? a
+        : b
+      : !!a.htl !== !!b.htl
+        ? a.htl
+          ? a
+          : b
+        : a.at <= b.at
+          ? a
+          : b;
 // One copy of each game, newest first. The list is sorted, so only games close in time are compared.
 function dedupeGames(list) {
   list.sort((a, b) => b.at - a.at);
@@ -207,6 +229,10 @@ function cleanLine(m) {
   for (const k of ["k", "d", "a"]) line[k] = count(m[k], 999);
   for (const k of ["hd", "siege", "heal", "taken", "xp"]) line[k] = count(m[k], 10000000);
   if (count(m.dead, 7200)) line.dead = count(m.dead, 7200);
+  // "More stats": takedowns, best kill streak, CC / stun seconds, self healing, shielding, damage soaked,
+  // structure damage, merc camps, escapes
+  for (const k of ["tk", "streak", "cc", "stun", "camps", "esc"]) if (count(m[k], 9999)) line[k] = count(m[k], 9999);
+  for (const k of ["selfheal", "shield", "soak", "struct"]) if (count(m[k], 10000000)) line[k] = count(m[k], 10000000);
   if (/^[0-9]{1,7}$/.test(String(m.t || ""))) line.t = String(m.t);
   const aw = Array.isArray(m.aw)
     ? m.aw
@@ -218,8 +244,38 @@ function cleanLine(m) {
   return line;
 }
 
+// The game's timeline from the replay, seconds from the gates opening. xp: [mine, theirs] team XP at each minute;
+// lv: {a, e} seconds each team reached level 1, 2, 3...; k: deaths [t, hero, side, [heroes in on the kill]]; s: forts/keeps/core lost
+// [t, "fort"|"keep"|"core", side]; c: merc camps [t, side, kind]; end: game length. Side "a" = my team, "e" = enemy.
+function cleanTimeline(tl) {
+  if (!tl || typeof tl !== "object") return null;
+  const t = (v) => Math.max(0, Math.min(7200, Math.round(Number(v) || 0)));
+  const side = (v) => (v === "a" ? "a" : "e");
+  const list = (v, max) => (Array.isArray(v) ? v.slice(0, max).filter(Array.isArray) : []);
+  const out = {
+    xp: list(tl.xp, 120).map(([a, e]) => [count(a, 1e7), count(e, 1e7)]),
+    lv: { a: list([tl.lv?.a], 1).flat().slice(0, 30).map(t), e: list([tl.lv?.e], 1).flat().slice(0, 30).map(t) },
+    k: list(tl.k, 200)
+      .filter(([, h]) => HERO_ID.test(String(h)))
+      .map(([at, h, s, by]) => [t(at), String(h), side(s), heroIds(by, 5)]),
+    s: list(tl.s, 40)
+      .filter(([, k]) => ["fort", "keep", "core"].includes(k))
+      .map(([at, k, s]) => [t(at), k, side(s)]),
+    c: list(tl.c, 80).map(([at, s, k]) => [
+      t(at),
+      side(s),
+      String(k || "")
+        .replace(/[^a-z]/g, "")
+        .slice(0, 12),
+    ]),
+    end: t(tl.end),
+  };
+  return out.xp.length || out.k.length ? out : null;
+}
+
 // One game from the overlay. Hero, map and result always; teams, bans, length, levels and my score line
-// when the replay had them; pl = all ten players' score lines by hero (POST moves it to PLAYERS_KEY).
+// when the replay had them; pl = all ten players' score lines by hero and tl = the timeline (POST moves both to
+// the month's extras key).
 function cleanGame(g) {
   if (!g || typeof g !== "object") throw new Error("bad game");
   const hero = String(g.hero || ""),
@@ -247,6 +303,10 @@ function cleanGame(g) {
   if (Array.isArray(g.lvl) && g.lvl.length === 2 && g.lvl.every((l) => count(l, 30)))
     game.lvl = g.lvl.map((l) => count(l, 30));
   if (g.me && typeof g.me === "object") game.me = cleanLine(g.me);
+  if (/^\d{1,2}\.\d{1,3}(\.\d{1,3})?$/.test(String(g.patch || ""))) game.patch = String(g.patch);
+  if (count(g.party, 5)) game.party = count(g.party, 5); // 1 = solo, 2 = duo...
+  const tl = cleanTimeline(g.tl);
+  if (tl) game.tl = tl;
   if (g.pl && typeof g.pl === "object" && !Array.isArray(g.pl)) {
     const pl = {};
     for (const [id, m] of Object.entries(g.pl).slice(0, 10))
@@ -483,15 +543,19 @@ export default {
         env.BUILDS.get(GAMES_KEY)
           .then((t) => JSON.parse(t || "[]"))
           .catch(() => []);
-      const players = () =>
-        env.BUILDS.get(PLAYERS_KEY)
-          .then((t) => JSON.parse(t || "{}"))
-          .catch(() => ({}));
+      const readJson = (key, empty) =>
+        env.BUILDS.get(key)
+          .then((t) => (t ? JSON.parse(t) : empty))
+          .catch(() => empty);
       if (request.method === "GET") {
         const one = url.searchParams.get("players");
         if (one) {
-          const pl = (await players())[one];
-          return pl ? json({ pl }) : json({ error: "no players for this game" }, 404);
+          let x = (await readJson(extrasKey(one), {}))[one];
+          if (!x) {
+            const old = (await readJson(OLD_PLAYERS_KEY, null))?.[one]; // not moved to the monthly keys yet
+            if (old) x = { pl: old };
+          }
+          return x ? json({ pl: x.pl || {}, tl: x.tl || null }) : json({ error: "no players for this game" }, 404);
         }
         const hero = url.searchParams.get("hero"),
           limit = Math.max(0, Number(url.searchParams.get("limit")) || 0);
@@ -510,14 +574,23 @@ export default {
         } catch (e) {
           return json({ error: e.message }, 400);
         }
-        // The other players' lines go to their own key; the game keeps hp: 1 so the card knows to ask for them
-        const newPlayers = {};
-        for (const g of incoming)
+        // The other players' lines and the timeline go to the month's extras key; the game keeps hp: 1 / htl: 1
+        // so the card knows to ask for them
+        const extras = {};
+        for (const g of incoming) {
+          const x = {};
           if (g.pl) {
-            newPlayers[g.id] = g.pl;
+            x.pl = g.pl;
             delete g.pl;
             g.hp = 1;
           }
+          if (g.tl) {
+            x.tl = g.tl;
+            delete g.tl;
+            g.htl = 1;
+          }
+          if (x.pl || x.tl) extras[g.id] = x;
+        }
         const before = await games();
         // Sending the same game twice keeps one (sameGame); a resent copy with the same id replaces the old one.
         const ids = new Set(incoming.map((g) => g.id));
@@ -525,13 +598,24 @@ export default {
         const added = Math.max(0, list.length - before.length);
         const kept = list.slice(0, MAX_GAMES);
         await env.BUILDS.put(GAMES_KEY, JSON.stringify(kept));
-        if (Object.keys(newPlayers).length) {
-          // Only games still in the list keep their players (dropped duplicates and games past MAX_GAMES go)
-          const all = { ...(await players()), ...newPlayers },
+        // One-time move of the old all-games players key into the monthly keys
+        const oldPlayers = await readJson(OLD_PLAYERS_KEY, null);
+        if (oldPlayers) for (const [id, pl] of Object.entries(oldPlayers)) if (!extras[id]) extras[id] = { pl, old: 1 };
+        const byMonth = {};
+        for (const [id, x] of Object.entries(extras)) (byMonth[extrasKey(id)] ||= {})[id] = x;
+        // Only games still in the list keep their extras (dropped duplicates and games past MAX_GAMES go)
+        const keep = new Set(kept.map((g) => g.id));
+        for (const [key, fresh] of Object.entries(byMonth)) {
+          const all = await readJson(key, {}),
             out = {};
-          for (const g of kept) if (g.hp && all[g.id]) out[g.id] = all[g.id];
-          await env.BUILDS.put(PLAYERS_KEY, JSON.stringify(out));
+          for (const [id, x] of Object.entries(fresh)) {
+            if (!x.old) all[id] = x;
+            else if (!all[id]) all[id] = { pl: x.pl }; // a newer copy already there wins
+          }
+          for (const [id, x] of Object.entries(all)) if (keep.has(id)) out[id] = x;
+          await env.BUILDS.put(key, JSON.stringify(out));
         }
+        if (oldPlayers) await env.BUILDS.delete(OLD_PLAYERS_KEY);
         if (incoming.length === 1) await env.BUILDS.delete(NOW_KEY); // the game that was "now" is over
         if (incoming.length === 1) ctx.waitUntil(refreshVods(env, true).catch(() => {})); // tonight's VOD for "Watch this game"
         return json({ ok: true, added, games: Math.min(list.length, MAX_GAMES) });
